@@ -1,0 +1,90 @@
+[gd_scene format=3 uid="uid://bvs737efe1vl6"]
+
+[ext_resource type="Texture2D" uid="uid://nk2qt76inyip" path="res://sprites/banner/banner_wind_spritesheet.png" id="1_w8kwa"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1gq0u"]
+atlas = ExtResource("1_w8kwa")
+region = Rect2(0, 0, 1365, 2048)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ahpvl"]
+atlas = ExtResource("1_w8kwa")
+region = Rect2(1365, 0, 1365, 2048)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yl27h"]
+atlas = ExtResource("1_w8kwa")
+region = Rect2(2730, 0, 1365, 2048)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4e5gb"]
+atlas = ExtResource("1_w8kwa")
+region = Rect2(4095, 0, 1365, 2048)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5fsco"]
+atlas = ExtResource("1_w8kwa")
+region = Rect2(5460, 0, 1365, 2048)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dyims"]
+atlas = ExtResource("1_w8kwa")
+region = Rect2(6825, 0, 1365, 2048)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8gp0v"]
+atlas = ExtResource("1_w8kwa")
+region = Rect2(8190, 0, 1365, 2048)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rbxoo"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1gq0u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1gq0u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ahpvl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ahpvl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yl27h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yl27h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4e5gb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4e5gb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5fsco")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5fsco")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dyims")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dyims")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8gp0v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8gp0v")
+}],
+"loop": true,
+"name": &"wind",
+"speed": 18.0
+}]
+
+[node name="Banner" type="Node2D" unique_id=2074483130]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=438087863]
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_rbxoo")
+animation = &"wind"
+autoplay = "wind"
+frame_progress = 0.08705909

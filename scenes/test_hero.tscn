@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://b1fuouuirp7lo"]
+
+[ext_resource type="Script" uid="uid://ci36ccupguav5" path="res://scenes/combatant.gd" id="1_sydeb"]
+[ext_resource type="AudioBusLayout" uid="uid://gmsrk1opc7ch" path="res://weapons/sword.tres" id="2_va80o"]
+
+[node name="Hero" type="Node2D" unique_id=994908165]
+script = ExtResource("1_sydeb")
+display_name = "Hero"
+max_hp = 25
+weapon = ExtResource("2_va80o")

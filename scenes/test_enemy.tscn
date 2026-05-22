@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://herfeu7ycvvg"]
+
+[ext_resource type="Script" uid="uid://ci36ccupguav5" path="res://scenes/combatant.gd" id="1_w8sih"]
+[ext_resource type="AudioBusLayout" uid="uid://cdhq2giqrt76e" path="res://weapons/club.tres" id="2_mkyue"]
+
+[node name="Enemy" type="Node2D" unique_id=333387828]
+script = ExtResource("1_w8sih")
+display_name = "Goblin"
+max_hp = 15
+weapon = ExtResource("2_mkyue")

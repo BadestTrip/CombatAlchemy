@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://bihbgf44u3y3m"]
+
+[ext_resource type="Script" uid="uid://dsnyg1ipu6ff6" path="res://managers/combat_manager.gd" id="1_ohrj1"]
+[ext_resource type="PackedScene" uid="uid://b1fuouuirp7lo" path="res://scenes/test_hero.tscn" id="1_w21jl"]
+[ext_resource type="PackedScene" uid="uid://herfeu7ycvvg" path="res://scenes/test_enemy.tscn" id="2_ohrj1"]
+[ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://scenes/level_music.tscn" id="4_w6gk5"]
+[ext_resource type="AudioStream" uid="uid://c4eip32jmo0ui" path="res://music/Combat.mp3" id="5_s5ga2"]
+
+[node name="CombatTest" type="Node2D" unique_id=1862308542 node_paths=PackedStringArray("hero", "enemy")]
+script = ExtResource("1_ohrj1")
+hero = NodePath("Hero")
+enemy = NodePath("Enemy")
+
+[node name="Hero" parent="." unique_id=994908165 instance=ExtResource("1_w21jl")]
+
+[node name="Enemy" parent="." unique_id=333387828 instance=ExtResource("2_ohrj1")]
+
+[node name="UI" type="Control" parent="." unique_id=1469123929]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="HeroHP" type="Label" parent="UI" unique_id=266392374]
+layout_mode = 0
+offset_left = 412.0
+offset_top = 40.0
+offset_right = 862.0
+offset_bottom = 311.0
+
+[node name="EnemyHP" type="Label" parent="UI" unique_id=1427020584]
+layout_mode = 0
+offset_left = 1039.0
+offset_top = 51.0
+offset_right = 1424.0
+offset_bottom = 313.0
+
+[node name="Log" type="Label" parent="UI" unique_id=1433112335]
+layout_mode = 0
+offset_left = 727.0
+offset_top = 696.0
+offset_right = 1236.0
+offset_bottom = 987.0
+
+[node name="AttackButton" type="Button" parent="UI" unique_id=1771293017]
+layout_mode = 0
+offset_left = 1513.0
+offset_top = 670.0
+offset_right = 1846.0
+offset_bottom = 999.0
+text = "A"
+
+[node name="RestartButton" type="Button" parent="UI" unique_id=1583411881]
+layout_mode = 0
+offset_left = 111.0
+offset_top = 717.0
+offset_right = 452.0
+offset_bottom = 987.0
+text = "R"
+
+[node name="MainMenuButton" type="Button" parent="UI" unique_id=1651288712]
+layout_mode = 0
+offset_left = 1429.0
+offset_top = 44.0
+offset_right = 1770.0
+offset_bottom = 314.0
+text = "R"
+
+[node name="LevelMusic" parent="." unique_id=521502007 instance=ExtResource("4_w6gk5")]
+music = ExtResource("5_s5ga2")
