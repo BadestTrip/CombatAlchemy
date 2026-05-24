@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://dr3fdywcsbtfi"]
+
+[ext_resource type="Script" uid="uid://cjby2ixo1s6h4" path="res://scenes/inkwash_transition.gd" id="1_qvahc"]
+[ext_resource type="Shader" uid="uid://jtk1prvgmlyk" path="res://extra/ink_wash_shader_done.gdshader" id="2_qvahc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0n02w"]
+shader = ExtResource("2_qvahc")
+shader_parameter/reveal_progress = 0.61600002926
+shader_parameter/puddle_growth_time = 2.1
+shader_parameter/ink_color = Color(0.035, 0.028, 0.022, 1)
+shader_parameter/drop_scale = 1.0
+shader_parameter/puddle_scale = 2.2
+shader_parameter/edge_noise_strength = 0.89999997615814
+shader_parameter/ink_rim_strength = 0.0
+shader_parameter/drop_alpha = 1.0
+shader_parameter/splash_alpha = 0.75
+shader_parameter/splash_visibility = 1.0
+shader_parameter/splash_fade_time = 1.20000005537006
+shader_parameter/transition_duration_seconds = 2.2
+
+[node name="InkWashTransition" type="CanvasLayer" unique_id=791004573]
+layer = 20
+script = ExtResource("1_qvahc")
+
+[node name="TransitionSnapshot" type="TextureRect" parent="." unique_id=1135348625]
+material = SubResource("ShaderMaterial_0n02w")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

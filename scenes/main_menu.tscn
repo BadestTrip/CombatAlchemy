@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bfchsdvo2wm0y"]
 
 [ext_resource type="Script" uid="uid://bnujbb67xn4ab" path="res://scenes/main_menu.gd" id="1_o168s"]
-[ext_resource type="Texture2D" uid="uid://bjg8uuryr4a2i" path="res://sprites/main_menu_no_banner.png" id="2_7b55j"]
+[ext_resource type="Texture2D" uid="uid://bjg8uuryr4a2i" path="res://sprites/main_menu_no_banner.png" id="2_5pajh"]
 [ext_resource type="Shader" uid="uid://d1ib7a1k4stpk" path="res://extra/main_menu_shader.gdshader" id="2_o168s"]
 [ext_resource type="Texture2D" uid="uid://sc2qo0coeisr" path="res://sprites/buttons/continue_normal.png" id="9_5faoh"]
 [ext_resource type="Texture2D" uid="uid://c0i68xamre1mg" path="res://sprites/buttons/continue_pressed.png" id="10_ptake"]
@@ -46,7 +46,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_7b55j")
+texture = ExtResource("2_5pajh")
 
 [node name="Banner" parent="." unique_id=2074483130 instance=ExtResource("16_5pajh")]
 position = Vector2(244.75787, 402.77768)
