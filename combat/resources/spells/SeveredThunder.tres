@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://cufwjhrssv27v"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_damage"]
+script = ExtResource("2_effect")
+amount = 12
+
+[sub_resource type="Resource" id="Effect_stun"]
+script = ExtResource("2_effect")
+effect_type = 6
+status_id = "stunned"
+log_text = "{target} is stunned."
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["keth", "mira", "zun"])
+result_name = "Severed Thunder"
+result_type = "op"
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_damage"), SubResource("Effect_stun")])
