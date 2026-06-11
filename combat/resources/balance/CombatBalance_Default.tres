@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="CombatBalanceData" format=3 uid="uid://1ejqhdk0ryvd"]
+
+[ext_resource type="Script" uid="uid://bxwi0aqynywd" path="res://combat/resources/CombatBalanceData.gd" id="1_balance"]
+
+[resource]
+script = ExtResource("1_balance")
+starting_hand_size = 4
+max_hand_size = 4

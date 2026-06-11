@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://bfb5msl85mgeo"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_damage"]
+script = ExtResource("2_effect")
+effect_type = 14
+amount = 3
+log_text = "Bad Reflection hits {mage} for {amount} damage."
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["nox", "mira", "nox"])
+result_name = "Bad Reflection"
+result_type = "disaster"
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_damage")])
