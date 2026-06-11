@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://7b33tm0ihsyf"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_quiet_ward"]
+script = ExtResource("2_effect")
+effect_type = 18
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["nox", "elum", "mira"])
+result_name = "Quiet Ward"
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_quiet_ward")])

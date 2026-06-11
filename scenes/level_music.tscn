@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://4nc00skw10kf"]
-
-[ext_resource type="Script" uid="uid://b86dt8t08aoil" path="res://scenes/level_music.gd" id="1_6t0gt"]
-
-[node name="LevelMusic" type="Node2D" unique_id=521502007 groups=["level_music"]]
-script = ExtResource("1_6t0gt")

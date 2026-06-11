@@ -22,6 +22,12 @@ signal unit_shield_changed(unit: Node, shield: int)
 signal unit_died(unit: Node)
 
 
+# Assign CombatBalance_Default.tres here. CombatManager passes it to every
+# manager and applies its defaults to units during scene setup.
+@export_group("Balance")
+@export var balance: CombatBalanceData
+
+
 # These unique-name paths assume the named nodes exist in CombatScene.tscn.
 @onready var mages_root: Node = %Mages
 @onready var enemies_root: Node = %Enemies
@@ -45,8 +51,15 @@ var has_combat_ended: bool = false
 # Godot calls this after child nodes have entered the tree.
 # Setup order matters because opening hands need configured MageUnit references.
 func _ready() -> void:
+	if balance == null:
+		balance = CombatBalanceData.new()
+		push_warning(
+			"CombatManager has no CombatBalanceData assigned; using script defaults."
+		)
+
 	_collect_units()
 	_connect_unit_signals()
+	_pass_balance_to_combat_nodes()
 
 	for mage: MageUnit in mages:
 		mage.configure(deck_manager)
@@ -65,7 +78,11 @@ func _ready() -> void:
 
 	combat_log.append_line("Three mages face three hostile adepts.")
 	combat_started.emit()
-	round_manager.start_combat()
+	if balance.auto_start_combat:
+		round_manager.start_combat()
+	else:
+		set_phase_text("Ready")
+		ui_controller.refresh_all()
 
 
 # RoundManager and ChantResolver use this instead of owning duplicate unit arrays.
@@ -173,6 +190,19 @@ func _connect_unit_signals() -> void:
 		enemy.unit_damaged.connect(_on_enemy_damaged)
 		enemy.unit_shield_changed.connect(_on_enemy_shield_changed)
 		enemy.unit_died.connect(_on_enemy_died)
+
+
+# One shared Resource keeps Inspector tuning consistent across combat systems.
+func _pass_balance_to_combat_nodes() -> void:
+	deck_manager.balance = balance
+	round_manager.balance = balance
+	chant_resolver.balance = balance
+	ui_controller.balance = balance
+
+	for mage: MageUnit in mages:
+		mage.apply_balance_defaults(balance)
+	for enemy: EnemyUnit in enemies:
+		enemy.apply_balance_defaults(balance)
 
 
 func _on_mage_damaged(mage: MageUnit, amount: int) -> void:

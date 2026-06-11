@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://1de5st71gim2"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_random"]
+script = ExtResource("2_effect")
+effect_type = 20
+
+[sub_resource type="Resource" id="Effect_violence"]
+script = ExtResource("2_effect")
+amount = 14
+
+[sub_resource type="Resource" id="Effect_protection"]
+script = ExtResource("2_effect")
+effect_type = 3
+amount = 10
+
+[sub_resource type="Resource" id="Effect_chaos_enemies"]
+script = ExtResource("2_effect")
+effect_type = 1
+amount = 5
+
+[sub_resource type="Resource" id="Effect_chaos_mages"]
+script = ExtResource("2_effect")
+effect_type = 2
+amount = 5
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["iri", "bavo", "asha"])
+result_name = "Idiot Star"
+result_type = "op"
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_random"), SubResource("Effect_violence"), SubResource("Effect_protection"), SubResource("Effect_chaos_enemies"), SubResource("Effect_chaos_mages")])

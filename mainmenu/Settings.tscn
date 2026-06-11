@@ -1,0 +1,121 @@
+[gd_scene format=3 uid="uid://bsnod8l07k2md"]
+
+[ext_resource type="Script" uid="uid://dpxmbukrx5llk" path="res://mainmenu/SettingsMenu.gd" id="1_4hxq3"]
+[ext_resource type="Shader" uid="uid://bm57c64bwyeyx" path="res://extra/settings_menu_shader.gdshader" id="3_ppjuv"]
+[ext_resource type="Texture2D" uid="uid://bltgeboh3kb3e" path="res://sprites/buttons/back_normal.png" id="4_gis3k"]
+[ext_resource type="Texture2D" uid="uid://jnmyoew3lgna" path="res://sprites/buttons/back_pressed.png" id="5_83j8s"]
+[ext_resource type="FontFile" uid="uid://bi7jlcgpmn18i" path="res://extra/yoster.ttf" id="5_646k0"]
+[ext_resource type="Texture2D" uid="uid://c4hdehyxkrj84" path="res://sprites/buttons/back_hover.png" id="6_gjs24"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ipgag"]
+shader = ExtResource("3_ppjuv")
+shader_parameter/panel_opacity = 0.92
+shader_parameter/blur_radius = 3.0
+shader_parameter/panel_tint = Color(0.16, 0.09, 0.045, 0.78)
+shader_parameter/edge_color = Color(1, 0.72, 0.34, 1)
+shader_parameter/edge_strength = 0.55
+shader_parameter/grain_strength = 0.045
+shader_parameter/rounded_corners = 0.13
+shader_parameter/corner_softness = 0.02
+shader_parameter/darken_background = 0.28
+shader_parameter/shimmer_speed = 0.7
+
+[node name="SettingsMenu" type="Control" unique_id=1399243671]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_4hxq3")
+
+[node name="Shader" type="ColorRect" parent="." unique_id=1499595724]
+material = SubResource("ShaderMaterial_ipgag")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1573.0
+offset_top = -1067.0
+offset_right = 1516.0
+offset_bottom = 1072.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1401794530]
+modulate = Color(1, 1, 1, 0.13725491)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=89257487]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 93.0
+grow_horizontal = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=1937675963]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Settings" type="Label" parent="CenterContainer/VBoxContainer" unique_id=1858182731]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_646k0")
+theme_override_font_sizes/font_size = 48
+text = "Sound Settings"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/VBoxContainer" unique_id=2104333175]
+layout_mode = 2
+
+[node name="Music" type="Label" parent="CenterContainer/VBoxContainer/HBoxContainer" unique_id=450945469]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_646k0")
+theme_override_font_sizes/font_size = 48
+text = "Music"
+
+[node name="MusicSlider" type="HSlider" parent="CenterContainer/VBoxContainer/HBoxContainer" unique_id=977599329]
+custom_minimum_size = Vector2(800, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+tick_count = 10
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="CenterContainer/VBoxContainer" unique_id=855747240]
+layout_mode = 2
+
+[node name="SFX" type="Label" parent="CenterContainer/VBoxContainer/HBoxContainer2" unique_id=236676467]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_646k0")
+theme_override_font_sizes/font_size = 48
+text = "SFX"
+
+[node name="SFXSlider" type="HSlider" parent="CenterContainer/VBoxContainer/HBoxContainer2" unique_id=2124244684]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+tick_count = 10
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="CenterContainer/VBoxContainer" unique_id=1715019198]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="BackButton" type="TextureButton" parent="CenterContainer/VBoxContainer/HBoxContainer3" unique_id=1807450633]
+custom_minimum_size = Vector2(240, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
+texture_normal = ExtResource("4_gis3k")
+texture_pressed = ExtResource("5_83j8s")
+texture_hover = ExtResource("6_gjs24")
+stretch_mode = 0

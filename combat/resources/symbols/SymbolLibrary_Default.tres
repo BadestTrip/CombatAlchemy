@@ -1,0 +1,89 @@
+[gd_resource type="Resource" script_class="SymbolLibraryData" format=3 uid="uid://f1frsjbdcext"]
+
+[ext_resource type="Script" uid="uid://cvmng6hy0vo1v" path="res://combat/SymbolCardData.gd" id="1_symbol"]
+[ext_resource type="Script" uid="uid://btv0iscc0ceo" path="res://combat/resources/SymbolLibraryData.gd" id="2_library"]
+
+[sub_resource type="Resource" id="Symbol_asha"]
+script = ExtResource("1_symbol")
+symbol_id = "asha"
+spoken_word = "ASHA"
+display_name = "First Flame"
+visual_hint = "^^"
+developer_note = "ignition, beginning, activation"
+card_color = Color(1, 0.45, 0.25, 1)
+
+[sub_resource type="Resource" id="Symbol_voro"]
+script = ExtResource("1_symbol")
+symbol_id = "voro"
+spoken_word = "VORO"
+display_name = "Turning Force"
+visual_hint = ">>"
+developer_note = "force, motion, push"
+card_color = Color(0.35, 0.72, 1, 1)
+
+[sub_resource type="Resource" id="Symbol_keth"]
+script = ExtResource("1_symbol")
+symbol_id = "keth"
+spoken_word = "KETH"
+display_name = "Sever Mark"
+visual_hint = "//"
+developer_note = "cut, sever, damage"
+card_color = Color(0.95, 0.25, 0.28, 1)
+
+[sub_resource type="Resource" id="Symbol_mira"]
+script = ExtResource("1_symbol")
+symbol_id = "mira"
+spoken_word = "MIRA"
+display_name = "Mirror Eye"
+visual_hint = "<>"
+developer_note = "mirror, reflection, copy"
+card_color = Color(0.72, 0.55, 1, 1)
+
+[sub_resource type="Resource" id="Symbol_nox"]
+script = ExtResource("1_symbol")
+symbol_id = "nox"
+spoken_word = "NOX"
+display_name = "Null Ring"
+visual_hint = "OO"
+developer_note = "void, silence, negation"
+card_color = Color(0.35, 0.35, 0.42, 1)
+
+[sub_resource type="Resource" id="Symbol_iri"]
+script = ExtResource("1_symbol")
+symbol_id = "iri"
+spoken_word = "IRI"
+display_name = "Many Star"
+visual_hint = "***"
+developer_note = "scatter, random, many"
+card_color = Color(1, 0.72, 0.25, 1)
+
+[sub_resource type="Resource" id="Symbol_elum"]
+script = ExtResource("1_symbol")
+symbol_id = "elum"
+spoken_word = "ELUM"
+display_name = "Ward Gate"
+visual_hint = "[]"
+developer_note = "light, ward, protection"
+card_color = Color(0.45, 0.9, 0.72, 1)
+
+[sub_resource type="Resource" id="Symbol_zun"]
+script = ExtResource("1_symbol")
+symbol_id = "zun"
+spoken_word = "ZUN"
+display_name = "Forked Shock"
+visual_hint = "!!"
+developer_note = "shock, instability, surge"
+card_color = Color(0.95, 0.88, 0.25, 1)
+
+[sub_resource type="Resource" id="Symbol_bavo"]
+script = ExtResource("1_symbol")
+symbol_id = "bavo"
+spoken_word = "BAVO"
+display_name = "Heavy Knot"
+visual_hint = "##"
+developer_note = "mass, body, absurdity"
+card_color = Color(0.65, 0.48, 0.34, 1)
+
+[resource]
+script = ExtResource("2_library")
+symbols = Array[ExtResource("1_symbol")]([SubResource("Symbol_asha"), SubResource("Symbol_voro"), SubResource("Symbol_keth"), SubResource("Symbol_mira"), SubResource("Symbol_nox"), SubResource("Symbol_iri"), SubResource("Symbol_elum"), SubResource("Symbol_zun"), SubResource("Symbol_bavo")])

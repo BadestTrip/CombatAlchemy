@@ -30,14 +30,26 @@ signal intent_generated(unit: EnemyUnit, intent: Dictionary)
 # Set this in the Inspector to normal attack damage before modifiers.
 @export var base_attack: int = 3
 
+# Set this in the Inspector to shield granted when combat begins.
+@export var starting_shield: int = 0
+
+# Set the probability that this enemy chooses Guard instead of an attack.
+@export_range(0.0, 1.0, 0.01) var guard_chance: float = 0.25
+
+# Set the shield granted by a Guard intent.
+@export var guard_shield: int = 3
+
 
 # Current HP is initialized from max_hp when the scene loads.
+# This is runtime state and should not be exposed in Inspector.
 var current_hp: int = 0
 
 # Shield absorbs incoming damage before HP unless a spell ignores shield.
+# This is runtime state and should not be exposed in Inspector.
 var shield: int = 0
 
 # RoundManager asks the enemy to create this before the planning phase.
+# This is runtime state and should not be exposed in Inspector.
 var current_intent: Dictionary = {}
 
 # Dead enemies do not generate or execute intents.
@@ -62,9 +74,28 @@ var _was_attacked_this_round: bool = false
 # Godot calls _ready when the scene is loaded.
 func _ready() -> void:
 	current_hp = max_hp
+	shield = starting_shield
 	is_alive = current_hp > 0
 	add_to_group("enemies")
 	add_to_group("combat_units")
+
+
+# CombatManager passes global defaults after child _ready methods have run.
+# Explicit non-default Inspector values remain local overrides.
+func apply_balance_defaults(balance: CombatBalanceData) -> void:
+	if balance == null:
+		return
+	if max_hp == 15:
+		max_hp = balance.default_enemy_max_hp
+	if base_attack == 3:
+		base_attack = balance.default_enemy_base_attack
+	if guard_chance == 0.25:
+		guard_chance = balance.enemy_guard_chance
+	if guard_shield == 3:
+		guard_shield = balance.enemy_guard_shield
+	current_hp = max_hp
+	shield = starting_shield
+	is_alive = current_hp > 0
 
 
 # RoundManager calls this at round start before the player chooses cards.
@@ -89,11 +120,15 @@ func generate_intent(living_mages: Array[MageUnit]) -> void:
 			"type": "skip",
 			"description": "%s is silenced and cannot form an intent." % enemy_name
 		}
-	elif randf() < 0.25:
+	# Guard probability and shield are exported design values, not runtime state.
+	elif randf() < clampf(guard_chance, 0.0, 1.0):
 		current_intent = {
 			"type": "guard",
-			"shield": 3,
-			"description": "%s intends to Guard for 3 shield." % enemy_name
+			"shield": guard_shield,
+			"description": "%s intends to Guard for %d shield." % [
+				enemy_name,
+				guard_shield
+			]
 		}
 	elif not living_mages.is_empty():
 		var target: MageUnit = living_mages.pick_random()
@@ -140,7 +175,7 @@ func execute_intent(living_mages: Array[MageUnit]) -> void:
 			))
 			_remove_skip_statuses()
 		"guard":
-			var guard_amount := int(current_intent.get("shield", 3))
+			var guard_amount := int(current_intent.get("shield", guard_shield))
 			gain_shield(guard_amount)
 			last_action_log = "%s guards and gains %d shield." % [
 				enemy_name,

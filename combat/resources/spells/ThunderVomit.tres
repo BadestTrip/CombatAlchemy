@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://c2iqnbdic1q46"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_enemies"]
+script = ExtResource("2_effect")
+effect_type = 1
+amount = 4
+
+[sub_resource type="Resource" id="Effect_mages"]
+script = ExtResource("2_effect")
+effect_type = 2
+amount = 2
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["zun", "zun", "zun"])
+result_name = "Thunder Vomit"
+result_type = "disaster"
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_enemies"), SubResource("Effect_mages")])

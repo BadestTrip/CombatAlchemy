@@ -6,6 +6,11 @@ extends VBoxContainer
 class_name CombatUIController
 
 
+# Assign CombatBalance_Default.tres here to tune graybox card presentation.
+@export_group("Balance")
+@export var balance: CombatBalanceData
+
+
 # These node paths assume the exact child names used in CombatScene.tscn.
 @onready var mage_statuses: VBoxContainer = %MageStatuses
 @onready var enemy_statuses: VBoxContainer = %EnemyStatuses
@@ -34,6 +39,9 @@ var _card_buttons: Array[Button] = []
 
 # This prevents target list rebuilding from triggering selection callbacks.
 var _is_refreshing_targets: bool = false
+
+# A missing Inspector resource uses this safe in-memory default.
+var _fallback_balance: CombatBalanceData
 
 
 # Godot calls this when the UI node enters the scene.
@@ -169,7 +177,7 @@ func _refresh_chant_slots() -> void:
 	chant_preview.text = "  >  ".join(preview_words)
 
 
-# Each living mage gets one row containing its current three clickable cards.
+# Each living mage gets one row containing its current clickable cards.
 func _refresh_mage_hands() -> void:
 	_card_buttons.clear()
 	_clear_children(mage_hands)
@@ -191,12 +199,20 @@ func _refresh_mage_hands() -> void:
 
 		for card: SymbolCardData in mage.hand:
 			var card_button := Button.new()
-			card_button.custom_minimum_size = Vector2(145.0, 72.0)
-			card_button.text = "%s\n%s\n%s" % [
-				card.visual_hint,
-				card.spoken_word,
-				card.display_name
-			]
+			var settings := _get_balance()
+			card_button.custom_minimum_size = Vector2(
+				maxf(1.0, settings.card_button_width),
+				maxf(1.0, settings.card_button_height)
+			)
+
+			# Spoken words always remain visible; debug details are optional.
+			var card_lines: PackedStringArray = []
+			if settings.show_card_visual_hints:
+				card_lines.append(card.visual_hint)
+			card_lines.append(card.spoken_word)
+			if settings.show_card_display_names:
+				card_lines.append(card.display_name)
+			card_button.text = "\n".join(card_lines)
 			card_button.tooltip_text = "%s symbol card" % card.spoken_word
 
 			if round_manager.selected_cards[mage_index] == card:
@@ -312,3 +328,16 @@ func _make_unit_label(
 		color if is_alive else Color(0.45, 0.45, 0.45)
 	)
 	return label
+
+
+# Missing scene wiring should warn but should not crash UI rebuilding.
+func _get_balance() -> CombatBalanceData:
+	if balance != null:
+		return balance
+	if _fallback_balance == null:
+		_fallback_balance = CombatBalanceData.new()
+		push_warning(
+			"CombatUIController has no CombatBalanceData assigned; "
+			+ "using script defaults."
+		)
+	return _fallback_balance

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://s8p7j64345n4"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_shield"]
+script = ExtResource("2_effect")
+effect_type = 15
+amount = 5
+
+[sub_resource type="Resource" id="Effect_damage"]
+script = ExtResource("2_effect")
+amount = 3
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["mira", "bavo", "keth"])
+result_name = "Mirror Bloat"
+result_type = "disaster"
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_shield"), SubResource("Effect_damage")])

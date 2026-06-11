@@ -28,8 +28,13 @@ signal chant_resolved(result: Dictionary)
 # Emitted before surviving enemies execute their visible intents.
 signal enemy_phase_started
 
-# Emitted after statuses update and hands draw back to three.
+# Emitted after statuses update and hands optionally draw to the configured maximum.
 signal round_ended(round_number: int)
+
+
+# Assign CombatBalance_Default.tres here to tune hand refill and phase delays.
+@export_group("Balance")
+@export var balance: CombatBalanceData
 
 
 # These states make button permissions and round order explicit.
@@ -62,6 +67,9 @@ var chant_resolver: ChantResolver
 var ui_controller: CombatUIController
 var combat_log: CombatLog
 
+# A missing Inspector resource uses this safe in-memory default.
+var _fallback_balance: CombatBalanceData
+
 
 # CombatManager calls this once after all child nodes are ready.
 func configure(
@@ -76,6 +84,8 @@ func configure(
 	chant_resolver = resolver
 	ui_controller = ui
 	combat_log = log
+	_clear_selected_cards()
+	_validate_chant_slot_count()
 
 
 # CombatManager calls this after opening hands have been dealt.
@@ -96,7 +106,7 @@ func select_chant_card(mage: MageUnit, card: SymbolCardData) -> void:
 		return
 
 	var slot_index := combat_manager.mages.find(mage)
-	if slot_index < 0 or slot_index >= 3:
+	if slot_index < 0 or slot_index >= selected_cards.size():
 		return
 
 	selected_cards[slot_index] = card
@@ -151,7 +161,7 @@ func cast_chant() -> void:
 	chant_cast_started.emit(cast_cards, cast_target)
 
 	# Used cards leave each mage hand before disasters can discard another card.
-	for slot_index: int in range(3):
+	for slot_index: int in range(selected_cards.size()):
 		var mage: MageUnit = combat_manager.mages[slot_index]
 		mage.discard_card(cast_cards[slot_index])
 
@@ -167,13 +177,14 @@ func cast_chant() -> void:
 	if combat_manager.check_combat_end():
 		return
 
-	current_state = RoundState.ENEMY_PHASE
-	combat_manager.set_phase_text("Enemy phase")
-	enemy_phase_started.emit()
-	await _execute_enemy_phase()
+	if _get_balance().enemy_phase_after_chant:
+		current_state = RoundState.ENEMY_PHASE
+		combat_manager.set_phase_text("Enemy phase")
+		enemy_phase_started.emit()
+		await _execute_enemy_phase()
 
-	if combat_manager.check_combat_end():
-		return
+		if combat_manager.check_combat_end():
+			return
 
 	current_state = RoundState.ROUND_END
 	combat_manager.set_phase_text("Round end")
@@ -181,7 +192,9 @@ func cast_chant() -> void:
 	round_ended.emit(round_number)
 	ui_controller.refresh_all()
 
-	await get_tree().create_timer(0.35).timeout
+	await get_tree().create_timer(
+		maxf(0.0, _get_balance().next_round_delay_seconds)
+	).timeout
 	_start_next_round()
 
 
@@ -239,7 +252,9 @@ func _execute_enemy_phase() -> void:
 		if combat_manager.check_combat_end():
 			return
 
-		await get_tree().create_timer(0.25).timeout
+		await get_tree().create_timer(
+			maxf(0.0, _get_balance().enemy_action_delay_seconds)
+		).timeout
 
 
 # End-of-round updates preserve last-round attack history and refill each hand.
@@ -247,8 +262,9 @@ func _end_round_updates() -> void:
 	for enemy: EnemyUnit in combat_manager.enemies:
 		enemy.end_round()
 
-	for mage: MageUnit in combat_manager.get_living_mages():
-		mage.draw_to_hand_size(3)
+	if _get_balance().draw_to_max_hand_at_round_end:
+		for mage: MageUnit in combat_manager.get_living_mages():
+			mage.draw_to_hand_size(maxi(0, _get_balance().max_hand_size))
 
 
 # ChantResolver returns an array of lines so presentation remains decoupled.
@@ -261,6 +277,31 @@ func _append_result_to_log(result: Dictionary) -> void:
 # Typed arrays are filled explicitly because chant slots intentionally contain null.
 func _clear_selected_cards() -> void:
 	selected_cards.clear()
-	selected_cards.append(null)
-	selected_cards.append(null)
-	selected_cards.append(null)
+	for slot_index: int in range(_supported_chant_card_count()):
+		selected_cards.append(null)
+
+
+# The graybox scene has exactly three visual slots and three mage rows.
+func _supported_chant_card_count() -> int:
+	return 3
+
+
+# Keep the requested Inspector knob visible without allowing an unsafe UI mismatch.
+func _validate_chant_slot_count() -> void:
+	if _get_balance().required_chant_cards != _supported_chant_card_count():
+		push_warning(
+			"Current graybox UI supports exactly 3 chant slots. "
+			+ "Keep required_chant_cards at 3 for now."
+		)
+
+
+# Missing scene wiring should warn but should not crash combat setup.
+func _get_balance() -> CombatBalanceData:
+	if balance != null:
+		return balance
+	if _fallback_balance == null:
+		_fallback_balance = CombatBalanceData.new()
+		push_warning(
+			"RoundManager has no CombatBalanceData assigned; using script defaults."
+		)
+	return _fallback_balance

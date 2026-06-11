@@ -1,32 +1,46 @@
 # ChantResolver.gd
 # Attach this script to the ChantResolver node in CombatScene.tscn.
-# It is the only script that knows authored chant combinations and spell effects.
-# RoundManager gives it exactly three ordered cards, one target, and combat context.
+# It builds a chant lookup from Inspector-assigned SpellRecipeData resources,
+# applies their SpellEffectData entries, and handles balance-driven miscasts.
 extends Node
 class_name ChantResolver
 
 
 # Emitted after a chant has been fully applied.
-# RoundManager listens to the returned Dictionary directly, while other future
-# presentation systems can listen to this signal for sound or animation.
 signal chant_resolved(result: Dictionary)
 
 
-# Authored keys map to name, category, and an internal effect id.
+# Add SpellRecipeData resources here. Order inside each recipe remains meaningful.
+@export_group("Spell Recipes")
+@export var spell_recipes: Array[SpellRecipeData] = []
+
+# Assign CombatBalance_Default.tres here to tune fallback miscasts.
+@export_group("Balance")
+@export var balance: CombatBalanceData
+
+# These switches make data setup easier to diagnose without changing gameplay code.
+@export_group("Debug")
+@export var log_unknown_chants: bool = true
+@export var allow_fallback_miscasts: bool = true
+
+
+# Authored chant keys map directly to editable SpellRecipeData resources.
 var spellbook: Dictionary = {}
 
-# Infinite Wink repeats this previous authored spell when one exists.
+# Infinite Wink reads this runtime history. It should not be exported.
 var previous_successful_spell_key: String = ""
 
+# A missing Inspector resource uses this safe in-memory default.
+var _fallback_balance: CombatBalanceData
 
-# Godot calls this once when CombatScene is loaded.
+
+# Godot calls this after exported recipe resources have been assigned.
 func _ready() -> void:
 	_build_spellbook()
 
 
 # RoundManager calls this after the player presses Cast.
-# The card order is preserved when building "word_word_word".
-# This function applies the effect and returns player-facing result data.
+# Card order is preserved when building "word_word_word".
 func resolve_chant(
 	symbols: Array[SymbolCardData],
 	target: EnemyUnit,
@@ -43,7 +57,6 @@ func resolve_chant(
 		symbol_ids.append(card.symbol_id)
 		spoken_words.append(card.spoken_word)
 
-	# Joining in array order makes ASHA-VORO-KETH different from ASHA-KETH-VORO.
 	var chant_key := "_".join(symbol_ids)
 	var log_lines: Array[String] = []
 	_append_shouted_words(log_lines, spoken_words, context)
@@ -57,7 +70,7 @@ func resolve_chant(
 			context,
 			log_lines
 		)
-	else:
+	elif allow_fallback_miscasts:
 		result = _resolve_fallback_miscast(
 			chant_key,
 			symbol_ids,
@@ -66,71 +79,42 @@ func resolve_chant(
 			context,
 			log_lines
 		)
+	else:
+		log_lines.append("The words fail to lock, but fallback miscasts are disabled.")
+		result = _make_result(
+			chant_key,
+			spoken_words,
+			"Unknown Chant",
+			"fallback",
+			false,
+			log_lines
+		)
 
 	chant_resolved.emit(result)
 	return result
 
 
-# The 30 requested authored results are registered here.
-# Effect ids are developer-only and never shown as hidden card meanings.
+# Build the runtime lookup from data instead of registering 30 keys in code.
 func _build_spellbook() -> void:
 	spellbook.clear()
 
-	# 12 workable spells.
-	_add_spell("asha_voro_keth", "Razor Comet", "workable", "razor_comet")
-	_add_spell("asha_elum_keth", "Bright Cut", "workable", "bright_cut")
-	_add_spell("nox_keth_voro", "Hollow Push", "workable", "hollow_push")
-	_add_spell("zun_voro_keth", "Crackbolt", "workable", "crackbolt")
-	_add_spell("elum_mira_asha", "Return Glow", "workable", "return_glow")
-	_add_spell("mira_keth_asha", "Reversed Blade", "workable", "reversed_blade")
-	_add_spell("iri_asha_voro", "Scatterflare", "workable", "scatterflare")
-	_add_spell("voro_bavo_keth", "Heavy Word", "workable", "heavy_word")
-	_add_spell("nox_elum_mira", "Quiet Ward", "workable", "quiet_ward")
-	_add_spell("asha_zun_iri", "Spark Rain", "workable", "spark_rain")
-	_add_spell("keth_keth_voro", "Double Sever", "workable", "double_sever")
-	_add_spell("elum_bavo_voro", "Stone Halo", "workable", "stone_halo")
+	for recipe: SpellRecipeData in spell_recipes:
+		if recipe == null:
+			continue
 
-	# 5 dangerous but non-crashing disasters.
-	_add_spell("zun_zun_zun", "Thunder Vomit", "disaster", "thunder_vomit")
-	_add_spell("nox_mira_nox", "Bad Reflection", "disaster", "bad_reflection")
-	_add_spell("bavo_iri_zun", "Meat Lightning", "disaster", "meat_lightning")
-	_add_spell("asha_asha_nox", "Choked Flame", "disaster", "choked_flame")
-	_add_spell("mira_bavo_keth", "Mirror Bloat", "disaster", "mirror_bloat")
+		var key := recipe.get_chant_key()
+		if key.is_empty():
+			push_warning("Spell recipe has empty chant key.")
+			continue
+		if spellbook.has(key):
+			push_warning("Duplicate spell key: " + key)
+			continue
 
-	# 4 intentionally overpowered secret discoveries.
-	_add_spell("mira_iri_mira", "Infinite Wink", "op", "infinite_wink")
-	_add_spell("nox_asha_elum", "Black Sunrise", "op", "black_sunrise")
-	_add_spell("keth_mira_zun", "Severed Thunder", "op", "severed_thunder")
-	_add_spell("iri_bavo_asha", "Idiot Star", "op", "idiot_star")
-
-	# 9 funny spells that still change combat.
-	_add_spell("bavo_bavo_bavo", "Great Belly", "funny", "great_belly")
-	_add_spell("iri_iri_iri", "Tiny Parade", "funny", "tiny_parade")
-	_add_spell("mira_mira_bavo", "Self Portrait", "funny", "self_portrait")
-	_add_spell("asha_bavo_iri", "Hot Potato", "funny", "hot_potato")
-	_add_spell("voro_iri_bavo", "Wrong Door", "funny", "wrong_door")
-	_add_spell("elum_iri_bavo", "Holy Pigeon", "funny", "holy_pigeon")
-	_add_spell("nox_bavo_iri", "Silent Frog", "funny", "silent_frog")
-	_add_spell("keth_bavo_mira", "Sword With Face", "funny", "sword_with_face")
-	_add_spell("zun_bavo_elum", "Glowing Mistake", "funny", "glowing_mistake")
+		# The dictionary stores the Resource itself so every effect remains editable.
+		spellbook[key] = recipe
 
 
-# This small helper keeps the spell list above readable for beginners.
-func _add_spell(
-	chant_key: String,
-	result_name: String,
-	result_type: String,
-	effect_id: String
-) -> void:
-	spellbook[chant_key] = {
-		"name": result_name,
-		"type": result_type,
-		"effect": effect_id
-	}
-
-
-# Known chants come through this path.
-# The effect id selects one readable match branch below.
+# Known chants apply their effect resources in array order.
 func _resolve_authored_chant(
 	chant_key: String,
 	spoken_words: PackedStringArray,
@@ -138,154 +122,228 @@ func _resolve_authored_chant(
 	context: Dictionary,
 	log_lines: Array[String]
 ) -> Dictionary:
-	var spell: Dictionary = spellbook[chant_key]
-	var result_name := String(spell["name"])
-	var result_type := String(spell["type"])
-	var effect_id := String(spell["effect"])
+	var recipe := spellbook[chant_key] as SpellRecipeData
+	if recipe == null:
+		return _invalid_result("Spell data could not be loaded.")
 
-	log_lines.append("The chant locks: %s." % result_name)
-	_apply_authored_effect(effect_id, target, context, log_lines)
+	log_lines.append("The chant locks: %s." % recipe.result_name)
+	_apply_recipe_effects(recipe, target, context, log_lines)
 
-	# Infinite Wink reads the previous spell and should not overwrite it with itself.
-	if effect_id != "infinite_wink":
+	# Repeat effects read the previous authored recipe and do not replace it.
+	if not _recipe_repeats_previous_spell(recipe):
 		previous_successful_spell_key = chant_key
 
 	return _make_result(
 		chant_key,
 		spoken_words,
-		result_name,
-		result_type,
+		recipe.result_name,
+		recipe.result_type,
 		true,
 		log_lines
 	)
 
 
-# This match contains the concrete gameplay for all 30 authored chants.
-# Small helper functions below keep repeated damage/shield code understandable.
-func _apply_authored_effect(
-	effect_id: String,
+# This is the single data-driven effect dispatch point.
+# Idiot Star is a grouped random outcome, so its marker consumes the remaining
+# supporting effects instead of applying all of them sequentially.
+func _apply_recipe_effects(
+	recipe: SpellRecipeData,
 	target: EnemyUnit,
 	context: Dictionary,
 	log_lines: Array[String]
 ) -> void:
-	match effect_id:
-		"razor_comet":
-			_damage_enemy(target, 7, log_lines)
-		"bright_cut":
-			_damage_enemy(target, 5, log_lines, true)
-		"hollow_push":
-			_damage_enemy(target, 4, log_lines)
+	for effect: SpellEffectData in recipe.effects:
+		if effect == null:
+			continue
+		if effect.effect_type == SpellEffectData.EffectType.IDIOT_STAR_RANDOM_OUTCOME:
+			_apply_idiot_star_outcome(recipe.effects, target, context, log_lines)
+			return
+
+		var clamped_chance := clampf(effect.chance, 0.0, 1.0)
+		if clamped_chance < 1.0 and randf() >= clamped_chance:
+			continue
+
+		_apply_effect(effect, target, context, log_lines)
+
+
+# Each match branch explains which exported effect fields it consumes.
+func _apply_effect(
+	effect: SpellEffectData,
+	target: EnemyUnit,
+	context: Dictionary,
+	log_lines: Array[String]
+) -> void:
+	match effect.effect_type:
+		SpellEffectData.EffectType.DAMAGE_TARGET:
+			for hit_index: int in range(maxi(1, effect.hit_count)):
+				_damage_enemy(target, effect.amount, log_lines, effect.ignore_shield)
+
+		SpellEffectData.EffectType.DAMAGE_ALL_ENEMIES:
+			_damage_all_enemies(context, effect.amount, log_lines)
+
+		SpellEffectData.EffectType.DAMAGE_ALL_MAGES:
+			_damage_all_mages(context, effect.amount, log_lines)
+
+		SpellEffectData.EffectType.SHIELD_ALL_MAGES:
+			_shield_all_mages(context, effect.amount, log_lines)
+
+		SpellEffectData.EffectType.SHIELD_RANDOM_MAGE:
+			var shielded_mage := _random_living_mage(context)
+			if shielded_mage != null:
+				shielded_mage.gain_shield(effect.amount)
+				_append_effect_log(
+					log_lines,
+					effect.log_text,
+					target,
+					shielded_mage,
+					effect.amount,
+					"%s gains %d shield." % [
+						shielded_mage.mage_name,
+						effect.amount
+					]
+				)
+
+		SpellEffectData.EffectType.HEAL_TARGET_ENEMY:
 			if _is_valid_enemy(target):
-				target.apply_status("delayed")
-				log_lines.append("%s's intent is delayed." % target.enemy_name)
-		"crackbolt":
-			_damage_enemy(target, 6, log_lines)
-			if _is_valid_enemy(target) and randf() < 0.30:
-				target.apply_status("stunned")
-				log_lines.append("%s is stunned." % target.enemy_name)
-		"return_glow":
-			_shield_all_mages(context, 3, log_lines)
-		"reversed_blade":
-			var reversed_damage := 4
-			if _is_valid_enemy(target) and target.was_attacked_last_round:
-				reversed_damage += 3
-				log_lines.append("The blade remembers last round's wound.")
-			_damage_enemy(target, reversed_damage, log_lines)
-		"scatterflare":
-			_damage_all_enemies(context, 3, log_lines)
-		"heavy_word":
-			log_lines.append("The chant feels impossibly heavy.")
-			_damage_enemy(target, 8, log_lines)
-		"quiet_ward":
-			_apply_quiet_ward(target, context, log_lines)
-		"spark_rain":
-			for hit_index: int in range(3):
+				target.heal(effect.amount)
+				_append_effect_log(
+					log_lines,
+					effect.log_text,
+					target,
+					null,
+					effect.amount,
+					"%s is healed for %d." % [target.enemy_name, effect.amount]
+				)
+
+		SpellEffectData.EffectType.APPLY_STATUS_TARGET:
+			if _is_valid_enemy(target):
+				target.apply_status(effect.status_id, effect.status_duration)
+				_append_effect_log(
+					log_lines,
+					effect.log_text,
+					target,
+					null,
+					effect.amount,
+					"%s gains status '%s'." % [target.enemy_name, effect.status_id]
+				)
+
+		SpellEffectData.EffectType.RANDOM_HITS_ENEMIES:
+			for hit_index: int in range(maxi(0, effect.hit_count)):
 				var random_enemy := _random_living_enemy(context)
 				if random_enemy != null:
-					_damage_enemy(random_enemy, 2, log_lines)
-		"double_sever":
-			_damage_enemy(target, 4, log_lines)
+					_damage_enemy(random_enemy, effect.amount, log_lines)
+
+		SpellEffectData.EffectType.DISCARD_RANDOM_MAGE_CARD:
+			var discard_mage := _random_living_mage(context)
+			if discard_mage != null:
+				var discarded := discard_mage.discard_random_card()
+				if discarded != null:
+					log_lines.append(
+						"%s loses a random card: %s." % [
+							discard_mage.mage_name,
+							discarded.spoken_word
+						]
+					)
+
+		SpellEffectData.EffectType.MODIFY_TARGET_NEXT_ATTACK:
 			if _is_valid_enemy(target):
-				_damage_enemy(target, 4, log_lines)
-		"stone_halo":
-			var halo_mage := _random_living_mage(context)
-			if halo_mage != null:
-				halo_mage.gain_shield(8)
-				log_lines.append("%s gains 8 shield." % halo_mage.mage_name)
-		"thunder_vomit":
-			_damage_all_enemies(context, 4, log_lines)
-			_damage_all_mages(context, 2, log_lines)
-		"bad_reflection":
-			var reflected_mage := _random_living_mage(context)
-			if reflected_mage != null:
-				reflected_mage.take_damage(3)
+				target.modify_next_attack_damage(effect.amount)
+				var direction := "less" if effect.amount < 0 else "more"
 				log_lines.append(
-					"Bad Reflection hits %s for 3 damage." % reflected_mage.mage_name
+					"%s will deal %d %s damage next attack." % [
+						target.enemy_name,
+						absi(effect.amount),
+						direction
+					]
 				)
-		"meat_lightning":
-			_damage_random_living_unit(context, 10, log_lines)
-		"choked_flame":
-			_resolve_choked_flame(target, context, log_lines)
-		"mirror_bloat":
+
+		SpellEffectData.EffectType.SWAP_RANDOM_ENEMY_INTENTS:
+			_swap_random_enemy_intents(
+				target,
+				context,
+				effect.amount,
+				log_lines
+			)
+
+		SpellEffectData.EffectType.REPEAT_PREVIOUS_SPELL:
+			_repeat_previous_spell(
+				target,
+				context,
+				effect.amount,
+				log_lines
+			)
+
+		SpellEffectData.EffectType.RANDOM_UNIT_DAMAGE:
+			_damage_random_living_units(
+				context,
+				effect.amount,
+				effect.hit_count,
+				log_lines
+			)
+
+		SpellEffectData.EffectType.LOG_ONLY:
+			if not effect.log_text.is_empty():
+				log_lines.append(effect.log_text)
+
+		SpellEffectData.EffectType.DAMAGE_RANDOM_MAGE:
+			var damaged_mage := _random_living_mage(context)
+			if damaged_mage != null:
+				damaged_mage.take_damage(effect.amount)
+				_append_effect_log(
+					log_lines,
+					effect.log_text,
+					target,
+					damaged_mage,
+					effect.amount,
+					"%s takes %d damage." % [
+						damaged_mage.mage_name,
+						effect.amount
+					]
+				)
+
+		SpellEffectData.EffectType.SHIELD_TARGET_ENEMY:
 			if _is_valid_enemy(target):
-				target.gain_shield(5)
-				target.take_damage(3)
+				target.gain_shield(effect.amount)
 				log_lines.append(
-					"%s gains 5 shield, then takes 3 damage." % target.enemy_name
+					"%s gains %d shield." % [target.enemy_name, effect.amount]
 				)
-		"infinite_wink":
-			_resolve_infinite_wink(target, context, log_lines)
-		"black_sunrise":
-			_damage_all_enemies(context, 8, log_lines)
-			_damage_all_mages(context, 1, log_lines)
-		"severed_thunder":
-			_damage_enemy(target, 12, log_lines)
-			if _is_valid_enemy(target):
-				target.apply_status("stunned")
-				log_lines.append("%s is stunned." % target.enemy_name)
-		"idiot_star":
-			_resolve_idiot_star(target, context, log_lines)
-		"great_belly":
-			if _is_valid_enemy(target):
-				target.apply_status("confused")
-				log_lines.append("%s is confused and will skip an action." % target.enemy_name)
-		"tiny_parade":
-			log_lines.append("A tiny parade marches with unbearable confidence.")
-			_damage_all_enemies(context, 1, log_lines)
-		"self_portrait":
-			var portrait_mage := _random_living_mage(context)
-			if portrait_mage != null:
-				portrait_mage.gain_shield(4)
-				log_lines.append("%s admires 4 new shield." % portrait_mage.mage_name)
-			if _is_valid_enemy(target):
-				target.modify_next_attack_damage(-1)
-				log_lines.append("%s will deal 1 less damage next attack." % target.enemy_name)
-		"hot_potato":
-			_resolve_hot_potato(context, log_lines)
-		"wrong_door":
-			_resolve_wrong_door(target, context, log_lines)
-		"holy_pigeon":
+
+		SpellEffectData.EffectType.HEAL_ALL_MAGES:
 			for mage: MageUnit in _living_mages(context):
-				mage.heal(1)
-			log_lines.append("Holy Pigeon heals every living mage for 1.")
-			if _is_valid_enemy(target):
-				target.modify_next_attack_damage(-2)
-				log_lines.append("%s will deal 2 less damage next attack." % target.enemy_name)
-		"silent_frog":
-			if _is_valid_enemy(target):
-				target.apply_status("silenced")
-				log_lines.append("%s is silenced until damaged or next action." % target.enemy_name)
-		"sword_with_face":
-			_damage_enemy(target, 3, log_lines)
-			log_lines.append("The sword says something rude about the target's posture.")
-		"glowing_mistake":
-			_shield_all_mages(context, 2, log_lines)
+				mage.heal(effect.amount)
+			log_lines.append(
+				"Every living mage is healed for %d." % effect.amount
+			)
+
+		SpellEffectData.EffectType.MODIFY_ALL_ENEMIES_NEXT_ATTACK:
 			for enemy: EnemyUnit in _living_enemies(context):
-				enemy.modify_next_attack_damage(-1)
-			log_lines.append("All enemies will deal 1 less damage next attack.")
+				enemy.modify_next_attack_damage(effect.amount)
+			var direction := "less" if effect.amount < 0 else "more"
+			log_lines.append(
+				"All enemies will deal %d %s damage next attack." % [
+					absi(effect.amount),
+					direction
+				]
+			)
+
+		SpellEffectData.EffectType.QUIET_WARD:
+			_apply_quiet_ward(target, context, log_lines)
+
+		SpellEffectData.EffectType.CONDITIONAL_PREVIOUS_ROUND_DAMAGE:
+			var damage := effect.amount
+			if _is_valid_enemy(target) and target.was_attacked_last_round:
+				damage += effect.hit_count
+				if not effect.log_text.is_empty():
+					log_lines.append(effect.log_text)
+			_damage_enemy(target, damage, log_lines, effect.ignore_shield)
+
+		SpellEffectData.EffectType.IDIOT_STAR_RANDOM_OUTCOME:
+			# The recipe-level loop handles this grouped effect before dispatch.
+			pass
 
 
-# Unknown chants always resolve through one of the five requested priorities.
+# Unknown chants keep the original five-priority fallback behavior.
+# Every balance number now comes from CombatBalanceData.
 func _resolve_fallback_miscast(
 	chant_key: String,
 	symbol_ids: PackedStringArray,
@@ -294,41 +352,67 @@ func _resolve_fallback_miscast(
 	context: Dictionary,
 	log_lines: Array[String]
 ) -> Dictionary:
+	if log_unknown_chants:
+		print("Unknown chant resolved as fallback: ", chant_key)
 	log_lines.append("The words fail to lock.")
 
+	var settings := _get_balance()
 	var result_name := ""
 	var counts: Dictionary = {}
 	for symbol_id: String in symbol_ids:
 		counts[symbol_id] = int(counts.get(symbol_id, 0)) + 1
 
+	# Priority 1: three identical symbols.
 	if counts.size() == 1:
 		result_name = "Echo Miscast"
 		var random_enemy := _random_living_enemy(context)
 		var random_mage := _random_living_mage(context)
 		if random_enemy != null:
-			_damage_enemy(random_enemy, 2, log_lines)
+			_damage_enemy(
+				random_enemy,
+				settings.echo_miscast_enemy_damage,
+				log_lines
+			)
 		if random_mage != null:
-			random_mage.take_damage(1)
-			log_lines.append("%s takes 1 backfire damage." % random_mage.mage_name)
+			random_mage.take_damage(settings.echo_miscast_mage_damage)
+			log_lines.append(
+				"%s takes %d backfire damage." % [
+					random_mage.mage_name,
+					settings.echo_miscast_mage_damage
+				]
+			)
+	# Priority 2: any repeated symbol.
 	elif _has_repeated_symbol(counts):
 		result_name = "Overchewed Word"
-		_damage_enemy(target, 2, log_lines)
-		if randf() < 0.25:
+		_damage_enemy(target, settings.overchewed_word_damage, log_lines)
+		if randf() < clampf(settings.overchewed_backfire_chance, 0.0, 1.0):
 			var backfire_mage := _random_living_mage(context)
 			if backfire_mage != null:
-				backfire_mage.take_damage(1)
-				log_lines.append("%s takes 1 backfire damage." % backfire_mage.mage_name)
+				backfire_mage.take_damage(settings.overchewed_backfire_damage)
+				log_lines.append(
+					"%s takes %d backfire damage." % [
+						backfire_mage.mage_name,
+						settings.overchewed_backfire_damage
+					]
+				)
+	# Priority 3: any ZUN.
 	elif symbol_ids.has("zun"):
 		result_name = "Unstable Spark"
 		var spark_target := _random_living_enemy(context)
 		if spark_target != null:
-			_damage_enemy(spark_target, 3, log_lines)
+			_damage_enemy(
+				spark_target,
+				settings.unstable_spark_damage,
+				log_lines
+			)
+	# Priority 4: any ELUM.
 	elif symbol_ids.has("elum"):
 		result_name = "Weak Ward"
-		_shield_all_mages(context, 1, log_lines)
+		_shield_all_mages(context, settings.weak_ward_shield, log_lines)
+	# Priority 5: every other unknown order.
 	else:
 		result_name = "Mumbled Spark"
-		_damage_enemy(target, 1, log_lines)
+		_damage_enemy(target, settings.mumbled_spark_damage, log_lines)
 
 	return _make_result(
 		chant_key,
@@ -340,10 +424,11 @@ func _resolve_fallback_miscast(
 	)
 
 
-# Infinite Wink repeats the previous authored effect without consuming more cards.
-func _resolve_infinite_wink(
+# Infinite Wink applies the previous recipe without consuming more cards.
+func _repeat_previous_spell(
 	target: EnemyUnit,
 	context: Dictionary,
+	fallback_shield: int,
 	log_lines: Array[String]
 ) -> void:
 	if (
@@ -351,80 +436,73 @@ func _resolve_infinite_wink(
 		or not spellbook.has(previous_successful_spell_key)
 	):
 		log_lines.append("There is no earlier spell to repeat.")
-		_shield_all_mages(context, 3, log_lines)
+		_shield_all_mages(context, fallback_shield, log_lines)
 		return
 
-	var previous_spell: Dictionary = spellbook[previous_successful_spell_key]
-	var previous_name := String(previous_spell["name"])
-	var previous_effect := String(previous_spell["effect"])
-	log_lines.append("Infinite Wink repeats %s for free." % previous_name)
-	_apply_authored_effect(previous_effect, target, context, log_lines)
+	var previous_recipe := (
+		spellbook[previous_successful_spell_key] as SpellRecipeData
+	)
+	if previous_recipe == null:
+		return
+	log_lines.append(
+		"Infinite Wink repeats %s for free." % previous_recipe.result_name
+	)
+	_apply_recipe_effects(previous_recipe, target, context, log_lines)
 
 
-# Choked Flame helps the enemy and removes an extra random mage card.
-func _resolve_choked_flame(
+# Idiot Star uses one marker plus four supporting data effects:
+# target damage, all-mage shield, all-enemy damage, and all-mage damage.
+func _apply_idiot_star_outcome(
+	effects: Array[SpellEffectData],
 	target: EnemyUnit,
 	context: Dictionary,
 	log_lines: Array[String]
 ) -> void:
-	if _is_valid_enemy(target):
-		target.heal(3)
-		log_lines.append("%s is healed for 3." % target.enemy_name)
+	var violence := _find_effect(
+		effects,
+		SpellEffectData.EffectType.DAMAGE_TARGET
+	)
+	var protection := _find_effect(
+		effects,
+		SpellEffectData.EffectType.SHIELD_ALL_MAGES
+	)
+	var chaos_enemies := _find_effect(
+		effects,
+		SpellEffectData.EffectType.DAMAGE_ALL_ENEMIES
+	)
+	var chaos_mages := _find_effect(
+		effects,
+		SpellEffectData.EffectType.DAMAGE_ALL_MAGES
+	)
 
-	var mage := _random_living_mage(context)
-	if mage == null:
-		return
-	var discarded := mage.discard_random_card()
-	if discarded != null:
-		log_lines.append(
-			"%s loses a random card: %s." % [mage.mage_name, discarded.spoken_word]
-		)
-
-
-# Idiot Star deliberately selects one powerful result at random.
-func _resolve_idiot_star(
-	target: EnemyUnit,
-	context: Dictionary,
-	log_lines: Array[String]
-) -> void:
-	var outcome := randi_range(0, 2)
-	match outcome:
+	match randi_range(0, 2):
 		0:
 			log_lines.append("Idiot Star chooses violence.")
-			_damage_enemy(target, 14, log_lines)
+			if violence != null:
+				_apply_effect(violence, target, context, log_lines)
 		1:
 			log_lines.append("Idiot Star becomes unexpectedly protective.")
-			_shield_all_mages(context, 10, log_lines)
+			if protection != null:
+				_apply_effect(protection, target, context, log_lines)
 		2:
 			log_lines.append("Idiot Star cannot tell friend from foe.")
-			_damage_all_enemies(context, 5, log_lines)
-			_damage_all_mages(context, 5, log_lines)
+			if chaos_enemies != null:
+				_apply_effect(chaos_enemies, target, context, log_lines)
+			if chaos_mages != null:
+				_apply_effect(chaos_mages, target, context, log_lines)
 
 
-# Hot Potato hits two different random living units when possible.
-func _resolve_hot_potato(context: Dictionary, log_lines: Array[String]) -> void:
-	var units := _all_living_units(context)
-	if units.is_empty():
-		return
-
-	var first_unit: Node = units.pick_random()
-	_damage_any_unit(first_unit, 2, log_lines)
-	units.erase(first_unit)
-
-	if not units.is_empty():
-		var second_unit: Node = units.pick_random()
-		_damage_any_unit(second_unit, 2, log_lines)
-
-
-# Wrong Door swaps already visible intents so the UI prediction changes meaningfully.
-func _resolve_wrong_door(
+# Wrong Door swaps visible intents. With fewer than two enemies it preserves the
+# old fallback and damages the selected target by the resource's amount.
+func _swap_random_enemy_intents(
 	target: EnemyUnit,
 	context: Dictionary,
+	fallback_damage: int,
 	log_lines: Array[String]
 ) -> void:
 	var enemies := _living_enemies(context)
 	if enemies.size() < 2:
-		_damage_enemy(target, 2, log_lines)
+		_damage_enemy(target, fallback_damage, log_lines)
 		return
 
 	enemies.shuffle()
@@ -441,9 +519,7 @@ func _resolve_wrong_door(
 	)
 
 
-# Quiet Ward cancels the first non-attack intent already visible this round.
-# If every enemy is only attacking, the ward remains a readable no-op for this
-# simplified AI rather than inventing a hidden enemy spell system.
+# Quiet Ward cancels the first visible non-attack intent.
 func _apply_quiet_ward(
 	target: EnemyUnit,
 	context: Dictionary,
@@ -454,7 +530,10 @@ func _apply_quiet_ward(
 		if intent_type != "attack" and intent_type != "skip":
 			enemy.current_intent = {
 				"type": "skip",
-				"description": "%s's special intent is blocked by Quiet Ward." % enemy.enemy_name
+				"description": (
+					"%s's special intent is blocked by Quiet Ward."
+					% enemy.enemy_name
+				)
 			}
 			log_lines.append("Quiet Ward blocks %s's intent." % enemy.enemy_name)
 			return
@@ -464,14 +543,28 @@ func _apply_quiet_ward(
 	log_lines.append("Quiet Ward waits, but no special intent is active.")
 
 
-# Repeated combat helpers below apply effects and add consistent log lines.
+# RANDOM_UNIT_DAMAGE hits different living units when possible, preserving Hot
+# Potato's two-target behavior while also supporting Meat Lightning.
+func _damage_random_living_units(
+	context: Dictionary,
+	amount: int,
+	hit_count: int,
+	log_lines: Array[String]
+) -> void:
+	var units := _all_living_units(context)
+	units.shuffle()
+	for hit_index: int in range(mini(maxi(0, hit_count), units.size())):
+		_damage_any_unit(units[hit_index], amount, log_lines)
+
+
+# Repeated combat helpers apply effects and add consistent log lines.
 func _damage_enemy(
 	target: EnemyUnit,
 	amount: int,
 	log_lines: Array[String],
 	ignore_shield: bool = false
 ) -> void:
-	if not _is_valid_enemy(target):
+	if not _is_valid_enemy(target) or amount <= 0:
 		return
 	target.take_damage(amount, ignore_shield)
 	var shield_note := " and ignores shield" if ignore_shield else ""
@@ -509,17 +602,6 @@ func _shield_all_mages(
 	log_lines.append("All living mages gain %d shield." % amount)
 
 
-func _damage_random_living_unit(
-	context: Dictionary,
-	amount: int,
-	log_lines: Array[String]
-) -> void:
-	var units := _all_living_units(context)
-	if units.is_empty():
-		return
-	_damage_any_unit(units.pick_random(), amount, log_lines)
-
-
 func _damage_any_unit(unit: Node, amount: int, log_lines: Array[String]) -> void:
 	if unit is MageUnit:
 		var mage := unit as MageUnit
@@ -529,7 +611,7 @@ func _damage_any_unit(unit: Node, amount: int, log_lines: Array[String]) -> void
 		_damage_enemy(unit as EnemyUnit, amount, log_lines)
 
 
-# Context contains the arrays owned by CombatManager.
+# Context contains the runtime arrays owned by CombatManager.
 func _living_mages(context: Dictionary) -> Array[MageUnit]:
 	var living: Array[MageUnit] = []
 	var context_mages: Array = context.get("mages", [])
@@ -585,6 +667,51 @@ func _has_repeated_symbol(counts: Dictionary) -> bool:
 	return false
 
 
+func _recipe_repeats_previous_spell(recipe: SpellRecipeData) -> bool:
+	for effect: SpellEffectData in recipe.effects:
+		if (
+			effect != null
+			and effect.effect_type == SpellEffectData.EffectType.REPEAT_PREVIOUS_SPELL
+		):
+			return true
+	return false
+
+
+func _find_effect(
+	effects: Array[SpellEffectData],
+	effect_type: SpellEffectData.EffectType
+) -> SpellEffectData:
+	for effect: SpellEffectData in effects:
+		if effect != null and effect.effect_type == effect_type:
+			return effect
+	return null
+
+
+# Resource log text supports a few readable placeholders without a template system.
+func _append_effect_log(
+	log_lines: Array[String],
+	template: String,
+	target: EnemyUnit,
+	mage: MageUnit,
+	amount: int,
+	fallback_text: String
+) -> void:
+	if template.is_empty():
+		log_lines.append(fallback_text)
+		return
+
+	var line := template.replace("{amount}", str(amount))
+	line = line.replace(
+		"{target}",
+		target.enemy_name if target != null else "the target"
+	)
+	line = line.replace(
+		"{mage}",
+		mage.mage_name if mage != null else "a mage"
+	)
+	log_lines.append(line)
+
+
 # The first three log lines make it clear which mage spoke each slot.
 func _append_shouted_words(
 	log_lines: Array[String],
@@ -601,7 +728,7 @@ func _append_shouted_words(
 		log_lines.append("%s shouts: %s!" % [speaker_name, spoken_words[index]])
 
 
-# All successful and fallback paths use the same output shape requested by the PDF.
+# All successful and fallback paths preserve the UI's existing result shape.
 func _make_result(
 	chant_key: String,
 	spoken_words: PackedStringArray,
@@ -630,3 +757,15 @@ func _invalid_result(message: String) -> Dictionary:
 		"is_known": false,
 		"log_lines": [message]
 	}
+
+
+# Missing scene wiring should warn but should not crash fallback resolution.
+func _get_balance() -> CombatBalanceData:
+	if balance != null:
+		return balance
+	if _fallback_balance == null:
+		_fallback_balance = CombatBalanceData.new()
+		push_warning(
+			"ChantResolver has no CombatBalanceData assigned; using script defaults."
+		)
+	return _fallback_balance

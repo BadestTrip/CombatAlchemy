@@ -1,6 +1,6 @@
 # MageUnit.gd
 # Attach this script to each Mage node under CombatScene/Mages.
-# It stores health, shield, life state, and the mage's current three-card hand.
+# It stores health, shield, life state, and the mage's current symbol-card hand.
 extends Node
 class_name MageUnit
 
@@ -27,17 +27,24 @@ signal hand_updated(mage: MageUnit)
 # Set this in the Inspector to the mage's starting and maximum HP.
 @export var max_hp: int = 20
 
+# Set this in the Inspector to shield granted when combat begins.
+@export var starting_shield: int = 0
+
 
 # Current HP is initialized from max_hp when the node enters the scene.
+# This is runtime state and should not be exposed in Inspector.
 var current_hp: int = 0
 
 # Shield absorbs incoming damage before HP.
+# This is runtime state and should not be exposed in Inspector.
 var shield: int = 0
 
 # The hand contains SymbolCardData Resources drawn from DeckManager.
+# This is runtime state and should not be exposed in Inspector.
 var hand: Array[SymbolCardData] = []
 
 # Dead mages cannot select cards and are not valid enemy targets.
+# This is runtime state and should not be exposed in Inspector.
 var is_alive: bool = true
 
 # CombatManager provides this reference during scene setup.
@@ -48,6 +55,7 @@ var deck_manager: DeckManager
 # The group names let other systems discover mages without old zone groups.
 func _ready() -> void:
 	current_hp = max_hp
+	shield = starting_shield
 	is_alive = current_hp > 0
 	add_to_group("mages")
 	add_to_group("combat_units")
@@ -56,6 +64,20 @@ func _ready() -> void:
 # CombatManager calls this once so draw/discard methods can reach the shared deck.
 func configure(new_deck_manager: DeckManager) -> void:
 	deck_manager = new_deck_manager
+
+
+# CombatManager passes global defaults after child _ready methods have run.
+# Explicit non-default Inspector values remain local overrides.
+func apply_balance_defaults(balance: CombatBalanceData) -> void:
+	if balance == null:
+		return
+	if max_hp == 20:
+		max_hp = balance.default_mage_max_hp
+	if starting_shield == 0:
+		starting_shield = balance.default_mage_starting_shield
+	current_hp = max_hp
+	shield = starting_shield
+	is_alive = current_hp > 0
 
 
 # EnemyUnit and ChantResolver call this when a mage is hurt.
