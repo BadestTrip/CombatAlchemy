@@ -9,7 +9,6 @@ var current_state: GameState = GameState.MAIN_MENU
 
 const START_MENU_SCENE: String = "res://scenes/start_menu.tscn"
 const COMBAT_TEST_SCENE: String = "res://scenes/combat_test.tscn"
-const COMBAT_SCENE: String = "res://scenes/CombatScene.tscn"
 
 const SCENE_TRANSITION_NODE_PATH: String = "/root/SceneTransition"
 
@@ -21,11 +20,11 @@ func go_to_main_menu() -> void:
 
 
 func start_new_game() -> void:
-	_change_state_and_scene(GameState.COMBAT, COMBAT_SCENE)
+	_change_state_and_scene(GameState.COMBAT, COMBAT_TEST_SCENE)
 
 
 func restart_combat() -> void:
-	_change_state_and_scene(GameState.COMBAT, COMBAT_SCENE)
+	_change_state_and_scene(GameState.COMBAT, COMBAT_TEST_SCENE)
 
 
 func quit_game() -> void:
