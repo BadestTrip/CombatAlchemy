@@ -12,4 +12,6 @@ hit_count = 2
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["keth", "keth", "voro"])
 result_name = "Double Sever"
+player_description = "Hits one enemy twice."
+discovery_flavor_text = "The cut returns before the first wound can close."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_damage")])

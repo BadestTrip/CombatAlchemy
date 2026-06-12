@@ -15,7 +15,10 @@ class_name SpellRecipeData
 @export_enum("workable", "disaster", "op", "funny", "fallback")
 var result_type: String = "workable"
 
-# These optional fields are ready for future spellbook presentation.
+# Enable this to show the spell in a fresh runtime spellbook.
+@export var initially_discovered: bool = false
+
+# These fields are player-facing spellbook and discovery text.
 @export_multiline var player_description: String = ""
 @export_multiline var discovery_flavor_text: String = ""
 

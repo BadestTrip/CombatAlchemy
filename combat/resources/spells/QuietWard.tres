@@ -11,4 +11,6 @@ effect_type = 18
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["nox", "elum", "mira"])
 result_name = "Quiet Ward"
+player_description = "Blocks one visible non-attack enemy intent."
+discovery_flavor_text = "Silence settles over the most dangerous intention."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_quiet_ward")])

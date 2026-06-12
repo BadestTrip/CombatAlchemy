@@ -139,7 +139,8 @@ func _resolve_authored_chant(
 		recipe.result_name,
 		recipe.result_type,
 		true,
-		log_lines
+		log_lines,
+		recipe
 	)
 
 
@@ -735,7 +736,8 @@ func _make_result(
 	result_name: String,
 	result_type: String,
 	is_known: bool,
-	log_lines: Array[String]
+	log_lines: Array[String],
+	recipe: SpellRecipeData = null
 ) -> Dictionary:
 	return {
 		"chant_key": chant_key,
@@ -743,6 +745,8 @@ func _make_result(
 		"result_name": result_name,
 		"result_type": result_type,
 		"is_known": is_known,
+		"recipe": recipe,
+		"recipe_path": recipe.resource_path if recipe != null else "",
 		"log_lines": log_lines
 	}
 
@@ -755,6 +759,8 @@ func _invalid_result(message: String) -> Dictionary:
 		"result_name": "Broken Chant",
 		"result_type": "invalid",
 		"is_known": false,
+		"recipe": null,
+		"recipe_path": "",
 		"log_lines": [message]
 	}
 

@@ -43,6 +43,9 @@
 [ext_resource type="Script" uid="uid://c6p1vnisdne8n" path="res://combat/EnemyUnit.gd" id="41_lo2c2"]
 [ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="42_hva8a"]
 [ext_resource type="AudioStream" uid="uid://c4eip32jmo0ui" path="res://music/Combat.mp3" id="43_sw1fx"]
+[ext_resource type="Script" path="res://combat/scripts/SpellDiscoveryManager.gd" id="44_discovery"]
+[ext_resource type="Script" uid="uid://bxek3rbqnl8wl" path="res://test/PauseMenu.gd" id="45_pause"]
+[ext_resource type="PackedScene" uid="uid://bsnod8l07k2md" path="res://mainmenu/Settings.tscn" id="46_settings"]
 
 [node name="CombatScene" type="Control" unique_id=1729869381]
 layout_mode = 3
@@ -341,6 +344,18 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 42)
 layout_mode = 2
 
+[node name="SpellbookButton" type="Button" parent="OuterMargin/CombatUI/ControlsPanel/ControlsMargin/Controls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+text = "Spellbook"
+
+[node name="CastHistoryButton" type="Button" parent="OuterMargin/CombatUI/ControlsPanel/ControlsMargin/Controls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+text = "Cast History"
+
 [node name="ControlSpacer" type="Control" parent="OuterMargin/CombatUI/ControlsPanel/ControlsMargin/Controls" unique_id=870598497]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -407,6 +422,147 @@ bbcode_enabled = true
 scroll_following = true
 script = ExtResource("4_r4hyf")
 
+[node name="SpellbookPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 20
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.18
+anchor_top = 0.1
+anchor_right = 0.82
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SpellbookMargin" type="MarginContainer" parent="SpellbookPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="SpellbookColumn" type="VBoxContainer" parent="SpellbookPanel/SpellbookMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SpellbookHeader" type="HBoxContainer" parent="SpellbookPanel/SpellbookMargin/SpellbookColumn"]
+layout_mode = 2
+
+[node name="SpellbookTitle" type="Label" parent="SpellbookPanel/SpellbookMargin/SpellbookColumn/SpellbookHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
+theme_override_font_sizes/font_size = 28
+text = "Discovered Spells"
+
+[node name="SpellbookCloseButton" type="Button" parent="SpellbookPanel/SpellbookMargin/SpellbookColumn/SpellbookHeader"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 42)
+layout_mode = 2
+text = "Close"
+
+[node name="SpellbookList" type="RichTextLabel" parent="SpellbookPanel/SpellbookMargin/SpellbookColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(900, 580)
+layout_mode = 2
+size_flags_vertical = 3
+scroll_active = true
+
+[node name="CastHistoryPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 20
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_top = 0.18
+anchor_right = 0.8
+anchor_bottom = 0.82
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HistoryMargin" type="MarginContainer" parent="CastHistoryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="HistoryColumn" type="VBoxContainer" parent="CastHistoryPanel/HistoryMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HistoryHeader" type="HBoxContainer" parent="CastHistoryPanel/HistoryMargin/HistoryColumn"]
+layout_mode = 2
+
+[node name="HistoryTitle" type="Label" parent="CastHistoryPanel/HistoryMargin/HistoryColumn/HistoryHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.68, 0.86, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "Cast History"
+
+[node name="CastHistoryCloseButton" type="Button" parent="CastHistoryPanel/HistoryMargin/HistoryColumn/HistoryHeader"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 42)
+layout_mode = 2
+text = "Close"
+
+[node name="CastHistoryList" type="RichTextLabel" parent="CastHistoryPanel/HistoryMargin/HistoryColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(900, 430)
+layout_mode = 2
+size_flags_vertical = 3
+scroll_active = true
+
+[node name="SpellDiscoveryPopup" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 25
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_top = 0.28
+anchor_right = 0.7
+anchor_bottom = 0.72
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DiscoveryMargin" type="MarginContainer" parent="SpellDiscoveryPopup"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="DiscoveryColumn" type="VBoxContainer" parent="SpellDiscoveryPopup/DiscoveryMargin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="DiscoveryPopupLabel" type="Label" parent="SpellDiscoveryPopup/DiscoveryMargin/DiscoveryColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
+theme_override_font_sizes/font_size = 22
+text = "NEW SPELL DISCOVERED"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="DiscoveryCloseButton" type="Button" parent="SpellDiscoveryPopup/DiscoveryMargin/DiscoveryColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Close"
+
+[node name="DiscoveryAutoHideTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+one_shot = true
+
 [node name="RoundManager" type="Node" parent="." unique_id=2072296989]
 unique_name_in_owner = true
 script = ExtResource("5_ssh5j")
@@ -423,6 +579,10 @@ unique_name_in_owner = true
 script = ExtResource("8_atnl1")
 spell_recipes = Array[ExtResource("9_qomwh")]([ExtResource("10_ev5v8"), ExtResource("11_coq2u"), ExtResource("12_27l7s"), ExtResource("13_mgvld"), ExtResource("14_i4xye"), ExtResource("15_w723g"), ExtResource("16_2gnrj"), ExtResource("17_qjqlw"), ExtResource("18_x6s81"), ExtResource("19_uipah"), ExtResource("20_38lk7"), ExtResource("21_0glsu"), ExtResource("22_ahggg"), ExtResource("23_h7yb6"), ExtResource("24_5f6ws"), ExtResource("25_aofff"), ExtResource("26_n50u6"), ExtResource("27_p17b8"), ExtResource("28_jr2jv"), ExtResource("29_6ua2i"), ExtResource("30_ho547"), ExtResource("31_v31dn"), ExtResource("32_now20"), ExtResource("33_txdav"), ExtResource("34_bhrft"), ExtResource("35_q87u8"), ExtResource("36_tbdm8"), ExtResource("37_80wt3"), ExtResource("38_5e57c"), ExtResource("39_d6lhu")])
 balance = ExtResource("2_66qso")
+
+[node name="SpellDiscoveryManager" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("44_discovery")
 
 [node name="Mages" type="Node" parent="." unique_id=2136153042]
 unique_name_in_owner = true
@@ -453,6 +613,76 @@ enemy_name = "Enemy 2 - Mirror Adept"
 [node name="Enemy3" type="Node" parent="Enemies" unique_id=1653999225]
 script = ExtResource("41_lo2c2")
 enemy_name = "Enemy 3 - Storm Scribe"
+
+[node name="PauseMenu" type="Control" parent="."]
+visible = false
+z_index = 30
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+process_mode = 3
+script = ExtResource("45_pause")
+
+[node name="PauseShade" type="ColorRect" parent="PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.72)
+
+[node name="CenterContainer" type="CenterContainer" parent="PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/CenterContainer"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PauseTitle" type="Label" parent="PauseMenu/CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
+theme_override_font_sizes/font_size = 34
+text = "Paused"
+horizontal_alignment = 1
+
+[node name="Resume" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "Resume"
+
+[node name="Restart" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "Restart Combat"
+
+[node name="Settings" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "Settings"
+
+[node name="MainMenu" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "Main Menu"
+
+[node name="Quit" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "Quit Game"
+
+[node name="SettingsMenu" parent="PauseMenu" instance=ExtResource("46_settings")]
+visible = false
+layout_mode = 1
 
 [node name="LevelMusic" parent="." unique_id=238704293 instance=ExtResource("42_hva8a")]
 music = ExtResource("43_sw1fx")

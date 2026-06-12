@@ -16,5 +16,7 @@ amount = 3
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["mira", "bavo", "keth"])
 result_name = "Mirror Bloat"
+player_description = "Grants the target enemy shield, then damages it."
+discovery_flavor_text = "The reflection swells until even its protection becomes painful."
 result_type = "disaster"
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_shield"), SubResource("Effect_damage")])

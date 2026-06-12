@@ -18,4 +18,6 @@ log_text = "{target} is stunned."
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["zun", "voro", "keth"])
 result_name = "Crackbolt"
+player_description = "Deals strong damage with a chance to stun the target."
+discovery_flavor_text = "A crooked bolt snaps into place between the words."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_damage"), SubResource("Effect_stun")])

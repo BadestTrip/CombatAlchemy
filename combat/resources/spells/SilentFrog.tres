@@ -13,5 +13,7 @@ log_text = "{target} is silenced until damaged or next action."
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["nox", "bavo", "iri"])
 result_name = "Silent Frog"
+player_description = "Silences the target until it is damaged or acts."
+discovery_flavor_text = "The battlefield pauses to listen to a frog say nothing."
 result_type = "funny"
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_silence")])

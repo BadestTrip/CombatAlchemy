@@ -11,4 +11,7 @@ amount = 7
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["asha", "voro", "keth"])
 result_name = "Razor Comet"
+initially_discovered = true
+player_description = "Deals heavy damage to one enemy."
+discovery_flavor_text = "The three words sharpen into a falling blade of light."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_damage")])

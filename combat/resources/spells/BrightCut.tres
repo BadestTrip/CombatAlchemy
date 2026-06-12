@@ -12,4 +12,6 @@ ignore_shield = true
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["asha", "elum", "keth"])
 result_name = "Bright Cut"
+player_description = "Damages one enemy and ignores shield."
+discovery_flavor_text = "A clean line of light passes through every defense."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_damage")])

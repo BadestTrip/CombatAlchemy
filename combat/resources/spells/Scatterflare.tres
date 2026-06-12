@@ -12,4 +12,6 @@ amount = 3
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["iri", "asha", "voro"])
 result_name = "Scatterflare"
+player_description = "Deals damage to every living enemy."
+discovery_flavor_text = "One flare breaks into a sky full of smaller fires."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_damage")])

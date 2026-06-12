@@ -13,4 +13,6 @@ hit_count = 3
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["asha", "zun", "iri"])
 result_name = "Spark Rain"
+player_description = "Strikes random enemies three times."
+discovery_flavor_text = "Loose sparks find their own paths through the enemy line."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_hits")])

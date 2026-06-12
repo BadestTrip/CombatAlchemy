@@ -13,5 +13,7 @@ log_text = "{target} is confused and will skip an action."
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["bavo", "bavo", "bavo"])
 result_name = "Great Belly"
+player_description = "Confuses the target so it skips an action."
+discovery_flavor_text = "The target forgets its plan while considering an enormous lunch."
 result_type = "funny"
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_confuse")])

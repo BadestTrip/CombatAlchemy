@@ -16,4 +16,6 @@ amount = 8
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["voro", "bavo", "keth"])
 result_name = "Heavy Word"
+player_description = "Deals very heavy damage to one enemy."
+discovery_flavor_text = "The final word lands with impossible weight."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_log"), SubResource("Effect_damage")])

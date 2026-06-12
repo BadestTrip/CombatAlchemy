@@ -1,9 +1,14 @@
 extends Control
 
+# Emitted when Back is pressed. Combat pause UI listens to this signal.
+signal close_requested
+
 @onready var music_slider: HSlider = $CenterContainer/VBoxContainer/HBoxContainer/MusicSlider
 @onready var sfx_slider:   HSlider = $CenterContainer/VBoxContainer/HBoxContainer2/SFXSlider
 @onready var back_button:  TextureButton  = $CenterContainer/VBoxContainer/HBoxContainer3/BackButton
-@onready var main_menu: CenterContainer = $"../MainMenu/UI"
+
+# The main-menu scene has this sibling. Combat intentionally does not.
+@onready var main_menu: Control = get_node_or_null("../MainMenu/UI") as Control
 
 func _ready() -> void:
 	if back_button: back_button.pressed.connect(_on_back_button_pressed)
@@ -23,5 +28,7 @@ func _on_sfx_changed(v: float) -> void:
 
 func _on_back_button_pressed() -> void:
 	visible = false
-	main_menu.visible = true
+	if main_menu != null:
+		main_menu.visible = true
+	close_requested.emit()
 	

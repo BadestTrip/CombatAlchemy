@@ -30,5 +30,7 @@ amount = 5
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["iri", "bavo", "asha"])
 result_name = "Idiot Star"
+player_description = "Randomly deals extreme damage, grants mass shield, or harms both sides."
+discovery_flavor_text = "A brilliant star appears without understanding the assignment."
 result_type = "op"
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_random"), SubResource("Effect_violence"), SubResource("Effect_protection"), SubResource("Effect_chaos_enemies"), SubResource("Effect_chaos_mages")])

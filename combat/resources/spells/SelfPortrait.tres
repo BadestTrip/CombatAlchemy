@@ -18,5 +18,7 @@ amount = -1
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["mira", "mira", "bavo"])
 result_name = "Self Portrait"
+player_description = "Shields a random mage and weakens the target's next attack."
+discovery_flavor_text = "The portrait flatters one mage and insults one enemy."
 result_type = "funny"
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_shield"), SubResource("Effect_weaken")])

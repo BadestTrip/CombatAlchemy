@@ -17,4 +17,6 @@ log_text = "{target}'s intent is delayed."
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["nox", "keth", "voro"])
 result_name = "Hollow Push"
+player_description = "Damages one enemy and delays its current intent."
+discovery_flavor_text = "The chant leaves a hollow space where the enemy's action should be."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_damage"), SubResource("Effect_delay")])

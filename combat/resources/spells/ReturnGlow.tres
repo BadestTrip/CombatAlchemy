@@ -12,4 +12,6 @@ amount = 3
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["elum", "mira", "asha"])
 result_name = "Return Glow"
+player_description = "Grants shield to every living mage."
+discovery_flavor_text = "A reflected glow returns to shelter the whole circle."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_shield")])

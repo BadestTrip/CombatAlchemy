@@ -34,6 +34,7 @@ signal unit_died(unit: Node)
 @onready var deck_manager: DeckManager = %DeckManager
 @onready var round_manager: RoundManager = %RoundManager
 @onready var chant_resolver: ChantResolver = %ChantResolver
+@onready var discovery_manager: SpellDiscoveryManager = %SpellDiscoveryManager
 @onready var ui_controller: CombatUIController = %CombatUI
 @onready var combat_log: CombatLog = %CombatLog
 @onready var round_label: Label = %RoundLabel
@@ -66,15 +67,22 @@ func _ready() -> void:
 
 	deck_manager.create_starter_deck()
 	deck_manager.deal_opening_hands(mages)
+	discovery_manager.configure(chant_resolver.spell_recipes)
 
 	round_manager.configure(
 		self,
 		deck_manager,
 		chant_resolver,
+		discovery_manager,
 		ui_controller,
 		combat_log
 	)
-	ui_controller.configure(self, round_manager, combat_log)
+	ui_controller.configure(
+		self,
+		round_manager,
+		discovery_manager,
+		combat_log
+	)
 
 	combat_log.append_line("Three mages face three hostile adepts.")
 	combat_started.emit()

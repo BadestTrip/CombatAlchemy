@@ -64,6 +64,7 @@ var selected_target: EnemyUnit
 var combat_manager: CombatManager
 var deck_manager: DeckManager
 var chant_resolver: ChantResolver
+var discovery_manager: SpellDiscoveryManager
 var ui_controller: CombatUIController
 var combat_log: CombatLog
 
@@ -76,12 +77,14 @@ func configure(
 	manager: CombatManager,
 	deck: DeckManager,
 	resolver: ChantResolver,
+	discovery: SpellDiscoveryManager,
 	ui: CombatUIController,
 	log: CombatLog
 ) -> void:
 	combat_manager = manager
 	deck_manager = deck
 	chant_resolver = resolver
+	discovery_manager = discovery
 	ui_controller = ui
 	combat_log = log
 	_clear_selected_cards()
@@ -98,6 +101,8 @@ func start_combat() -> void:
 # CombatUIController calls this when the player clicks a card.
 # Each mage owns one fixed slot, so selecting another card replaces that slot.
 func select_chant_card(mage: MageUnit, card: SymbolCardData) -> void:
+	if get_tree().paused:
+		return
 	if current_state != RoundState.PLANNING:
 		return
 	if mage == null or card == null or not mage.is_alive:
@@ -116,6 +121,8 @@ func select_chant_card(mage: MageUnit, card: SymbolCardData) -> void:
 
 # The Clear Chant button calls this during planning.
 func clear_chant() -> void:
+	if get_tree().paused:
+		return
 	if current_state != RoundState.PLANNING:
 		return
 	_clear_selected_cards()
@@ -125,6 +132,8 @@ func clear_chant() -> void:
 
 # CombatUIController calls this when the target drop-down changes.
 func select_target(enemy: EnemyUnit) -> void:
+	if get_tree().paused:
+		return
 	if current_state != RoundState.PLANNING:
 		return
 	if enemy != null and enemy.is_alive:
@@ -134,6 +143,8 @@ func select_target(enemy: EnemyUnit) -> void:
 
 # CombatUIController uses this to enable Cast only for a complete legal chant.
 func can_cast() -> bool:
+	if get_tree().paused:
+		return false
 	if current_state != RoundState.PLANNING:
 		return false
 	if selected_target == null or not selected_target.is_alive:
@@ -147,6 +158,8 @@ func can_cast() -> bool:
 # The Cast button calls this.
 # It resolves the chant, runs enemies, updates statuses, refills hands, and loops.
 func cast_chant() -> void:
+	if get_tree().paused:
+		return
 	if not can_cast():
 		return
 
@@ -170,6 +183,13 @@ func cast_chant() -> void:
 		cast_target,
 		combat_manager.get_combat_context()
 	)
+	if discovery_manager != null:
+		discovery_manager.record_chant_result(
+			result,
+			result.get("recipe") as SpellRecipeData,
+			round_number,
+			cast_target.enemy_name if cast_target != null else ""
+		)
 	chant_resolved.emit(result)
 	_append_result_to_log(result)
 	ui_controller.refresh_all()

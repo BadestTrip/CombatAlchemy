@@ -14,4 +14,6 @@ log_text = "The blade remembers last round's wound."
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["mira", "keth", "asha"])
 result_name = "Reversed Blade"
+player_description = "Damages one enemy, with bonus damage if it was hurt last round."
+discovery_flavor_text = "The remembered wound opens from the other direction."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_conditional_damage")])
