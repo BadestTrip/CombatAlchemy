@@ -5,7 +5,8 @@ extends Resource
 class_name CombatBalanceData
 
 
-# These values control deck size and how many cards each mage holds.
+# These values are unused in the full-rune-palette prototype.
+# They are kept for possible deck/hand variant tests later.
 @export_group("Hand / Deck")
 @export var starting_hand_size: int = 3
 @export var max_hand_size: int = 3
@@ -20,9 +21,19 @@ class_name CombatBalanceData
 @export var next_round_delay_seconds: float = 0.35
 @export var auto_start_combat: bool = true
 @export var enemy_phase_after_chant: bool = true
+# Unused by the current full-rune-palette combat loop.
+# Kept for possible deck/hand variant tests later.
 @export var draw_to_max_hand_at_round_end: bool = true
 
-# These are applied when a MageUnit still uses its script defaults.
+# These values control rune placement in the active 1v1 prototype.
+@export_group("Rune Palette")
+@export var allow_repeated_runes: bool = true
+@export var auto_advance_slot_after_rune_pick: bool = true
+@export var clear_chant_after_cast: bool = true
+@export var rune_button_width: float = 145.0
+@export var rune_button_height: float = 72.0
+
+# These are applied when the player MageUnit still uses its script defaults.
 @export_group("Mage Defaults")
 @export var default_mage_max_hp: int = 20
 @export var default_mage_starting_shield: int = 0
@@ -45,7 +56,8 @@ class_name CombatBalanceData
 @export var weak_ward_shield: int = 1
 @export var mumbled_spark_damage: int = 1
 
-# These values control graybox card presentation only.
+# These values control graybox card/rune presentation only.
+# The legacy names still drive rune buttons for compatibility.
 @export_group("UI Debug")
 @export var show_card_display_names: bool = true
 @export var show_card_visual_hints: bool = true

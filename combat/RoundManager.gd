@@ -1,20 +1,22 @@
 # RoundManager.gd
 # Attach this script to the RoundManager node in CombatScene.tscn.
-# It owns the order of phases, the three selected cards, and the selected enemy.
-# Chant effects stay in ChantResolver; scene-level victory checks stay in CombatManager.
+# It owns the 1v1 round flow and the three selected rune slots. Chant effects
+# stay in ChantResolver; scene-level Victory/Defeat checks stay in CombatManager.
 extends Node
 class_name RoundManager
 
 
 # Emitted when a new numbered round starts.
-# CombatUIController can use it for round presentation.
 signal round_started(round_number: int)
 
-# Emitted after enemy intents exist and card selection is enabled.
+# Emitted after enemy intent exists and rune selection is enabled.
 signal planning_started
 
-# Emitted when one mage card fills or replaces its matching chant slot.
-signal chant_card_selected(card: SymbolCardData, slot_index: int)
+# Emitted when a rune fills or replaces one chant slot.
+signal rune_placed(rune: SymbolCardData, slot_index: int)
+
+# Emitted when one slot is selected for replacement.
+signal slot_selected(slot_index: int)
 
 # Emitted when all three chant slots are cleared.
 signal chant_cleared
@@ -25,14 +27,14 @@ signal chant_cast_started(symbols: Array[SymbolCardData], target: EnemyUnit)
 # Emitted after ChantResolver returns its result Dictionary.
 signal chant_resolved(result: Dictionary)
 
-# Emitted before surviving enemies execute their visible intents.
+# Emitted before the surviving enemy executes its visible intent.
 signal enemy_phase_started
 
-# Emitted after statuses update and hands optionally draw to the configured maximum.
+# Emitted after statuses update.
 signal round_ended(round_number: int)
 
 
-# Assign CombatBalance_Default.tres here to tune hand refill and phase delays.
+# Assign CombatBalance_Default.tres here to tune phase delays and rune behavior.
 @export_group("Balance")
 @export var balance: CombatBalanceData
 
@@ -54,19 +56,25 @@ var current_state: RoundState = RoundState.ROUND_START
 # The first call to _start_next_round changes this from 0 to 1.
 var round_number: int = 0
 
-# Slots map directly to CombatManager.mages order: mage 1, mage 2, mage 3.
-var selected_cards: Array[SymbolCardData] = []
+# The three chant slots now hold freely chosen runes, not cards from mage hands.
+var selected_runes: Array[SymbolCardData] = []
 
-# The player chooses one living enemy before Cast becomes available.
+# The UI marks this slot and rune clicks place or replace here.
+var selected_slot_index: int = 0
+
+# There is only one enemy target in the full-rune-palette prototype.
 var selected_target: EnemyUnit
 
 # CombatManager provides these references during scene setup.
 var combat_manager: CombatManager
-var deck_manager: DeckManager
 var chant_resolver: ChantResolver
 var discovery_manager: SpellDiscoveryManager
 var ui_controller: CombatUIController
 var combat_log: CombatLog
+
+# Used to distinguish explicit slot replacement from the "first empty slot"
+# shortcut when the player simply clicks runes in sequence.
+var _slot_was_explicitly_selected: bool = false
 
 # A missing Inspector resource uses this safe in-memory default.
 var _fallback_balance: CombatBalanceData
@@ -75,47 +83,86 @@ var _fallback_balance: CombatBalanceData
 # CombatManager calls this once after all child nodes are ready.
 func configure(
 	manager: CombatManager,
-	deck: DeckManager,
 	resolver: ChantResolver,
 	discovery: SpellDiscoveryManager,
 	ui: CombatUIController,
 	log: CombatLog
 ) -> void:
 	combat_manager = manager
-	deck_manager = deck
 	chant_resolver = resolver
 	discovery_manager = discovery
 	ui_controller = ui
 	combat_log = log
-	_clear_selected_cards()
+	_clear_selected_runes()
 	_validate_chant_slot_count()
 
 
-# CombatManager calls this after opening hands have been dealt.
+# CombatManager calls this after setup.
 func start_combat() -> void:
 	round_number = 0
-	_clear_selected_cards()
+	selected_slot_index = 0
+	_clear_selected_runes()
 	_start_next_round()
 
 
-# CombatUIController calls this when the player clicks a card.
-# Each mage owns one fixed slot, so selecting another card replaces that slot.
-func select_chant_card(mage: MageUnit, card: SymbolCardData) -> void:
+# CombatUIController calls this when the player clicks a chant slot.
+func select_slot(slot_index: int) -> void:
 	if get_tree().paused:
 		return
 	if current_state != RoundState.PLANNING:
 		return
-	if mage == null or card == null or not mage.is_alive:
+	if slot_index < 0 or slot_index >= selected_runes.size():
 		return
-	if not mage.hand.has(card):
+	selected_slot_index = slot_index
+	_slot_was_explicitly_selected = true
+	slot_selected.emit(slot_index)
+	ui_controller.refresh_all()
+
+
+# Rune button shortcut: fill the selected empty slot, otherwise the first empty
+# slot, otherwise replace the currently selected slot.
+func place_rune_in_selected_slot(rune: SymbolCardData) -> void:
+	var slot_index := selected_slot_index
+	if not _slot_was_explicitly_selected and _slot_has_rune(slot_index):
+		var first_empty := _first_empty_slot()
+		if first_empty != -1:
+			slot_index = first_empty
+	place_rune_in_slot(rune, slot_index)
+
+
+# CombatUIController can call this directly for future explicit slot UI.
+func place_rune_in_slot(rune: SymbolCardData, slot_index: int) -> void:
+	if get_tree().paused:
+		return
+	if current_state != RoundState.PLANNING:
+		return
+	if rune == null or slot_index < 0 or slot_index >= selected_runes.size():
+		return
+	if not _get_balance().allow_repeated_runes and _rune_used_elsewhere(rune, slot_index):
 		return
 
-	var slot_index := combat_manager.mages.find(mage)
-	if slot_index < 0 or slot_index >= selected_cards.size():
-		return
+	selected_runes[slot_index] = rune
+	selected_slot_index = slot_index
+	_slot_was_explicitly_selected = false
+	rune_placed.emit(rune, slot_index)
 
-	selected_cards[slot_index] = card
-	chant_card_selected.emit(card, slot_index)
+	if _get_balance().auto_advance_slot_after_rune_pick:
+		_advance_selected_slot()
+
+	ui_controller.refresh_all()
+
+
+# Optional Clear Slot behavior for keyboard/controller or future UI.
+func clear_slot(slot_index: int) -> void:
+	if get_tree().paused:
+		return
+	if current_state != RoundState.PLANNING:
+		return
+	if slot_index < 0 or slot_index >= selected_runes.size():
+		return
+	selected_runes[slot_index] = null
+	selected_slot_index = slot_index
+	_slot_was_explicitly_selected = true
 	ui_controller.refresh_all()
 
 
@@ -125,20 +172,9 @@ func clear_chant() -> void:
 		return
 	if current_state != RoundState.PLANNING:
 		return
-	_clear_selected_cards()
+	_clear_selected_runes()
 	chant_cleared.emit()
 	ui_controller.refresh_all()
-
-
-# CombatUIController calls this when the target drop-down changes.
-func select_target(enemy: EnemyUnit) -> void:
-	if get_tree().paused:
-		return
-	if current_state != RoundState.PLANNING:
-		return
-	if enemy != null and enemy.is_alive:
-		selected_target = enemy
-		ui_controller.refresh_cast_controls()
 
 
 # CombatUIController uses this to enable Cast only for a complete legal chant.
@@ -149,14 +185,14 @@ func can_cast() -> bool:
 		return false
 	if selected_target == null or not selected_target.is_alive:
 		return false
-	for card: SymbolCardData in selected_cards:
-		if card == null:
+	for rune: SymbolCardData in selected_runes:
+		if rune == null:
 			return false
 	return true
 
 
-# The Cast button calls this.
-# It resolves the chant, runs enemies, updates statuses, refills hands, and loops.
+# The Cast button calls this. Selected runes are sent directly to ChantResolver;
+# nothing is discarded and no new cards are drawn.
 func cast_chant() -> void:
 	if get_tree().paused:
 		return
@@ -167,19 +203,14 @@ func cast_chant() -> void:
 	combat_manager.set_phase_text("Resolving chant")
 	ui_controller.set_input_enabled(false)
 
-	var cast_cards: Array[SymbolCardData] = []
-	for selected_card: SymbolCardData in selected_cards:
-		cast_cards.append(selected_card)
+	var cast_runes: Array[SymbolCardData] = []
+	for selected_rune: SymbolCardData in selected_runes:
+		cast_runes.append(selected_rune)
 	var cast_target := selected_target
-	chant_cast_started.emit(cast_cards, cast_target)
-
-	# Used cards leave each mage hand before disasters can discard another card.
-	for slot_index: int in range(selected_cards.size()):
-		var mage: MageUnit = combat_manager.mages[slot_index]
-		mage.discard_card(cast_cards[slot_index])
+	chant_cast_started.emit(cast_runes, cast_target)
 
 	var result := chant_resolver.resolve_chant(
-		cast_cards,
+		cast_runes,
 		cast_target,
 		combat_manager.get_combat_context()
 	)
@@ -221,19 +252,20 @@ func cast_chant() -> void:
 # CombatManager calls this after Victory or Defeat.
 func end_combat() -> void:
 	current_state = RoundState.COMBAT_ENDED
-	_clear_selected_cards()
+	_clear_selected_runes()
 	selected_target = null
 
 
 # This starts every round in the same readable sequence:
-# clear selection, generate visible intents, then enable planning.
+# clear selection, generate visible intent, then enable planning.
 func _start_next_round() -> void:
 	if current_state == RoundState.COMBAT_ENDED:
 		return
 
 	round_number += 1
 	current_state = RoundState.ROUND_START
-	_clear_selected_cards()
+	if round_number == 1 or _get_balance().clear_chant_after_cast:
+		_clear_selected_runes()
 	selected_target = combat_manager.get_first_living_enemy()
 
 	combat_manager.set_round_number(round_number)
@@ -252,7 +284,7 @@ func _start_next_round() -> void:
 	ui_controller.show_planning()
 
 
-# Enemy intents must exist before the player chooses a chant.
+# Enemy intent must exist before the player chooses a chant.
 func _generate_enemy_intents() -> void:
 	var living_mages := combat_manager.get_living_mages()
 	for enemy: EnemyUnit in combat_manager.get_living_enemies():
@@ -260,8 +292,7 @@ func _generate_enemy_intents() -> void:
 	ui_controller.refresh_enemy_intents()
 
 
-# Enemies act only after the chant.
-# If a target died during the chant, EnemyUnit selects a living replacement.
+# The single enemy acts only after the chant.
 func _execute_enemy_phase() -> void:
 	for enemy: EnemyUnit in combat_manager.get_living_enemies():
 		enemy.execute_intent(combat_manager.get_living_mages())
@@ -277,14 +308,10 @@ func _execute_enemy_phase() -> void:
 		).timeout
 
 
-# End-of-round updates preserve last-round attack history and refill each hand.
+# End-of-round updates preserve previous-round attack history.
 func _end_round_updates() -> void:
 	for enemy: EnemyUnit in combat_manager.enemies:
 		enemy.end_round()
-
-	if _get_balance().draw_to_max_hand_at_round_end:
-		for mage: MageUnit in combat_manager.get_living_mages():
-			mage.draw_to_hand_size(maxi(0, _get_balance().max_hand_size))
 
 
 # ChantResolver returns an array of lines so presentation remains decoupled.
@@ -295,20 +322,52 @@ func _append_result_to_log(result: Dictionary) -> void:
 
 
 # Typed arrays are filled explicitly because chant slots intentionally contain null.
-func _clear_selected_cards() -> void:
-	selected_cards.clear()
-	for slot_index: int in range(_supported_chant_card_count()):
-		selected_cards.append(null)
+func _clear_selected_runes() -> void:
+	selected_runes.clear()
+	for slot_index: int in range(_supported_chant_rune_count()):
+		selected_runes.append(null)
+	selected_slot_index = 0
+	_slot_was_explicitly_selected = false
 
 
-# The graybox scene has exactly three visual slots and three mage rows.
-func _supported_chant_card_count() -> int:
+func _slot_has_rune(slot_index: int) -> bool:
+	return (
+		slot_index >= 0
+		and slot_index < selected_runes.size()
+		and selected_runes[slot_index] != null
+	)
+
+
+func _first_empty_slot() -> int:
+	for slot_index: int in range(selected_runes.size()):
+		if selected_runes[slot_index] == null:
+			return slot_index
+	return -1
+
+
+func _advance_selected_slot() -> void:
+	var first_empty := _first_empty_slot()
+	if first_empty != -1:
+		selected_slot_index = first_empty
+		return
+	selected_slot_index = mini(selected_slot_index + 1, selected_runes.size() - 1)
+
+
+func _rune_used_elsewhere(rune: SymbolCardData, slot_index: int) -> bool:
+	for index: int in range(selected_runes.size()):
+		if index != slot_index and selected_runes[index] == rune:
+			return true
+	return false
+
+
+# The graybox scene has exactly three chant slots.
+func _supported_chant_rune_count() -> int:
 	return 3
 
 
 # Keep the requested Inspector knob visible without allowing an unsafe UI mismatch.
 func _validate_chant_slot_count() -> void:
-	if _get_balance().required_chant_cards != _supported_chant_card_count():
+	if _get_balance().required_chant_cards != _supported_chant_rune_count():
 		push_warning(
 			"Current graybox UI supports exactly 3 chant slots. "
 			+ "Keep required_chant_cards at 3 for now."

@@ -713,20 +713,26 @@ func _append_effect_log(
 	log_lines.append(line)
 
 
-# The first three log lines make it clear which mage spoke each slot.
+# The first three log lines make the selected rune order readable.
 func _append_shouted_words(
 	log_lines: Array[String],
 	spoken_words: PackedStringArray,
 	context: Dictionary
 ) -> void:
+	var speaker_name := "The Rune Mage"
 	var context_mages: Array = context.get("mages", [])
+	if not context_mages.is_empty():
+		var mage := context_mages[0] as MageUnit
+		if mage != null:
+			speaker_name = mage.mage_name
 	for index: int in range(spoken_words.size()):
-		var speaker_name := "Mage %d" % (index + 1)
-		if index < context_mages.size():
-			var mage := context_mages[index] as MageUnit
-			if mage != null:
-				speaker_name = mage.mage_name
-		log_lines.append("%s shouts: %s!" % [speaker_name, spoken_words[index]])
+		log_lines.append(
+			"%s sets Slot %d to %s." % [
+				speaker_name,
+				index + 1,
+				spoken_words[index]
+			]
+		)
 
 
 # All successful and fallback paths preserve the UI's existing result shape.

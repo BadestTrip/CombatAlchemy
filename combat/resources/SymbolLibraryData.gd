@@ -1,9 +1,10 @@
 # SymbolLibraryData.gd
-# Create this as a Resource and assign it to DeckManager in Inspector.
-# It is the editable catalog used to build physical cards in the shared deck.
+# Create this as a Resource and assign it to CombatUIController in Inspector.
+# It is the editable catalog used to build the full rune palette. Older
+# deck/hand variants can still assign the same resource to DeckManager.
 extends Resource
 class_name SymbolLibraryData
 
 
-# Add or reorder SymbolCardData resources here to change the shared symbol set.
+# Add or reorder SymbolCardData resources here to change the rune set.
 @export var symbols: Array[SymbolCardData] = []

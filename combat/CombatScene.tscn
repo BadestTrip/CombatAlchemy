@@ -5,7 +5,6 @@
 [ext_resource type="Script" uid="uid://c0x3bnmh8ajwc" path="res://combat/CombatUIController.gd" id="3_ftuvk"]
 [ext_resource type="Script" uid="uid://bnsfdagp3vxfk" path="res://combat/CombatLog.gd" id="4_r4hyf"]
 [ext_resource type="Script" uid="uid://d4ae0nx3egclw" path="res://combat/RoundManager.gd" id="5_ssh5j"]
-[ext_resource type="Script" uid="uid://cbsmpa0yda7jj" path="res://combat/DeckManager.gd" id="6_6moia"]
 [ext_resource type="Resource" uid="uid://f1frsjbdcext" path="res://combat/resources/symbols/SymbolLibrary_Default.tres" id="7_0rlu1"]
 [ext_resource type="Script" uid="uid://cwqc6y17g0xgk" path="res://combat/ChantResolver.gd" id="8_atnl1"]
 [ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="9_qomwh"]
@@ -85,6 +84,7 @@ layout_mode = 2
 theme_override_constants/separation = 9
 script = ExtResource("3_ftuvk")
 balance = ExtResource("2_66qso")
+symbol_library = ExtResource("7_0rlu1")
 
 [node name="Header" type="PanelContainer" parent="OuterMargin/CombatUI" unique_id=1156764800]
 custom_minimum_size = Vector2(0, 58)
@@ -105,7 +105,7 @@ theme_override_constants/separation = 18
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
 theme_override_font_sizes/font_size = 26
-text = "The Three-Word Duel"
+text = "Rune Duel Prototype"
 
 [node name="HeaderSpacer" type="Control" parent="OuterMargin/CombatUI/Header/HeaderMargin/HeaderRow" unique_id=1943837343]
 layout_mode = 2
@@ -150,7 +150,7 @@ theme_override_constants/separation = 4
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.84, 1, 1)
 theme_override_font_sizes/font_size = 21
-text = "MAGES"
+text = "PLAYER"
 horizontal_alignment = 1
 
 [node name="MageStatuses" type="VBoxContainer" parent="OuterMargin/CombatUI/BattleRow/MagePanel/MageMargin/MageColumn" unique_id=1311722811]
@@ -185,7 +185,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.68, 0.4, 1)
 theme_override_font_sizes/font_size = 18
-text = "Enemy Intents"
+text = "Enemy Intent"
 
 [node name="EnemyIntents" type="RichTextLabel" parent="OuterMargin/CombatUI/BattleRow/IntentPanel/IntentMargin/IntentColumn" unique_id=938475527]
 unique_name_in_owner = true
@@ -213,7 +213,7 @@ theme_override_constants/separation = 4
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.64, 0.48, 1)
 theme_override_font_sizes/font_size = 21
-text = "ENEMIES"
+text = "ENEMY"
 horizontal_alignment = 1
 
 [node name="EnemyStatuses" type="VBoxContainer" parent="OuterMargin/CombatUI/BattleRow/EnemyPanel/EnemyMargin/EnemyColumn" unique_id=505923183]
@@ -240,7 +240,7 @@ theme_override_constants/separation = 5
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
 theme_override_font_sizes/font_size = 19
-text = "CHANT - one symbol from each mage, left to right"
+text = "CHANT - click a slot, then click a rune"
 horizontal_alignment = 1
 
 [node name="ChantSlots" type="HBoxContainer" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn" unique_id=1409543708]
@@ -248,16 +248,13 @@ layout_mode = 2
 theme_override_constants/separation = 10
 alignment = 1
 
-[node name="ChantSlot1" type="Label" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=1842123587]
+[node name="ChantSlot1" type="Button" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=1842123587]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 50)
+custom_minimum_size = Vector2(250, 68)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.88, 1, 1)
 theme_override_font_sizes/font_size = 17
 text = "Slot 1
 ---"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="Arrow1" type="Label" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=1708149289]
 layout_mode = 2
@@ -265,16 +262,13 @@ theme_override_font_sizes/font_size = 22
 text = ">"
 vertical_alignment = 1
 
-[node name="ChantSlot2" type="Label" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=1445911917]
+[node name="ChantSlot2" type="Button" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=1445911917]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 50)
+custom_minimum_size = Vector2(250, 68)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.88, 1, 1)
 theme_override_font_sizes/font_size = 17
 text = "Slot 2
 ---"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="Arrow2" type="Label" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=1396531432]
 layout_mode = 2
@@ -282,16 +276,13 @@ theme_override_font_sizes/font_size = 22
 text = ">"
 vertical_alignment = 1
 
-[node name="ChantSlot3" type="Label" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=966775669]
+[node name="ChantSlot3" type="Button" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=966775669]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 50)
+custom_minimum_size = Vector2(250, 68)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.88, 1, 1)
 theme_override_font_sizes/font_size = 17
 text = "Slot 3
 ---"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="ChantPreview" type="Label" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn" unique_id=376363575]
 unique_name_in_owner = true
@@ -313,10 +304,12 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="MageHands" type="VBoxContainer" parent="OuterMargin/CombatUI/HandsPanel/HandsMargin" unique_id=1516872362]
+[node name="RunePalette" type="GridContainer" parent="OuterMargin/CombatUI/HandsPanel/HandsMargin" unique_id=1516872362]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 5
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 9
 
 [node name="ControlsPanel" type="PanelContainer" parent="OuterMargin/CombatUI" unique_id=680030063]
 custom_minimum_size = Vector2(0, 58)
@@ -334,6 +327,7 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="TargetLabel" type="Label" parent="OuterMargin/CombatUI/ControlsPanel/ControlsMargin/Controls" unique_id=1421247150]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Target Enemy:"
@@ -341,6 +335,7 @@ vertical_alignment = 1
 
 [node name="TargetSelect" type="OptionButton" parent="OuterMargin/CombatUI/ControlsPanel/ControlsMargin/Controls" unique_id=2013053444]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(420, 42)
 layout_mode = 2
 
@@ -568,12 +563,6 @@ unique_name_in_owner = true
 script = ExtResource("5_ssh5j")
 balance = ExtResource("2_66qso")
 
-[node name="DeckManager" type="Node" parent="." unique_id=885179237]
-unique_name_in_owner = true
-script = ExtResource("6_6moia")
-balance = ExtResource("2_66qso")
-symbol_library = ExtResource("7_0rlu1")
-
 [node name="ChantResolver" type="Node" parent="." unique_id=1199369047]
 unique_name_in_owner = true
 script = ExtResource("8_atnl1")
@@ -589,30 +578,14 @@ unique_name_in_owner = true
 
 [node name="Mage1" type="Node" parent="Mages" unique_id=1283010499]
 script = ExtResource("40_qrgab")
-mage_name = "Mage 1 - Sera"
-
-[node name="Mage2" type="Node" parent="Mages" unique_id=632687800]
-script = ExtResource("40_qrgab")
-mage_name = "Mage 2 - Orin"
-
-[node name="Mage3" type="Node" parent="Mages" unique_id=1914102596]
-script = ExtResource("40_qrgab")
-mage_name = "Mage 3 - Pell"
+mage_name = "The Rune Mage"
 
 [node name="Enemies" type="Node" parent="." unique_id=1257879806]
 unique_name_in_owner = true
 
 [node name="Enemy1" type="Node" parent="Enemies" unique_id=1321252]
 script = ExtResource("41_lo2c2")
-enemy_name = "Enemy 1 - Ash Guard"
-
-[node name="Enemy2" type="Node" parent="Enemies" unique_id=724567590]
-script = ExtResource("41_lo2c2")
-enemy_name = "Enemy 2 - Mirror Adept"
-
-[node name="Enemy3" type="Node" parent="Enemies" unique_id=1653999225]
-script = ExtResource("41_lo2c2")
-enemy_name = "Enemy 3 - Storm Scribe"
+enemy_name = "Training Adept"
 
 [node name="PauseMenu" type="Control" parent="."]
 visible = false

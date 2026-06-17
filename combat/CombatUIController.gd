@@ -1,14 +1,19 @@
 # CombatUIController.gd
 # Attach this script to the CombatUI VBoxContainer in CombatScene.tscn.
-# It builds graybox status panels and card buttons, then forwards player choices
-# to RoundManager. It does not calculate spell effects or round rules.
+# It builds graybox status panels and a full rune palette, then forwards player
+# slot/rune choices to RoundManager. It does not calculate spell effects.
 extends VBoxContainer
 class_name CombatUIController
 
 
-# Assign CombatBalance_Default.tres here to tune graybox card presentation.
+# Assign CombatBalance_Default.tres here to tune graybox rune presentation.
 @export_group("Balance")
 @export var balance: CombatBalanceData
+
+# Assign SymbolLibrary_Default.tres here. The rune palette is built from this
+# resource instead of from random hands or hardcoded button lists.
+@export_group("Runes")
+@export var symbol_library: SymbolLibraryData
 
 # These values control runtime-only discovery and history presentation.
 @export_group("Discovery UI")
@@ -20,12 +25,11 @@ class_name CombatUIController
 @onready var mage_statuses: VBoxContainer = %MageStatuses
 @onready var enemy_statuses: VBoxContainer = %EnemyStatuses
 @onready var enemy_intents: RichTextLabel = %EnemyIntents
-@onready var chant_slot_1: Label = %ChantSlot1
-@onready var chant_slot_2: Label = %ChantSlot2
-@onready var chant_slot_3: Label = %ChantSlot3
+@onready var chant_slot_1: Button = %ChantSlot1
+@onready var chant_slot_2: Button = %ChantSlot2
+@onready var chant_slot_3: Button = %ChantSlot3
 @onready var chant_preview: Label = %ChantPreview
-@onready var mage_hands: VBoxContainer = %MageHands
-@onready var target_select: OptionButton = %TargetSelect
+@onready var rune_palette: GridContainer = %RunePalette
 @onready var cast_button: Button = %CastButton
 @onready var clear_button: Button = %ClearButton
 @onready var result_panel: PanelContainer = %ResultPanel
@@ -52,11 +56,9 @@ var round_manager: RoundManager
 var discovery_manager: SpellDiscoveryManager
 var combat_log: CombatLog
 
-# Card buttons are tracked so resolving phases can disable them immediately.
-var _card_buttons: Array[Button] = []
-
-# This prevents target list rebuilding from triggering selection callbacks.
-var _is_refreshing_targets: bool = false
+# Runtime rune buttons are rebuilt from SymbolLibraryData once at setup.
+var _rune_buttons: Array[Button] = []
+var _slot_buttons: Array[Button] = []
 
 # RoundManager requests input on/off as phases change. Modal UI can still block it.
 var _round_input_enabled: bool = false
@@ -70,9 +72,15 @@ var _fallback_balance: CombatBalanceData
 
 # Godot calls this when the UI node enters the scene.
 func _ready() -> void:
+	_slot_buttons.clear()
+	_slot_buttons.append(chant_slot_1)
+	_slot_buttons.append(chant_slot_2)
+	_slot_buttons.append(chant_slot_3)
+	for slot_index: int in range(_slot_buttons.size()):
+		_slot_buttons[slot_index].pressed.connect(_on_slot_pressed.bind(slot_index))
+
 	cast_button.pressed.connect(_on_cast_pressed)
 	clear_button.pressed.connect(_on_clear_pressed)
-	target_select.item_selected.connect(_on_target_selected)
 	restart_button.pressed.connect(_on_restart_pressed)
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
 	spellbook_button.pressed.connect(_on_spellbook_pressed)
@@ -81,6 +89,7 @@ func _ready() -> void:
 	cast_history_close_button.pressed.connect(_close_cast_history)
 	discovery_close_button.pressed.connect(_close_discovery_popup)
 	discovery_auto_hide_timer.timeout.connect(_close_discovery_popup)
+
 	result_panel.visible = false
 	spellbook_panel.visible = false
 	cast_history_panel.visible = false
@@ -104,6 +113,7 @@ func configure(
 		discovery_manager.spellbook_updated.connect(_refresh_spellbook)
 		discovery_manager.cast_history_updated.connect(_on_cast_history_updated)
 
+	_build_rune_palette()
 	_refresh_spellbook()
 	_refresh_cast_history()
 
@@ -115,45 +125,38 @@ func show_planning() -> void:
 	refresh_all()
 
 
-# Managers call this after cards, HP, shield, intents, or selection changes.
+# Managers call this after rune slots, HP, shield, intents, or modal state changes.
 func refresh_all() -> void:
 	if combat_manager == null or round_manager == null:
 		return
 	_refresh_unit_statuses()
 	refresh_enemy_intents()
 	_refresh_chant_slots()
-	_refresh_mage_hands()
-	_refresh_target_options()
+	_refresh_rune_button_state()
 	refresh_cast_controls()
 
 
 # RoundManager uses this during resolution and enemy actions.
 func set_input_enabled(enabled: bool) -> void:
 	_round_input_enabled = enabled
-	var allow_combat_input := enabled and not _combat_actions_blocked()
-	for button: Button in _card_buttons:
-		button.disabled = not allow_combat_input
-	target_select.disabled = not allow_combat_input
-	cast_button.disabled = not allow_combat_input
-	clear_button.disabled = not allow_combat_input
+	_refresh_rune_button_state()
+	refresh_cast_controls()
 
 
-# This updates only buttons whose state depends on a complete chant and target.
+# This updates only buttons whose state depends on a complete chant.
 func refresh_cast_controls() -> void:
 	if round_manager == null:
 		return
-	cast_button.disabled = (
-		_combat_actions_blocked()
-		or not round_manager.can_cast()
-	)
+	var combat_blocked := _combat_actions_blocked()
+	cast_button.disabled = combat_blocked or not round_manager.can_cast()
 	clear_button.disabled = (
-		_combat_actions_blocked()
+		combat_blocked
 		or round_manager.current_state != RoundManager.RoundState.PLANNING
-		or _selected_card_count() == 0
+		or _selected_rune_count() == 0
 	)
 
 
-# Enemy intents are visible before Cast, as required by the round flow.
+# Enemy intent is visible before Cast, as required by the round flow.
 func refresh_enemy_intents() -> void:
 	if combat_manager == null:
 		return
@@ -205,124 +208,99 @@ func _refresh_unit_statuses() -> void:
 		))
 
 
-# Slots always follow mage order, which makes chant order unambiguous.
+# Slots are explicit buttons: click a slot, then click any rune to place it.
 func _refresh_chant_slots() -> void:
-	var slot_labels: Array[Label] = [chant_slot_1, chant_slot_2, chant_slot_3]
 	var preview_words: PackedStringArray = []
 
-	for index: int in range(3):
-		var card: SymbolCardData = round_manager.selected_cards[index]
-		if card == null:
-			slot_labels[index].text = "Slot %d\n---" % (index + 1)
+	for index: int in range(_slot_buttons.size()):
+		var slot_button := _slot_buttons[index]
+		var rune: SymbolCardData = round_manager.selected_runes[index]
+		var lines: PackedStringArray = []
+		if index == round_manager.selected_slot_index:
+			lines.append("[SELECTED]")
+		lines.append("Slot %d" % (index + 1))
+		if rune == null:
+			lines.append("---")
 			preview_words.append("...")
 		else:
-			slot_labels[index].text = "Slot %d\n%s  %s" % [
-				index + 1,
-				card.visual_hint,
-				card.spoken_word
-			]
-			preview_words.append(card.spoken_word)
+			if not rune.visual_hint.is_empty():
+				lines.append(rune.visual_hint)
+			lines.append(rune.spoken_word)
+			preview_words.append(rune.spoken_word)
+
+		slot_button.text = "\n".join(lines)
+		slot_button.disabled = (
+			_combat_actions_blocked()
+			or not _round_input_enabled
+			or round_manager.current_state != RoundManager.RoundState.PLANNING
+		)
 
 	chant_preview.text = "Selected Chant:\n" + "  >  ".join(preview_words)
 
 
-# Each living mage gets one row containing its current clickable cards.
-func _refresh_mage_hands() -> void:
-	_card_buttons.clear()
-	_clear_children(mage_hands)
+# The full rune palette is data-driven from SymbolLibraryData.symbols.
+func _build_rune_palette() -> void:
+	_rune_buttons.clear()
+	_clear_children(rune_palette)
 
-	for mage_index: int in range(combat_manager.mages.size()):
-		var mage: MageUnit = combat_manager.mages[mage_index]
-		var section := VBoxContainer.new()
-		section.add_theme_constant_override("separation", 4)
-		mage_hands.add_child(section)
+	if symbol_library == null or symbol_library.symbols.is_empty():
+		var warning := Label.new()
+		warning.text = "No rune library assigned."
+		rune_palette.add_child(warning)
+		return
 
-		var title := Label.new()
-		title.text = "%s hand - Chant Slot %d" % [mage.mage_name, mage_index + 1]
-		title.add_theme_color_override("font_color", Color(0.72, 0.88, 1.0))
-		section.add_child(title)
+	for rune: SymbolCardData in symbol_library.symbols:
+		if rune == null:
+			continue
+		var rune_button := Button.new()
+		var settings := _get_balance()
+		rune_button.custom_minimum_size = Vector2(
+			maxf(1.0, settings.rune_button_width),
+			maxf(1.0, settings.rune_button_height)
+		)
+		rune_button.text = _format_rune_button_text(rune)
+		rune_button.tooltip_text = "%s rune" % rune.spoken_word
+		rune_button.pressed.connect(_on_rune_pressed.bind(rune))
+		rune_palette.add_child(rune_button)
+		_rune_buttons.append(rune_button)
 
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 6)
-		section.add_child(row)
-
-		for card: SymbolCardData in mage.hand:
-			var card_button := Button.new()
-			var settings := _get_balance()
-			card_button.custom_minimum_size = Vector2(
-				maxf(1.0, settings.card_button_width),
-				maxf(1.0, settings.card_button_height)
-			)
-
-			# Spoken words always remain visible; debug details are optional.
-			var card_lines: PackedStringArray = []
-			if settings.show_card_visual_hints:
-				card_lines.append(card.visual_hint)
-			card_lines.append(card.spoken_word)
-			if settings.show_card_display_names:
-				card_lines.append(card.display_name)
-			card_button.text = "\n".join(card_lines)
-			card_button.tooltip_text = "%s symbol card" % card.spoken_word
-
-			if round_manager.selected_cards[mage_index] == card:
-				card_button.text = "[SELECTED]\n" + card_button.text
-
-			card_button.disabled = (
-				_combat_actions_blocked()
-				or not _round_input_enabled
-				or not mage.is_alive
-				or round_manager.current_state != RoundManager.RoundState.PLANNING
-			)
-			card_button.pressed.connect(_on_card_pressed.bind(mage, card))
-			row.add_child(card_button)
-			_card_buttons.append(card_button)
+	_refresh_rune_button_state()
 
 
-# The target drop-down contains only living enemies.
-func _refresh_target_options() -> void:
-	_is_refreshing_targets = true
-	target_select.clear()
+# Existing balance UI toggles still control what appears on rune buttons.
+func _format_rune_button_text(rune: SymbolCardData) -> String:
+	var lines: PackedStringArray = []
+	if _get_balance().show_card_visual_hints and not rune.visual_hint.is_empty():
+		lines.append(rune.visual_hint)
+	lines.append(rune.spoken_word)
+	if _get_balance().show_card_display_names and not rune.display_name.is_empty():
+		lines.append(rune.display_name)
+	return "\n".join(lines)
 
-	var selected_index := -1
-	var living_enemies := combat_manager.get_living_enemies()
-	for index: int in range(living_enemies.size()):
-		var enemy: EnemyUnit = living_enemies[index]
-		target_select.add_item("%s - %d HP / %d Shield" % [
-			enemy.enemy_name,
-			enemy.current_hp,
-			enemy.shield
-		])
-		target_select.set_item_metadata(index, enemy)
-		if enemy == round_manager.selected_target:
-			selected_index = index
 
-	if target_select.item_count > 0:
-		if selected_index < 0:
-			selected_index = 0
-			round_manager.selected_target = target_select.get_item_metadata(0) as EnemyUnit
-		target_select.select(selected_index)
-
-	target_select.disabled = (
-		_combat_actions_blocked()
-		or not _round_input_enabled
-		or target_select.item_count == 0
-		or round_manager.current_state != RoundManager.RoundState.PLANNING
+func _refresh_rune_button_state() -> void:
+	var allow_input := (
+		_round_input_enabled
+		and not _combat_actions_blocked()
+		and round_manager != null
+		and round_manager.current_state == RoundManager.RoundState.PLANNING
 	)
-	_is_refreshing_targets = false
+	for button: Button in _rune_buttons:
+		button.disabled = not allow_input
+	for slot_button: Button in _slot_buttons:
+		slot_button.disabled = not allow_input
 
 
-# Card clicks are forwarded to RoundManager, which validates mage, card, and phase.
-func _on_card_pressed(mage: MageUnit, card: SymbolCardData) -> void:
+func _on_slot_pressed(slot_index: int) -> void:
 	if _combat_actions_blocked():
 		return
-	round_manager.select_chant_card(mage, card)
+	round_manager.select_slot(slot_index)
 
 
-func _on_target_selected(index: int) -> void:
-	if _combat_actions_blocked() or _is_refreshing_targets or index < 0:
+func _on_rune_pressed(rune: SymbolCardData) -> void:
+	if _combat_actions_blocked():
 		return
-	var enemy := target_select.get_item_metadata(index) as EnemyUnit
-	round_manager.select_target(enemy)
+	round_manager.place_rune_in_selected_slot(rune)
 
 
 func _on_cast_pressed() -> void:
@@ -525,10 +503,10 @@ func _on_main_menu_pressed() -> void:
 
 
 # These small UI helpers keep the rebuilding functions readable.
-func _selected_card_count() -> int:
+func _selected_rune_count() -> int:
 	var count := 0
-	for card: SymbolCardData in round_manager.selected_cards:
-		if card != null:
+	for rune: SymbolCardData in round_manager.selected_runes:
+		if rune != null:
 			count += 1
 	return count
 

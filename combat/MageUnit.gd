@@ -1,6 +1,7 @@
 # MageUnit.gd
-# Attach this script to each Mage node under CombatScene/Mages.
-# It stores health, shield, life state, and the mage's current symbol-card hand.
+# Attach this script to the player Mage node under CombatScene/Mages.
+# It stores health, shield, and life state. The class name stays MageUnit for
+# compatibility, but the active prototype treats this as the one player unit.
 extends Node
 class_name MageUnit
 
@@ -39,11 +40,12 @@ var current_hp: int = 0
 # This is runtime state and should not be exposed in Inspector.
 var shield: int = 0
 
-# The hand contains SymbolCardData Resources drawn from DeckManager.
+# Hand logic is unused in the full-rune-palette prototype.
+# It remains only so older deck/hand experiments and spell effects keep loading.
 # This is runtime state and should not be exposed in Inspector.
 var hand: Array[SymbolCardData] = []
 
-# Dead mages cannot select cards and are not valid enemy targets.
+# Dead player units are not valid enemy targets.
 # This is runtime state and should not be exposed in Inspector.
 var is_alive: bool = true
 
@@ -61,7 +63,8 @@ func _ready() -> void:
 	add_to_group("combat_units")
 
 
-# CombatManager calls this once so draw/discard methods can reach the shared deck.
+# Deprecated for the active full-rune-palette prototype.
+# Older deck/hand variants call this so draw/discard methods can reach a deck.
 func configure(new_deck_manager: DeckManager) -> void:
 	deck_manager = new_deck_manager
 
@@ -123,8 +126,8 @@ func heal(amount: int) -> void:
 		unit_healed.emit(self, applied_healing)
 
 
-# RoundManager calls this between rounds.
-# It asks the shared DeckManager for cards until the hand reaches hand_size.
+# Deprecated for the active full-rune-palette prototype.
+# Older deck/hand variants use this to draw cards between rounds.
 func draw_to_hand_size(hand_size: int) -> void:
 	if deck_manager == null or not is_alive:
 		return
@@ -139,7 +142,8 @@ func draw_to_hand_size(hand_size: int) -> void:
 	deck_manager.hand_updated.emit(self)
 
 
-# RoundManager calls this after the selected card has contributed to a chant.
+# Deprecated for the active full-rune-palette prototype.
+# Older deck/hand variants call this after a selected card contributes to a chant.
 func discard_card(card: SymbolCardData) -> void:
 	if card == null or deck_manager == null:
 		return
@@ -152,7 +156,8 @@ func discard_card(card: SymbolCardData) -> void:
 	deck_manager.hand_updated.emit(self)
 
 
-# CombatManager may call this for a disaster that discards a random hand card.
+# Some old spell data can ask for a random discard. With no active hand this
+# simply returns null, which makes that effect harmless in the rune prototype.
 func discard_random_card() -> SymbolCardData:
 	if hand.is_empty():
 		return null

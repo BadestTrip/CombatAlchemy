@@ -1,8 +1,8 @@
 # DeckManager.gd
-# Attach this script to the DeckManager node in CombatScene.tscn.
-# It owns the shared draw pile and discard pile used by all three mages.
-# Mages ask this manager for cards instead of managing separate decks. Symbol
-# definitions come from an Inspector-assigned SymbolLibraryData resource.
+# Deprecated for the current full-rune-palette prototype.
+# Kept only in case we later test deck/hand variants again. The active
+# CombatScene does not instantiate this manager, deal hands, draw, or discard.
+# Older deck experiments can still use it as a shared draw/discard manager.
 extends Node
 class_name DeckManager
 
