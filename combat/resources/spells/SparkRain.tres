@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://dltge0kqotew6"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_hits"]
+script = ExtResource("2_effect")
+effect_type = 7
+amount = 2
+hit_count = 3
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["asha", "zun", "iri"])
+result_name = "Spark Rain"
+player_description = "Strikes random enemies three times."
+discovery_flavor_text = "Loose sparks find their own paths through the enemy line."
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_hits")])

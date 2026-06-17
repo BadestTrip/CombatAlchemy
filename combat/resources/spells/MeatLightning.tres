@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://cgi2xp01gdu0c"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_damage"]
+script = ExtResource("2_effect")
+effect_type = 12
+amount = 10
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["bavo", "iri", "zun"])
+result_name = "Meat Lightning"
+player_description = "Deals massive damage to one random living unit."
+discovery_flavor_text = "The bolt chooses a body before deciding whose body it is."
+result_type = "disaster"
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_damage")])

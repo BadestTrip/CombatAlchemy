@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://cgjn21f5wwxym"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_log"]
+script = ExtResource("2_effect")
+effect_type = 13
+log_text = "The chant feels impossibly heavy."
+
+[sub_resource type="Resource" id="Effect_damage"]
+script = ExtResource("2_effect")
+amount = 8
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["voro", "bavo", "keth"])
+result_name = "Heavy Word"
+player_description = "Deals very heavy damage to one enemy."
+discovery_flavor_text = "The final word lands with impossible weight."
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_log"), SubResource("Effect_damage")])

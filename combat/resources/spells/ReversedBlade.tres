@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://dn1aqhrt7ty03"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_conditional_damage"]
+script = ExtResource("2_effect")
+effect_type = 19
+amount = 4
+hit_count = 3
+log_text = "The blade remembers last round's wound."
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["mira", "keth", "asha"])
+result_name = "Reversed Blade"
+player_description = "Damages one enemy, with bonus damage if it was hurt last round."
+discovery_flavor_text = "The remembered wound opens from the other direction."
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_conditional_damage")])

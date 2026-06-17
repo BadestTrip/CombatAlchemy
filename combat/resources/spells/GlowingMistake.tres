@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://c12o8jy60dqwd"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_shield"]
+script = ExtResource("2_effect")
+effect_type = 3
+amount = 2
+
+[sub_resource type="Resource" id="Effect_weaken"]
+script = ExtResource("2_effect")
+effect_type = 17
+amount = -1
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["zun", "bavo", "elum"])
+result_name = "Glowing Mistake"
+player_description = "Shields every mage and weakens every enemy's next attack."
+discovery_flavor_text = "The error glows brightly enough to become helpful."
+result_type = "funny"
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_shield"), SubResource("Effect_weaken")])

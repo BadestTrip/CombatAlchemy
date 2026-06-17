@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellRecipeData" format=3 uid="uid://blx4ank13w781"]
+
+[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://blnti0t43mw5q" path="res://combat/resources/SpellEffectData.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Effect_repeat"]
+script = ExtResource("2_effect")
+effect_type = 11
+amount = 3
+
+[resource]
+script = ExtResource("1_recipe")
+chant_symbols = Array[String](["mira", "iri", "mira"])
+result_name = "Infinite Wink"
+player_description = "Repeats the previous authored spell for free."
+discovery_flavor_text = "For one instant, the last chant happens again."
+result_type = "op"
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_repeat")])
