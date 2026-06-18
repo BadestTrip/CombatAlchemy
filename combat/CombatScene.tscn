@@ -554,6 +554,7 @@ text = "Close"
 
 [node name="DiscoveryAutoHideTimer" type="Timer" parent="." unique_id=1256023856]
 unique_name_in_owner = true
+wait_time = 5.0
 one_shot = true
 
 [node name="RoundManager" type="Node" parent="." unique_id=2072296989]
