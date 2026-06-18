@@ -37,6 +37,13 @@ func is_busy() -> bool:
 	return is_transitioning
 
 
+# MainMenu calls this before scene-changing buttons invoke GameManager.
+# Keeping the setter here lets other menus reuse the same transition autoload.
+func set_transition_duration(duration: float) -> void:
+	ink_reveal_time = maxf(0.01, duration)
+	_set_shader_parameter("transition_duration_seconds", ink_reveal_time)
+
+
 func transition_to_scene(scene_path: String) -> void:
 	if is_transitioning:
 		return
@@ -53,6 +60,7 @@ func transition_to_scene(scene_path: String) -> void:
 	# 2. Show screenshot as frozen cover.
 	visible = true
 	transition_snapshot.visible = true
+	_set_shader_parameter("transition_duration_seconds", ink_reveal_time)
 	_set_shader_parameter("reveal_progress", 0.0)
 
 	# 3. Change scene behind the screenshot.
