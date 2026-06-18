@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://btyxtwij5kbf7"]
+
+[ext_resource type="Script" uid="uid://bbdflu1w5nhgw" path="res://mainmenu/VersionStone.gd" id="1_version_stone"]
+[ext_resource type="FontFile" uid="uid://bi7jlcgpmn18i" path="res://extra/yoster.ttf" id="2_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_version_stone"]
+bg_color = Color(0.16, 0.12, 0.08, 0.68)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.08, 0.055, 0.035, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="VersionStone" type="PanelContainer" unique_id=1923792999]
+custom_minimum_size = Vector2(300, 120)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_version_stone")
+script = ExtResource("1_version_stone")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=1024358746]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="TextColumn" type="VBoxContainer" parent="Margin" unique_id=1219081314]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="VersionLabel" type="Label" parent="Margin/TextColumn" unique_id=1688200991]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.82, 0.55, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+text = "v0.1.0"
+
+[node name="FocusTitleLabel" type="Label" parent="Margin/TextColumn" unique_id=62658664]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.66, 0.46, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 17
+text = "Current Focus:"
+
+[node name="FocusLabel" type="Label" parent="Margin/TextColumn" unique_id=372410054]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.82, 0.66, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "Combat Experimentation"
+autowrap_mode = 2
