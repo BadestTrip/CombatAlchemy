@@ -20,6 +20,17 @@ class_name CombatUIController
 @export var discovery_popup_auto_hide_seconds: float = 2.5
 @export var visible_cast_history_entries: int = 10
 
+@export_group("Modular UI Controllers")
+@export var rune_circle_ui: RuneCircleUIController
+@export var rune_wheel_controller: RuneWheelController
+@export var chant_shout_controller: ChantShoutController
+@export var result_banner_controller: SpellResultBannerController
+@export var secondary_panel_controller: SecondaryPanelController
+@export var player_hud: FloatingUnitHUD
+@export var enemy_hud: FloatingUnitHUD
+@export var enemy_intent_bubble: EnemyIntentBubble
+@export var objective_label: Label
+
 
 # These node paths assume the exact child names used in CombatScene.tscn.
 @onready var mage_statuses: VBoxContainer = %MageStatuses
@@ -29,7 +40,7 @@ class_name CombatUIController
 @onready var chant_slot_2: Button = %ChantSlot2
 @onready var chant_slot_3: Button = %ChantSlot3
 @onready var chant_preview: Label = %ChantPreview
-@onready var rune_palette: GridContainer = %RunePalette
+@onready var rune_palette: Control = %RunePalette
 @onready var cast_button: Button = %CastButton
 @onready var clear_button: Button = %ClearButton
 @onready var result_panel: PanelContainer = %ResultPanel
@@ -38,6 +49,7 @@ class_name CombatUIController
 @onready var main_menu_button: Button = %MainMenuButton
 @onready var spellbook_button: Button = %SpellbookButton
 @onready var cast_history_button: Button = %CastHistoryButton
+@onready var log_panel: PanelContainer = get_node_or_null("LogPanel") as PanelContainer
 @onready var spellbook_panel: PanelContainer = %SpellbookPanel
 @onready var spellbook_list: RichTextLabel = %SpellbookList
 @onready var spellbook_close_button: Button = %SpellbookCloseButton
@@ -76,21 +88,15 @@ func _ready() -> void:
 	_slot_buttons.append(chant_slot_1)
 	_slot_buttons.append(chant_slot_2)
 	_slot_buttons.append(chant_slot_3)
-	for slot_index: int in range(_slot_buttons.size()):
-		_slot_buttons[slot_index].pressed.connect(_on_slot_pressed.bind(slot_index))
 
-	cast_button.pressed.connect(_on_cast_pressed)
-	clear_button.pressed.connect(_on_clear_pressed)
 	restart_button.pressed.connect(_on_restart_pressed)
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
-	spellbook_button.pressed.connect(_on_spellbook_pressed)
-	cast_history_button.pressed.connect(_on_cast_history_pressed)
-	spellbook_close_button.pressed.connect(_close_spellbook)
-	cast_history_close_button.pressed.connect(_close_cast_history)
 	discovery_close_button.pressed.connect(_close_discovery_popup)
 	discovery_auto_hide_timer.timeout.connect(_close_discovery_popup)
 
 	result_panel.visible = false
+	if log_panel != null:
+		log_panel.visible = false
 	spellbook_panel.visible = false
 	cast_history_panel.visible = false
 	discovery_popup.visible = false
@@ -108,20 +114,37 @@ func configure(
 	discovery_manager = discovery
 	combat_log = log
 
+	_resolve_modular_controllers()
+	_apply_balance_to_modules()
+	_connect_round_objective_signals()
+
 	if discovery_manager != null:
 		discovery_manager.spell_discovered.connect(_on_spell_discovered)
 		discovery_manager.spellbook_updated.connect(_refresh_spellbook)
 		discovery_manager.cast_history_updated.connect(_on_cast_history_updated)
 
-	_build_rune_palette()
+	if rune_circle_ui != null:
+		rune_circle_ui.initialize(round_manager, symbol_library)
+	else:
+		_build_rune_palette()
+
+	if player_hud != null:
+		player_hud.bind_unit(combat_manager.player)
+	if enemy_hud != null:
+		enemy_hud.bind_unit(combat_manager.enemy)
+	if enemy_intent_bubble != null:
+		enemy_intent_bubble.bind_enemy(combat_manager.enemy)
+
 	_refresh_spellbook()
 	_refresh_cast_history()
+	_update_objective_text()
 
 
 # RoundManager calls this after intents are generated.
 func show_planning() -> void:
 	result_panel.visible = false
 	set_input_enabled(true)
+	_update_objective_text()
 	refresh_all()
 
 
@@ -129,23 +152,37 @@ func show_planning() -> void:
 func refresh_all() -> void:
 	if combat_manager == null or round_manager == null:
 		return
-	_refresh_unit_statuses()
+	if player_hud != null:
+		player_hud.refresh()
+	if enemy_hud != null:
+		enemy_hud.refresh()
+	if player_hud == null or enemy_hud == null:
+		_refresh_unit_statuses()
 	refresh_enemy_intents()
-	_refresh_chant_slots()
-	_refresh_rune_button_state()
-	refresh_cast_controls()
+	if rune_circle_ui != null:
+		rune_circle_ui.refresh_all()
+	else:
+		_refresh_chant_slots()
+		_refresh_rune_button_state()
+		refresh_cast_controls()
+	_update_objective_text()
 
 
 # RoundManager uses this during resolution and enemy actions.
 func set_input_enabled(enabled: bool) -> void:
 	_round_input_enabled = enabled
-	_refresh_rune_button_state()
-	refresh_cast_controls()
+	_update_modular_input_lock()
+	if rune_circle_ui == null:
+		_refresh_rune_button_state()
+		refresh_cast_controls()
 
 
 # This updates only buttons whose state depends on a complete chant.
 func refresh_cast_controls() -> void:
 	if round_manager == null:
+		return
+	if rune_circle_ui != null:
+		rune_circle_ui.refresh_cast_button()
 		return
 	var combat_blocked := _combat_actions_blocked()
 	cast_button.disabled = combat_blocked or not round_manager.can_cast()
@@ -167,6 +204,8 @@ func refresh_enemy_intents() -> void:
 			"%s has no intent." % enemy.enemy_name
 		))
 		enemy_intents.append_text("- %s\n" % description)
+	if enemy_intent_bubble != null:
+		enemy_intent_bubble.refresh_intent()
 
 
 # CombatManager calls this after Victory or Defeat.
@@ -180,6 +219,19 @@ func show_result(victory: bool) -> void:
 	)
 	restart_button.disabled = false
 	main_menu_button.disabled = false
+
+
+func play_chant_shout(runes: Array[SymbolCardData]) -> void:
+	_update_objective_text("Resolving chant...")
+	if chant_shout_controller == null:
+		return
+	await chant_shout_controller.play_shout_sequence(runes)
+
+
+func show_spell_result(result: Dictionary) -> void:
+	if result_banner_controller == null:
+		return
+	result_banner_controller.show_result(result)
 
 
 # Status columns on the left and right are rebuilt from current unit data.
@@ -475,18 +527,165 @@ func _format_recipe_chant(recipe: SpellRecipeData) -> String:
 
 # This is the single safety check used by every combat input callback.
 func _combat_actions_blocked() -> bool:
-	return (
-		_pause_menu_open
-		or get_tree().paused
-		or spellbook_panel.visible
-		or cast_history_panel.visible
-		or discovery_popup.visible
-	)
+	if _pause_menu_open or get_tree().paused or discovery_popup.visible:
+		return true
+	if secondary_panel_controller != null:
+		return (
+			_get_balance().block_combat_input_when_secondary_panel_open
+			and secondary_panel_controller.is_any_panel_open()
+		)
+	return spellbook_panel.visible or cast_history_panel.visible
 
 
 func _update_combat_input_state() -> void:
 	set_input_enabled(_round_input_enabled)
 	refresh_cast_controls()
+
+
+func _resolve_modular_controllers() -> void:
+	if rune_circle_ui == null:
+		rune_circle_ui = _find_scene_node("RuneCircleRoot") as RuneCircleUIController
+	if rune_circle_ui == null:
+		rune_circle_ui = _find_scene_node("ChantPanel") as RuneCircleUIController
+	if rune_wheel_controller == null:
+		rune_wheel_controller = _find_scene_node("RuneWheelRoot") as RuneWheelController
+	if rune_wheel_controller == null:
+		rune_wheel_controller = _find_scene_node("HandsPanel") as RuneWheelController
+	if chant_shout_controller == null:
+		chant_shout_controller = _find_scene_node("ChantShoutText") as ChantShoutController
+	if result_banner_controller == null:
+		result_banner_controller = _find_scene_node("SpellResultBanner") as SpellResultBannerController
+	if secondary_panel_controller == null:
+		secondary_panel_controller = _find_scene_node("SecondaryUI") as SecondaryPanelController
+	if player_hud == null:
+		player_hud = _find_scene_node("PlayerFloatingHUD") as FloatingUnitHUD
+	if enemy_hud == null:
+		enemy_hud = _find_scene_node("EnemyFloatingHUD") as FloatingUnitHUD
+	if enemy_intent_bubble == null:
+		enemy_intent_bubble = _find_scene_node("EnemyIntentBubble") as EnemyIntentBubble
+	if enemy_intent_bubble == null:
+		enemy_intent_bubble = _find_scene_node("IntentPanel") as EnemyIntentBubble
+	if objective_label == null:
+		objective_label = _find_scene_node("ObjectiveLabel") as Label
+
+
+func _apply_balance_to_modules() -> void:
+	var settings := _get_balance()
+	if rune_circle_ui != null:
+		rune_circle_ui.auto_expand_wheel_on_empty_slot_click = settings.auto_expand_wheel_on_slot_click
+		rune_circle_ui.rune_wheel_controller = rune_wheel_controller
+	if rune_wheel_controller != null:
+		rune_wheel_controller.starts_expanded = settings.rune_wheel_starts_expanded
+		rune_wheel_controller.auto_retract_after_rune_pick = settings.auto_retract_wheel_after_rune_pick
+		rune_wheel_controller.wheel_radius = settings.rune_wheel_radius
+		rune_wheel_controller.tween_seconds = settings.rune_wheel_tween_seconds
+		rune_wheel_controller.rune_button_size = Vector2(
+			maxf(1.0, settings.rune_button_width * 0.62),
+			maxf(1.0, settings.rune_button_height)
+		)
+	if chant_shout_controller != null:
+		chant_shout_controller.shout_each_rune_seconds = settings.shout_each_rune_seconds
+		chant_shout_controller.shout_between_runes_seconds = settings.shout_between_runes_seconds
+	if result_banner_controller != null:
+		result_banner_controller.auto_hide_seconds = settings.spell_result_banner_seconds
+	if secondary_panel_controller != null:
+		secondary_panel_controller.configure(
+			settings.secondary_panels_start_closed,
+			settings.only_one_secondary_panel_open,
+			settings.block_combat_input_when_secondary_panel_open
+		)
+		if not secondary_panel_controller.panel_state_changed.is_connected(_on_secondary_panel_state_changed):
+			secondary_panel_controller.panel_state_changed.connect(_on_secondary_panel_state_changed)
+
+
+func _connect_round_objective_signals() -> void:
+	if round_manager == null:
+		return
+	if not round_manager.selected_slot_changed.is_connected(_on_round_selection_changed):
+		round_manager.selected_slot_changed.connect(_on_round_selection_changed)
+	if not round_manager.selected_runes_changed.is_connected(_on_round_runes_changed):
+		round_manager.selected_runes_changed.connect(_on_round_runes_changed)
+	if not round_manager.casting_started.is_connected(_on_round_casting_started):
+		round_manager.casting_started.connect(_on_round_casting_started)
+	if not round_manager.casting_finished.is_connected(_on_round_casting_finished):
+		round_manager.casting_finished.connect(_on_round_casting_finished)
+	if not round_manager.player_phase_started.is_connected(_on_player_phase_started):
+		round_manager.player_phase_started.connect(_on_player_phase_started)
+	if not round_manager.enemy_phase_started.is_connected(_on_enemy_phase_started):
+		round_manager.enemy_phase_started.connect(_on_enemy_phase_started)
+
+
+func _update_modular_input_lock() -> void:
+	var locked := not _round_input_enabled or _combat_actions_blocked()
+	if rune_circle_ui != null:
+		rune_circle_ui.set_input_locked(locked)
+	elif rune_wheel_controller != null:
+		rune_wheel_controller.set_input_locked(locked)
+
+
+func _update_objective_text(forced_text: String = "") -> void:
+	if objective_label == null:
+		return
+	if not forced_text.is_empty():
+		objective_label.text = forced_text
+		return
+	if round_manager == null:
+		objective_label.text = "Ready."
+		return
+	if round_manager.current_state == RoundManager.RoundState.ENEMY_PHASE:
+		objective_label.text = "Enemy phase."
+		return
+	if round_manager.current_state == RoundManager.RoundState.RESOLVING_CHANT:
+		objective_label.text = "Resolving chant..."
+		return
+	if round_manager.can_cast():
+		objective_label.text = "Cast the chant."
+		return
+	var slot_number := round_manager.selected_slot_index + 1
+	objective_label.text = "Choose a rune for Slot %d." % slot_number
+
+
+func _on_secondary_panel_state_changed(panel_id: String, is_open: bool) -> void:
+	if is_open:
+		match panel_id:
+			"history":
+				_refresh_cast_history()
+			"chants":
+				_refresh_spellbook()
+	_update_combat_input_state()
+
+
+func _on_round_selection_changed(_slot_index: int) -> void:
+	_update_objective_text()
+
+
+func _on_round_runes_changed(_selected_runes: Array) -> void:
+	_update_objective_text()
+
+
+func _on_round_casting_started() -> void:
+	_update_objective_text("Resolving chant...")
+
+
+func _on_round_casting_finished() -> void:
+	_update_objective_text()
+
+
+func _on_player_phase_started() -> void:
+	_update_objective_text()
+
+
+func _on_enemy_phase_started() -> void:
+	_update_objective_text("Enemy phase.")
+
+
+func _find_scene_node(node_name: String) -> Node:
+	var scene := get_tree().current_scene
+	if scene == null:
+		scene = owner
+	if scene == null:
+		return null
+	return scene.find_child(node_name, true, false)
 
 
 # Result buttons preserve the existing GameManager scene flow.

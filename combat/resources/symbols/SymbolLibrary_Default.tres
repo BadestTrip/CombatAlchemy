@@ -2,6 +2,15 @@
 
 [ext_resource type="Script" uid="uid://cvmng6hy0vo1v" path="res://combat/SymbolCardData.gd" id="1_symbol"]
 [ext_resource type="Script" uid="uid://btv0iscc0ceo" path="res://combat/resources/SymbolLibraryData.gd" id="2_library"]
+[ext_resource type="Texture2D" uid="uid://d2x1j3m5t6frt" path="res://sprites/runes/rune_asha_placeholder.png" id="3_asha_icon"]
+[ext_resource type="Texture2D" uid="uid://cf320odlord0x" path="res://sprites/runes/rune_voro_placeholder.png" id="4_voro_icon"]
+[ext_resource type="Texture2D" uid="uid://b6ype71jon513" path="res://sprites/runes/rune_keth_placeholder.png" id="5_keth_icon"]
+[ext_resource type="Texture2D" uid="uid://u5o8of8lvk5w" path="res://sprites/runes/rune_mira_placeholder.png" id="6_mira_icon"]
+[ext_resource type="Texture2D" uid="uid://cxewjdagxg4m6" path="res://sprites/runes/rune_nox_placeholder.png" id="7_nox_icon"]
+[ext_resource type="Texture2D" uid="uid://crcct5sixg3c3" path="res://sprites/runes/rune_iri_placeholder.png" id="8_iri_icon"]
+[ext_resource type="Texture2D" uid="uid://b86gcruibcg8c" path="res://sprites/runes/rune_elum_placeholder.png" id="9_elum_icon"]
+[ext_resource type="Texture2D" uid="uid://cs45r6hkuasjr" path="res://sprites/runes/rune_zun_placeholder.png" id="10_zun_icon"]
+[ext_resource type="Texture2D" uid="uid://d2ecccmfwkm55" path="res://sprites/runes/rune_bavo_placeholder.png" id="11_bavo_icon"]
 
 [sub_resource type="Resource" id="Symbol_asha"]
 script = ExtResource("1_symbol")
@@ -11,6 +20,7 @@ display_name = "First Flame"
 visual_hint = "^^"
 developer_note = "ignition, beginning, activation"
 card_color = Color(1, 0.45, 0.25, 1)
+placeholder_icon = ExtResource("3_asha_icon")
 
 [sub_resource type="Resource" id="Symbol_voro"]
 script = ExtResource("1_symbol")
@@ -20,6 +30,7 @@ display_name = "Turning Force"
 visual_hint = ">>"
 developer_note = "force, motion, push"
 card_color = Color(0.35, 0.72, 1, 1)
+placeholder_icon = ExtResource("4_voro_icon")
 
 [sub_resource type="Resource" id="Symbol_keth"]
 script = ExtResource("1_symbol")
@@ -29,6 +40,7 @@ display_name = "Sever Mark"
 visual_hint = "//"
 developer_note = "cut, sever, damage"
 card_color = Color(0.95, 0.25, 0.28, 1)
+placeholder_icon = ExtResource("5_keth_icon")
 
 [sub_resource type="Resource" id="Symbol_mira"]
 script = ExtResource("1_symbol")
@@ -38,6 +50,7 @@ display_name = "Mirror Eye"
 visual_hint = "<>"
 developer_note = "mirror, reflection, copy"
 card_color = Color(0.72, 0.55, 1, 1)
+placeholder_icon = ExtResource("6_mira_icon")
 
 [sub_resource type="Resource" id="Symbol_nox"]
 script = ExtResource("1_symbol")
@@ -47,6 +60,7 @@ display_name = "Null Ring"
 visual_hint = "OO"
 developer_note = "void, silence, negation"
 card_color = Color(0.35, 0.35, 0.42, 1)
+placeholder_icon = ExtResource("7_nox_icon")
 
 [sub_resource type="Resource" id="Symbol_iri"]
 script = ExtResource("1_symbol")
@@ -56,6 +70,7 @@ display_name = "Many Star"
 visual_hint = "***"
 developer_note = "scatter, random, many"
 card_color = Color(1, 0.72, 0.25, 1)
+placeholder_icon = ExtResource("8_iri_icon")
 
 [sub_resource type="Resource" id="Symbol_elum"]
 script = ExtResource("1_symbol")
@@ -65,6 +80,7 @@ display_name = "Ward Gate"
 visual_hint = "[]"
 developer_note = "light, ward, protection"
 card_color = Color(0.45, 0.9, 0.72, 1)
+placeholder_icon = ExtResource("9_elum_icon")
 
 [sub_resource type="Resource" id="Symbol_zun"]
 script = ExtResource("1_symbol")
@@ -74,6 +90,7 @@ display_name = "Forked Shock"
 visual_hint = "!!"
 developer_note = "shock, instability, surge"
 card_color = Color(0.95, 0.88, 0.25, 1)
+placeholder_icon = ExtResource("10_zun_icon")
 
 [sub_resource type="Resource" id="Symbol_bavo"]
 script = ExtResource("1_symbol")
@@ -83,6 +100,7 @@ display_name = "Heavy Knot"
 visual_hint = "##"
 developer_note = "mass, body, absurdity"
 card_color = Color(0.65, 0.48, 0.34, 1)
+placeholder_icon = ExtResource("11_bavo_icon")
 
 [resource]
 script = ExtResource("2_library")

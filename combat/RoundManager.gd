@@ -18,14 +18,32 @@ signal rune_placed(rune: SymbolCardData, slot_index: int)
 # Emitted when one slot is selected for replacement.
 signal slot_selected(slot_index: int)
 
+# Emitted when one slot is selected for replacement.
+signal selected_slot_changed(slot_index: int)
+
+# Emitted when chant slot contents change.
+signal selected_runes_changed(selected_runes: Array)
+
+# Emitted when a slot/content change affects Cast availability.
+signal cast_availability_changed(can_cast: bool)
+
 # Emitted when all three chant slots are cleared.
 signal chant_cleared
 
 # Emitted immediately before ChantResolver applies the selected combination.
 signal chant_cast_started(symbols: Array[SymbolCardData], target: EnemyUnit)
 
+# Emitted when cast presentation and resolution start.
+signal casting_started
+
+# Emitted after cast presentation and resolution finish.
+signal casting_finished
+
 # Emitted after ChantResolver returns its result Dictionary.
 signal chant_resolved(result: Dictionary)
+
+# Emitted after enemy intent exists and rune selection is enabled.
+signal player_phase_started
 
 # Emitted before the surviving enemy executes its visible intent.
 signal enemy_phase_started
@@ -116,6 +134,8 @@ func select_slot(slot_index: int) -> void:
 	selected_slot_index = slot_index
 	_slot_was_explicitly_selected = true
 	slot_selected.emit(slot_index)
+	selected_slot_changed.emit(slot_index)
+	_emit_selection_changed()
 	ui_controller.refresh_all()
 
 
@@ -149,6 +169,7 @@ func place_rune_in_slot(rune: SymbolCardData, slot_index: int) -> void:
 	if _get_balance().auto_advance_slot_after_rune_pick:
 		_advance_selected_slot()
 
+	_emit_selection_changed()
 	ui_controller.refresh_all()
 
 
@@ -163,6 +184,7 @@ func clear_slot(slot_index: int) -> void:
 	selected_runes[slot_index] = null
 	selected_slot_index = slot_index
 	_slot_was_explicitly_selected = true
+	_emit_selection_changed()
 	ui_controller.refresh_all()
 
 
@@ -174,6 +196,7 @@ func clear_chant() -> void:
 		return
 	_clear_selected_runes()
 	chant_cleared.emit()
+	_emit_selection_changed()
 	ui_controller.refresh_all()
 
 
@@ -202,12 +225,15 @@ func cast_chant() -> void:
 	current_state = RoundState.RESOLVING_CHANT
 	combat_manager.set_phase_text("Resolving chant")
 	ui_controller.set_input_enabled(false)
+	casting_started.emit()
 
 	var cast_runes: Array[SymbolCardData] = []
 	for selected_rune: SymbolCardData in selected_runes:
 		cast_runes.append(selected_rune)
 	var cast_target := selected_target
 	chant_cast_started.emit(cast_runes, cast_target)
+	if ui_controller != null:
+		await ui_controller.play_chant_shout(cast_runes)
 
 	var result := chant_resolver.resolve_chant(
 		cast_runes,
@@ -223,7 +249,10 @@ func cast_chant() -> void:
 		)
 	chant_resolved.emit(result)
 	_append_result_to_log(result)
+	if ui_controller != null:
+		ui_controller.show_spell_result(result)
 	ui_controller.refresh_all()
+	casting_finished.emit()
 
 	if combat_manager.check_combat_end():
 		return
@@ -281,6 +310,8 @@ func _start_next_round() -> void:
 	current_state = RoundState.PLANNING
 	combat_manager.set_phase_text("Planning")
 	planning_started.emit()
+	player_phase_started.emit()
+	_emit_selection_changed()
 	ui_controller.show_planning()
 
 
@@ -349,8 +380,15 @@ func _advance_selected_slot() -> void:
 	var first_empty := _first_empty_slot()
 	if first_empty != -1:
 		selected_slot_index = first_empty
+		selected_slot_changed.emit(selected_slot_index)
 		return
 	selected_slot_index = mini(selected_slot_index + 1, selected_runes.size() - 1)
+	selected_slot_changed.emit(selected_slot_index)
+
+
+func _emit_selection_changed() -> void:
+	selected_runes_changed.emit(selected_runes.duplicate())
+	cast_availability_changed.emit(can_cast())
 
 
 func _rune_used_elsewhere(rune: SymbolCardData, slot_index: int) -> bool:

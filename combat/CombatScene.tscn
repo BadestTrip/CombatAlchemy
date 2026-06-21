@@ -45,6 +45,27 @@
 [ext_resource type="AudioStream" uid="uid://c36fy0n0rxco3" path="res://music/combat_scene_not_final.mp3" id="45_ftuvk"]
 [ext_resource type="Script" uid="uid://bin7tkhjryrkc" path="res://test/PauseMenu.gd" id="45_pause"]
 [ext_resource type="PackedScene" uid="uid://bsnod8l07k2md" path="res://mainmenu/Settings.tscn" id="46_settings"]
+[ext_resource type="Script" uid="uid://da6jfhgual4hy" path="res://combat/scripts/ui/RuneCircleUIController.gd" id="47_rune_circle"]
+[ext_resource type="Script" uid="uid://b6pevmp70xcyf" path="res://combat/scripts/ui/RuneWheelController.gd" id="48_rune_wheel"]
+[ext_resource type="Script" uid="uid://bvdaat3ddx1qg" path="res://combat/scripts/ui/FloatingUnitHUD.gd" id="49_floating_hud"]
+[ext_resource type="Script" uid="uid://bucd4t28cskdo" path="res://combat/scripts/ui/EnemyIntentBubble.gd" id="50_intent_bubble"]
+[ext_resource type="Script" uid="uid://dr6chox6fatg4" path="res://combat/scripts/ui/ChantShoutController.gd" id="51_chant_shout"]
+[ext_resource type="Script" uid="uid://rgyks6ibuxcr" path="res://combat/scripts/ui/SpellResultBannerController.gd" id="52_result_banner"]
+[ext_resource type="Script" uid="uid://c4wx8l13pg0xd" path="res://combat/scripts/ui/SecondaryPanelController.gd" id="53_secondary_panels"]
+[ext_resource type="Texture2D" uid="uid://cjnbtwthds1lf" path="res://sprites/characters/placeholder_mage_spritey.png" id="54_mage_placeholder"]
+[ext_resource type="Texture2D" uid="uid://c7wjn7t52je3b" path="res://sprites/characters/placeholder_enemy_adept_sprite.png" id="55_enemy_placeholder"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rune_circle"]
+bg_color = Color(0.18, 0.16, 0.12, 0.55)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.78, 0.38, 0.65)
+corner_radius_top_left = 240
+corner_radius_top_right = 240
+corner_radius_bottom_right = 240
+corner_radius_bottom_left = 240
 
 [node name="CombatScene" type="Control" unique_id=1729869381]
 layout_mode = 3
@@ -66,7 +87,380 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.08, 0.085, 0.09, 1)
 
+[node name="CombatSpace" type="Control" parent="." unique_id=249285751]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PlayerUnit" type="Control" parent="CombatSpace" unique_id=1595591338]
+layout_mode = 1
+anchor_left = 0.045
+anchor_top = 0.18
+anchor_right = 0.265
+anchor_bottom = 0.82
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PlayerUnitVisual" type="TextureRect" parent="CombatSpace/PlayerUnit" unique_id=1151901809]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.05
+anchor_top = 0.22
+anchor_right = 0.95
+anchor_bottom = 0.96
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("54_mage_placeholder")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="PlayerFloatingHUD" type="PanelContainer" parent="CombatSpace/PlayerUnit" unique_id=478240943]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.02
+anchor_right = 1.0
+anchor_bottom = 0.2
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("49_floating_hud")
+
+[node name="PlayerHUDMargin" type="MarginContainer" parent="CombatSpace/PlayerUnit/PlayerFloatingHUD" unique_id=435172065]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 5
+
+[node name="PlayerHUDColumn" type="VBoxContainer" parent="CombatSpace/PlayerUnit/PlayerFloatingHUD/PlayerHUDMargin" unique_id=973814440]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="CombatSpace/PlayerUnit/PlayerFloatingHUD/PlayerHUDMargin/PlayerHUDColumn" unique_id=1634198758]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "The Rune Mage"
+horizontal_alignment = 1
+
+[node name="HPBar" type="ProgressBar" parent="CombatSpace/PlayerUnit/PlayerFloatingHUD/PlayerHUDMargin/PlayerHUDColumn" unique_id=2117075796]
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+show_percentage = false
+
+[node name="ShieldLabel" type="Label" parent="CombatSpace/PlayerUnit/PlayerFloatingHUD/PlayerHUDMargin/PlayerHUDColumn" unique_id=1857788431]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "No Shield"
+horizontal_alignment = 1
+
+[node name="EnemyUnit" type="Control" parent="CombatSpace" unique_id=1653108272]
+layout_mode = 1
+anchor_left = 0.735
+anchor_top = 0.18
+anchor_right = 0.955
+anchor_bottom = 0.82
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="EnemyIntentBubble" type="PanelContainer" parent="CombatSpace/EnemyUnit" unique_id=299960294]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.19
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("50_intent_bubble")
+
+[node name="EnemyIntentMargin" type="MarginContainer" parent="CombatSpace/EnemyUnit/EnemyIntentBubble" unique_id=96830412]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="IntentLabel" type="Label" parent="CombatSpace/EnemyUnit/EnemyIntentBubble/EnemyIntentMargin" unique_id=1688789535]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "No intent"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="EnemyUnitVisual" type="TextureRect" parent="CombatSpace/EnemyUnit" unique_id=1660979381]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.05
+anchor_top = 0.29
+anchor_right = 0.95
+anchor_bottom = 0.96
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("55_enemy_placeholder")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="EnemyFloatingHUD" type="PanelContainer" parent="CombatSpace/EnemyUnit" unique_id=1702212065]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.19
+anchor_right = 1.0
+anchor_bottom = 0.34
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("49_floating_hud")
+
+[node name="EnemyHUDMargin" type="MarginContainer" parent="CombatSpace/EnemyUnit/EnemyFloatingHUD" unique_id=1444071403]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 5
+
+[node name="EnemyHUDColumn" type="VBoxContainer" parent="CombatSpace/EnemyUnit/EnemyFloatingHUD/EnemyHUDMargin" unique_id=2061475307]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="CombatSpace/EnemyUnit/EnemyFloatingHUD/EnemyHUDMargin/EnemyHUDColumn" unique_id=2030399288]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Training Adept"
+horizontal_alignment = 1
+
+[node name="HPBar" type="ProgressBar" parent="CombatSpace/EnemyUnit/EnemyFloatingHUD/EnemyHUDMargin/EnemyHUDColumn" unique_id=2050941323]
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+show_percentage = false
+
+[node name="ShieldLabel" type="Label" parent="CombatSpace/EnemyUnit/EnemyFloatingHUD/EnemyHUDMargin/EnemyHUDColumn" unique_id=1082550001]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "No Shield"
+horizontal_alignment = 1
+
+[node name="RuneCircleRoot" type="Control" parent="CombatSpace" unique_id=1636944135]
+custom_minimum_size = Vector2(640, 640)
+layout_mode = 1
+anchor_left = 0.28
+anchor_top = 0.06
+anchor_right = 0.72
+anchor_bottom = 0.94
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("47_rune_circle")
+
+[node name="RuneCircleVisual" type="Panel" parent="CombatSpace/RuneCircleRoot" unique_id=1181045826]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.12
+anchor_top = 0.12
+anchor_right = 0.88
+anchor_bottom = 0.88
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_rune_circle")
+
+[node name="ObjectiveLabel" type="Label" parent="CombatSpace/RuneCircleRoot" unique_id=1811661347]
+z_index = 3
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.18
+anchor_top = 0.05
+anchor_right = 0.82
+anchor_bottom = 0.11
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.68, 0.86, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "Choose a rune for Slot 1."
+horizontal_alignment = 1
+
+[node name="ChantSlots" type="HBoxContainer" parent="CombatSpace/RuneCircleRoot" unique_id=1409543708]
+z_index = 3
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_top = 0.36
+anchor_right = 0.8
+anchor_bottom = 0.52
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="ChantSlot1" type="Button" parent="CombatSpace/RuneCircleRoot/ChantSlots" unique_id=1842123587]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(118, 72)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Slot 1
+---"
+
+[node name="Arrow1" type="Label" parent="CombatSpace/RuneCircleRoot/ChantSlots" unique_id=1708149289]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = ">"
+vertical_alignment = 1
+
+[node name="ChantSlot2" type="Button" parent="CombatSpace/RuneCircleRoot/ChantSlots" unique_id=1445911917]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(118, 72)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Slot 2
+---"
+
+[node name="Arrow2" type="Label" parent="CombatSpace/RuneCircleRoot/ChantSlots" unique_id=1396531432]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = ">"
+vertical_alignment = 1
+
+[node name="ChantSlot3" type="Button" parent="CombatSpace/RuneCircleRoot/ChantSlots" unique_id=966775669]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(118, 72)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Slot 3
+---"
+
+[node name="ChantPreview" type="Label" parent="CombatSpace/RuneCircleRoot" unique_id=376363575]
+unique_name_in_owner = true
+z_index = 3
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_top = 0.53
+anchor_right = 0.8
+anchor_bottom = 0.61
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.83, 0.48, 1)
+theme_override_font_sizes/font_size = 16
+text = "...  >  ...  >  ..."
+horizontal_alignment = 1
+
+[node name="ChantShoutText" type="Label" parent="CombatSpace/RuneCircleRoot" unique_id=190740290]
+visible = false
+z_index = 5
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.18
+anchor_top = 0.2
+anchor_right = 0.82
+anchor_bottom = 0.34
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 38
+text = "ASHA!"
+horizontal_alignment = 1
+script = ExtResource("51_chant_shout")
+
+[node name="RuneWheelRoot" type="Control" parent="CombatSpace/RuneCircleRoot" unique_id=1162235777]
+z_index = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("48_rune_wheel")
+metadata/_edit_use_anchors_ = true
+
+[node name="RunePalette" type="Control" parent="CombatSpace/RuneCircleRoot/RuneWheelRoot" unique_id=1516872362]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(584, 584)
+layout_mode = 1
+anchor_right = 0.96
+anchor_bottom = 0.96
+offset_right = 33.391968
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RuneWheelToggleButton" type="Button" parent="CombatSpace/RuneCircleRoot/RuneWheelRoot" unique_id=1770090933]
+custom_minimum_size = Vector2(96, 34)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.42
+anchor_top = 0.86
+anchor_right = 0.58
+anchor_bottom = 0.92
+grow_horizontal = 2
+grow_vertical = 2
+text = "Runes"
+
+[node name="CircleActions" type="HBoxContainer" parent="CombatSpace/RuneCircleRoot" unique_id=416539027]
+z_index = 4
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.29
+anchor_top = 0.66
+anchor_right = 0.71
+anchor_bottom = 0.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ClearButton" type="Button" parent="CombatSpace/RuneCircleRoot/CircleActions" unique_id=1033226892]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 42)
+layout_mode = 2
+text = "Clear Chant"
+
+[node name="CastButton" type="Button" parent="CombatSpace/RuneCircleRoot/CircleActions" unique_id=885642082]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Cast"
+
+[node name="SpellResultBanner" type="PanelContainer" parent="CombatSpace/RuneCircleRoot" unique_id=2051196994]
+visible = false
+z_index = 6
+custom_minimum_size = Vector2(320, 74)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.25
+anchor_top = 0.75
+anchor_right = 0.75
+anchor_bottom = 0.88
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("52_result_banner")
+
+[node name="SpellResultMargin" type="MarginContainer" parent="CombatSpace/RuneCircleRoot/SpellResultBanner" unique_id=1856709847]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 8
+
+[node name="SpellResultColumn" type="VBoxContainer" parent="CombatSpace/RuneCircleRoot/SpellResultBanner/SpellResultMargin" unique_id=542938647]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="TitleLabel" type="Label" parent="CombatSpace/RuneCircleRoot/SpellResultBanner/SpellResultMargin/SpellResultColumn" unique_id=238352482]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
+theme_override_font_sizes/font_size = 24
+text = "Razor Comet"
+horizontal_alignment = 1
+
+[node name="CategoryLabel" type="Label" parent="CombatSpace/RuneCircleRoot/SpellResultBanner/SpellResultMargin/SpellResultColumn" unique_id=772286882]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.86, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "Known Spell"
+horizontal_alignment = 1
+
 [node name="OuterMargin" type="MarginContainer" parent="." unique_id=1383545123]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -87,6 +481,7 @@ balance = ExtResource("2_66qso")
 symbol_library = ExtResource("7_0rlu1")
 
 [node name="Header" type="PanelContainer" parent="OuterMargin/CombatUI" unique_id=1156764800]
+visible = false
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 
@@ -127,8 +522,9 @@ text = "Planning"
 horizontal_alignment = 2
 
 [node name="BattleRow" type="HBoxContainer" parent="OuterMargin/CombatUI" unique_id=1074538177]
-custom_minimum_size = Vector2(0, 210)
+custom_minimum_size = Vector2(0, 680)
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 12
 
 [node name="MagePanel" type="PanelContainer" parent="OuterMargin/CombatUI/BattleRow" unique_id=1956731677]
@@ -155,13 +551,14 @@ horizontal_alignment = 1
 
 [node name="MageStatuses" type="VBoxContainer" parent="OuterMargin/CombatUI/BattleRow/MagePanel/MageMargin/MageColumn" unique_id=1311722811]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 2
 
 [node name="IntentPanel" type="PanelContainer" parent="OuterMargin/CombatUI/BattleRow" unique_id=606430441]
-custom_minimum_size = Vector2(560, 0)
+custom_minimum_size = Vector2(680, 0)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 4
 
 [node name="IntentMargin" type="MarginContainer" parent="OuterMargin/CombatUI/BattleRow/IntentPanel" unique_id=302991169]
 layout_mode = 2
@@ -173,8 +570,10 @@ theme_override_constants/margin_bottom = 8
 [node name="IntentColumn" type="VBoxContainer" parent="OuterMargin/CombatUI/BattleRow/IntentPanel/IntentMargin" unique_id=247662544]
 layout_mode = 2
 theme_override_constants/separation = 6
+alignment = 1
 
 [node name="Versus" type="Label" parent="OuterMargin/CombatUI/BattleRow/IntentPanel/IntentMargin/IntentColumn" unique_id=1194677360]
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
 theme_override_font_sizes/font_size = 28
@@ -182,6 +581,7 @@ text = "VS"
 horizontal_alignment = 1
 
 [node name="IntentTitle" type="Label" parent="OuterMargin/CombatUI/BattleRow/IntentPanel/IntentMargin/IntentColumn" unique_id=1291991841]
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.68, 0.4, 1)
 theme_override_font_sizes/font_size = 18
@@ -189,6 +589,7 @@ text = "Enemy Intent"
 
 [node name="EnemyIntents" type="RichTextLabel" parent="OuterMargin/CombatUI/BattleRow/IntentPanel/IntentMargin/IntentColumn" unique_id=938475527]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 fit_content = true
@@ -218,11 +619,13 @@ horizontal_alignment = 1
 
 [node name="EnemyStatuses" type="VBoxContainer" parent="OuterMargin/CombatUI/BattleRow/EnemyPanel/EnemyMargin/EnemyColumn" unique_id=505923183]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 2
 
 [node name="ChantPanel" type="PanelContainer" parent="OuterMargin/CombatUI" unique_id=1972718706]
-custom_minimum_size = Vector2(0, 128)
+visible = false
+custom_minimum_size = Vector2(0, 170)
 layout_mode = 2
 
 [node name="ChantMargin" type="MarginContainer" parent="OuterMargin/CombatUI/ChantPanel" unique_id=151687661]
@@ -240,60 +643,12 @@ theme_override_constants/separation = 5
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
 theme_override_font_sizes/font_size = 19
-text = "CHANT - click a slot, then click a rune"
-horizontal_alignment = 1
-
-[node name="ChantSlots" type="HBoxContainer" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn" unique_id=1409543708]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="ChantSlot1" type="Button" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=1842123587]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 68)
-layout_mode = 2
-theme_override_font_sizes/font_size = 17
-text = "Slot 1
----"
-
-[node name="Arrow1" type="Label" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=1708149289]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = ">"
-vertical_alignment = 1
-
-[node name="ChantSlot2" type="Button" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=1445911917]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 68)
-layout_mode = 2
-theme_override_font_sizes/font_size = 17
-text = "Slot 2
----"
-
-[node name="Arrow2" type="Label" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=1396531432]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = ">"
-vertical_alignment = 1
-
-[node name="ChantSlot3" type="Button" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn/ChantSlots" unique_id=966775669]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 68)
-layout_mode = 2
-theme_override_font_sizes/font_size = 17
-text = "Slot 3
----"
-
-[node name="ChantPreview" type="Label" parent="OuterMargin/CombatUI/ChantPanel/ChantMargin/ChantColumn" unique_id=376363575]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.83, 0.48, 1)
-theme_override_font_sizes/font_size = 18
-text = "...  >  ...  >  ..."
+text = "Rune Circle"
 horizontal_alignment = 1
 
 [node name="HandsPanel" type="PanelContainer" parent="OuterMargin/CombatUI" unique_id=1973338237]
-custom_minimum_size = Vector2(0, 300)
+visible = false
+custom_minimum_size = Vector2(0, 530)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -304,14 +659,8 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="RunePalette" type="GridContainer" parent="OuterMargin/CombatUI/HandsPanel/HandsMargin" unique_id=1516872362]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 8
-columns = 9
-
 [node name="ControlsPanel" type="PanelContainer" parent="OuterMargin/CombatUI" unique_id=680030063]
+visible = false
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 
@@ -339,53 +688,76 @@ visible = false
 custom_minimum_size = Vector2(420, 42)
 layout_mode = 2
 
-[node name="SpellbookButton" type="Button" parent="OuterMargin/CombatUI/ControlsPanel/ControlsMargin/Controls" unique_id=1905627153]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 42)
-layout_mode = 2
-text = "Spellbook"
-
-[node name="CastHistoryButton" type="Button" parent="OuterMargin/CombatUI/ControlsPanel/ControlsMargin/Controls" unique_id=823475670]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 42)
-layout_mode = 2
-text = "Cast History"
-
 [node name="ControlSpacer" type="Control" parent="OuterMargin/CombatUI/ControlsPanel/ControlsMargin/Controls" unique_id=870598497]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ClearButton" type="Button" parent="OuterMargin/CombatUI/ControlsPanel/ControlsMargin/Controls" unique_id=1033226892]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 42)
-layout_mode = 2
-text = "Clear Chant"
+[node name="SecondaryUI" type="Control" parent="." unique_id=465070321]
+z_index = 10
+layout_mode = 1
+anchor_left = 0.025
+anchor_top = 0.88
+anchor_right = 0.38
+anchor_bottom = 0.97
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("53_secondary_panels")
 
-[node name="CastButton" type="Button" parent="OuterMargin/CombatUI/ControlsPanel/ControlsMargin/Controls" unique_id=885642082]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 42)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Cast"
+[node name="ToggleButtons" type="HBoxContainer" parent="SecondaryUI" unique_id=1349093113]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
 
-[node name="ResultPanel" type="PanelContainer" parent="OuterMargin/CombatUI" unique_id=1103795130]
+[node name="CombatLogButton" type="Button" parent="SecondaryUI/ToggleButtons" unique_id=13295732]
+custom_minimum_size = Vector2(120, 42)
+layout_mode = 2
+toggle_mode = true
+text = "Log"
+
+[node name="SpellbookButton" type="Button" parent="SecondaryUI/ToggleButtons" unique_id=1905627153]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+toggle_mode = true
+text = "Chants"
+
+[node name="CastHistoryButton" type="Button" parent="SecondaryUI/ToggleButtons" unique_id=823475670]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+toggle_mode = true
+text = "Cast History"
+
+[node name="ResultPanel" type="PanelContainer" parent="." unique_id=1103795130]
 unique_name_in_owner = true
 visible = false
-layout_mode = 2
+z_index = 25
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.28
+anchor_top = 0.42
+anchor_right = 0.72
+anchor_bottom = 0.58
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="ResultMargin" type="MarginContainer" parent="OuterMargin/CombatUI/ResultPanel" unique_id=1338907584]
+[node name="ResultMargin" type="MarginContainer" parent="ResultPanel" unique_id=1338907584]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 8
 
-[node name="ResultRow" type="HBoxContainer" parent="OuterMargin/CombatUI/ResultPanel/ResultMargin" unique_id=1336552608]
+[node name="ResultRow" type="HBoxContainer" parent="ResultPanel/ResultMargin" unique_id=1336552608]
 layout_mode = 2
 theme_override_constants/separation = 10
 alignment = 1
 
-[node name="ResultLabel" type="Label" parent="OuterMargin/CombatUI/ResultPanel/ResultMargin/ResultRow" unique_id=1204238784]
+[node name="ResultLabel" type="Label" parent="ResultPanel/ResultMargin/ResultRow" unique_id=1204238784]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(260, 44)
 layout_mode = 2
@@ -394,23 +766,31 @@ text = "Victory"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="RestartButton" type="Button" parent="OuterMargin/CombatUI/ResultPanel/ResultMargin/ResultRow" unique_id=742031531]
+[node name="RestartButton" type="Button" parent="ResultPanel/ResultMargin/ResultRow" unique_id=742031531]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 44)
 layout_mode = 2
 text = "Restart"
 
-[node name="MainMenuButton" type="Button" parent="OuterMargin/CombatUI/ResultPanel/ResultMargin/ResultRow" unique_id=1449910834]
+[node name="MainMenuButton" type="Button" parent="ResultPanel/ResultMargin/ResultRow" unique_id=1449910834]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 44)
 layout_mode = 2
 text = "Main Menu"
 
-[node name="LogPanel" type="PanelContainer" parent="OuterMargin/CombatUI" unique_id=1164199618]
-custom_minimum_size = Vector2(0, 170)
-layout_mode = 2
+[node name="LogPanel" type="PanelContainer" parent="." unique_id=1164199618]
+visible = false
+z_index = 20
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.025
+anchor_top = 0.58
+anchor_right = 0.42
+anchor_bottom = 0.86
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="CombatLog" type="RichTextLabel" parent="OuterMargin/CombatUI/LogPanel" unique_id=845310758]
+[node name="CombatLog" type="RichTextLabel" parent="LogPanel" unique_id=845310758]
 unique_name_in_owner = true
 layout_mode = 2
 bbcode_enabled = true

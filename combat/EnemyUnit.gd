@@ -20,6 +20,15 @@ signal unit_died(unit: EnemyUnit)
 # Emitted after generate_intent creates the visible enemy plan.
 signal intent_generated(unit: EnemyUnit, intent: Dictionary)
 
+# Lightweight UI signal for floating HUDs.
+signal stats_changed
+
+# Generic death signal for UI components that should not depend on old names.
+signal died
+
+# Emitted when the visible intent changes after generation.
+signal intent_changed
+
 
 # Set this in the Inspector to the player-facing enemy name.
 @export var enemy_name: String = "Enemy"
@@ -145,6 +154,7 @@ func generate_intent(living_mages: Array[MageUnit]) -> void:
 		}
 
 	intent_generated.emit(self, current_intent)
+	intent_changed.emit()
 
 
 # RoundManager calls this after the chant resolves.
@@ -209,6 +219,7 @@ func take_damage(amount: int, ignore_shield: bool = false) -> void:
 		shield -= absorbed
 		remaining_damage -= absorbed
 		unit_shield_changed.emit(self, shield)
+		stats_changed.emit()
 
 	if remaining_damage <= 0:
 		return
@@ -222,6 +233,7 @@ func take_damage(amount: int, ignore_shield: bool = false) -> void:
 		remove_status("silenced")
 
 	unit_damaged.emit(self, applied_damage)
+	stats_changed.emit()
 	if current_hp <= 0:
 		die()
 
@@ -235,6 +247,7 @@ func heal(amount: int) -> void:
 	var applied_healing := current_hp - previous_hp
 	if applied_healing > 0:
 		unit_healed.emit(self, applied_healing)
+		stats_changed.emit()
 
 
 # Several chant results protect an enemy instead of damaging it.
@@ -243,6 +256,7 @@ func gain_shield(amount: int) -> void:
 		return
 	shield += amount
 	unit_shield_changed.emit(self, shield)
+	stats_changed.emit()
 
 
 # ChantResolver calls this for stun, confusion, silence, and intent delay.
@@ -269,6 +283,14 @@ func modify_next_attack_damage(amount: int) -> void:
 	if String(current_intent.get("type", "")) == "attack":
 		var current_damage := int(current_intent.get("damage", base_attack))
 		current_intent["damage"] = maxi(0, current_damage + amount)
+		var target := current_intent.get("target") as MageUnit
+		var target_name := target.mage_name if target != null else "the mage"
+		current_intent["description"] = "%s intends to attack %s for %d." % [
+			enemy_name,
+			target_name,
+			int(current_intent["damage"])
+		]
+		intent_changed.emit()
 		return
 
 	# Guard/skip intents do not attack, so preserve the modifier for a later round.
@@ -297,6 +319,9 @@ func die() -> void:
 	current_hp = 0
 	current_intent.clear()
 	unit_died.emit(self)
+	died.emit()
+	stats_changed.emit()
+	intent_changed.emit()
 
 
 # Skip statuses are consumed when the skipped action is processed.

@@ -18,6 +18,12 @@ signal unit_shield_changed(unit: MageUnit, shield: int)
 # Emitted once when this mage reaches zero HP.
 signal unit_died(unit: MageUnit)
 
+# Lightweight UI signal for floating HUDs.
+signal stats_changed
+
+# Generic death signal for UI components that should not depend on old names.
+signal died
+
 # Emitted after this mage draws or discards.
 signal hand_updated(mage: MageUnit)
 
@@ -95,6 +101,7 @@ func take_damage(amount: int) -> void:
 		shield -= absorbed
 		remaining_damage -= absorbed
 		unit_shield_changed.emit(self, shield)
+		stats_changed.emit()
 
 	if remaining_damage <= 0:
 		return
@@ -102,6 +109,7 @@ func take_damage(amount: int) -> void:
 	var applied_damage := mini(current_hp, remaining_damage)
 	current_hp -= applied_damage
 	unit_damaged.emit(self, applied_damage)
+	stats_changed.emit()
 
 	if current_hp <= 0:
 		die()
@@ -113,6 +121,7 @@ func gain_shield(amount: int) -> void:
 		return
 	shield += amount
 	unit_shield_changed.emit(self, shield)
+	stats_changed.emit()
 
 
 # ChantResolver calls this for healing effects such as Holy Pigeon.
@@ -124,6 +133,7 @@ func heal(amount: int) -> void:
 	var applied_healing := current_hp - previous_hp
 	if applied_healing > 0:
 		unit_healed.emit(self, applied_healing)
+		stats_changed.emit()
 
 
 # Deprecated for the active full-rune-palette prototype.
@@ -173,3 +183,5 @@ func die() -> void:
 	is_alive = false
 	current_hp = 0
 	unit_died.emit(self)
+	died.emit()
+	stats_changed.emit()

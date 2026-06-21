@@ -33,6 +33,26 @@ class_name CombatBalanceData
 @export var rune_button_width: float = 145.0
 @export var rune_button_height: float = 72.0
 
+# These values control the modular ritual circle UI.
+@export_group("Rune Circle UI")
+@export var rune_wheel_starts_expanded: bool = true
+@export var auto_expand_wheel_on_slot_click: bool = true
+@export var auto_retract_wheel_after_rune_pick: bool = false
+@export var rune_wheel_radius: float = 220.0
+@export var rune_wheel_tween_seconds: float = 0.2
+
+# These values control the cast presentation sequence.
+@export_group("Chant Presentation")
+@export var shout_each_rune_seconds: float = 0.45
+@export var shout_between_runes_seconds: float = 0.15
+@export var spell_result_banner_seconds: float = 1.4
+
+# These values control hidden-by-default secondary panels.
+@export_group("Secondary Panels")
+@export var secondary_panels_start_closed: bool = true
+@export var only_one_secondary_panel_open: bool = true
+@export var block_combat_input_when_secondary_panel_open: bool = false
+
 # These are applied when the player MageUnit still uses its script defaults.
 @export_group("Mage Defaults")
 @export var default_mage_max_hp: int = 20

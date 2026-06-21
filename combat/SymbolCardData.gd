@@ -24,6 +24,10 @@ class_name SymbolCardData
 # This is available for future card presentation without changing deck logic.
 @export var card_color: Color = Color.WHITE
 
+# Optional prototype rune art used by the rune wheel. Final art can replace this
+# in SymbolLibrary_Default.tres without rewriting UI logic.
+@export var placeholder_icon: Texture2D
+
 
 # Code fallbacks and tests may use this helper to create a symbol resource.
 # Normal gameplay reads editable resources from SymbolLibrary_Default.tres.
@@ -33,7 +37,8 @@ func configure(
 	new_display_name: String,
 	new_visual_hint: String,
 	new_developer_note: String = "",
-	new_card_color: Color = Color.WHITE
+	new_card_color: Color = Color.WHITE,
+	new_placeholder_icon: Texture2D = null
 ) -> SymbolCardData:
 	symbol_id = new_symbol_id
 	spoken_word = new_spoken_word
@@ -41,4 +46,5 @@ func configure(
 	visual_hint = new_visual_hint
 	developer_note = new_developer_note
 	card_color = new_card_color
+	placeholder_icon = new_placeholder_icon
 	return self
