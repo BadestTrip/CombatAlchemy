@@ -4,6 +4,8 @@
 
 [resource]
 script = ExtResource("1_balance")
-rune_wheel_radius = 400.0
+rune_button_width = 216.0
+rune_button_height = 216.0
+rune_wheel_radius = 395.0
 show_card_display_names = false
 show_card_visual_hints = false

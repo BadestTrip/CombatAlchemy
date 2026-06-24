@@ -183,20 +183,20 @@ func _update_existing_buttons() -> void:
 func _apply_rune_button_data(button: Button, rune: SymbolCardData) -> void:
 	button.custom_minimum_size = rune_button_size
 	button.size = rune_button_size
-	button.text = _format_rune_text(rune)
+	#button.text = _format_rune_text(rune)
 	button.tooltip_text = _format_rune_tooltip(rune)
 	button.icon = rune.placeholder_icon
 	button.expand_icon = rune.placeholder_icon != null
 
 
-func _format_rune_text(rune: SymbolCardData) -> String:
-	var lines: PackedStringArray = []
-	if _show_visual_hints() and not rune.visual_hint.is_empty():
-		lines.append(rune.visual_hint)
-	lines.append(rune.spoken_word if not rune.spoken_word.is_empty() else rune.symbol_id.to_upper())
-	if _show_display_names() and not rune.display_name.is_empty():
-		lines.append(rune.display_name)
-	return "\n".join(lines)
+#func _format_rune_text(rune: SymbolCardData) -> String:
+	#var lines: PackedStringArray = []
+	#if _show_visual_hints() and not rune.visual_hint.is_empty():
+		#lines.append(rune.visual_hint)
+	#lines.append(rune.spoken_word if not rune.spoken_word.is_empty() else rune.symbol_id.to_upper())
+	#if _show_display_names() and not rune.display_name.is_empty():
+		#lines.append(rune.display_name)
+	#return "\n".join(lines)
 
 
 func _format_rune_tooltip(rune: SymbolCardData) -> String:

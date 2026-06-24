@@ -353,7 +353,6 @@ text = "ASHA!"
 horizontal_alignment = 1
 
 [node name="RuneWheelRoot" type="Control" parent="CombatSpace/RuneCircleRoot" unique_id=1162235777 node_paths=PackedStringArray("toggle_button")]
-visible = false
 z_index = 2
 layout_mode = 1
 anchors_preset = 15
