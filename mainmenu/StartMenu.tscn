@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://bfchsdvo2wm0y" path="res://mainmenu/MainMenu.tscn" id="1_ouf4f"]
 [ext_resource type="PackedScene" uid="uid://bsnod8l07k2md" path="res://mainmenu/Settings.tscn" id="2_thu50"]
 [ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="3_m7x51"]
-[ext_resource type="AudioStream" uid="uid://bsfrau3xv67jt" path="res://music/Mainmenu_new_notfinal.mp3" id="4_tvrj0"]
+[ext_resource type="AudioStream" uid="uid://y5ig7dxmnxg1" path="res://music/MainMenuAlternative.mp3" id="4_tvrj0"]
 
 [node name="StartMenu" type="Control" unique_id=1280976064]
 layout_mode = 3

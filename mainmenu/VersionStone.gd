@@ -14,7 +14,7 @@ extends PanelContainer
 
 
 # The short project version displayed at the top of the plaque.
-@export var version_text: String = "v0.1.0":
+@export var version_text: String = "v0.1.1":
 	set(value):
 		version_text = value
 		_refresh_labels()
