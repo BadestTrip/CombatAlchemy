@@ -1,7 +1,6 @@
 # SymbolLibraryData.gd
 # Create this as a Resource and assign it to CombatUIController in Inspector.
-# It is the editable catalog used to build the full rune palette. Older
-# deck/hand variants can still assign the same resource to DeckManager.
+# It is the editable catalog used to build the full rune palette.
 extends Resource
 class_name SymbolLibraryData
 

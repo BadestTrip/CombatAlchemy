@@ -14,16 +14,6 @@ signal chant_resolved(result: Dictionary)
 @export_group("Spell Recipes")
 @export var spell_recipes: Array[SpellRecipeData] = []
 
-# Assign CombatBalance_Default.tres here to tune fallback miscasts.
-@export_group("Balance")
-@export var balance: CombatBalanceData
-
-# These switches make data setup easier to diagnose without changing gameplay code.
-@export_group("Debug")
-@export var log_unknown_chants: bool = true
-@export var allow_fallback_miscasts: bool = true
-
-
 # Authored chant keys map directly to editable SpellRecipeData resources.
 var spellbook: Dictionary = {}
 
@@ -31,6 +21,7 @@ var spellbook: Dictionary = {}
 var previous_successful_spell_key: String = ""
 
 # A missing Inspector resource uses this safe in-memory default.
+var balance: CombatBalanceData
 var _fallback_balance: CombatBalanceData
 
 
@@ -70,7 +61,7 @@ func resolve_chant(
 			context,
 			log_lines
 		)
-	elif allow_fallback_miscasts:
+	elif _get_balance().allow_fallback_miscasts:
 		result = _resolve_fallback_miscast(
 			chant_key,
 			symbol_ids,
@@ -234,18 +225,6 @@ func _apply_effect(
 				if random_enemy != null:
 					_damage_enemy(random_enemy, effect.amount, log_lines)
 
-		SpellEffectData.EffectType.DISCARD_RANDOM_MAGE_CARD:
-			var discard_mage := _random_living_mage(context)
-			if discard_mage != null:
-				var discarded := discard_mage.discard_random_card()
-				if discarded != null:
-					log_lines.append(
-						"%s loses a random card: %s." % [
-							discard_mage.mage_name,
-							discarded.spoken_word
-						]
-					)
-
 		SpellEffectData.EffectType.MODIFY_TARGET_NEXT_ATTACK:
 			if _is_valid_enemy(target):
 				target.modify_next_attack_damage(effect.amount)
@@ -353,7 +332,7 @@ func _resolve_fallback_miscast(
 	context: Dictionary,
 	log_lines: Array[String]
 ) -> Dictionary:
-	if log_unknown_chants:
+	if _get_balance().log_unknown_chants:
 		print("Unknown chant resolved as fallback: ", chant_key)
 	log_lines.append("The words fail to lock.")
 

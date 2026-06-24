@@ -38,8 +38,6 @@ signal unit_died(unit: Node)
 @onready var discovery_manager: SpellDiscoveryManager = %SpellDiscoveryManager
 @onready var ui_controller: CombatUIController = %CombatUI
 @onready var combat_log: CombatLog = %CombatLog
-@onready var round_label: Label = %RoundLabel
-@onready var phase_label: Label = %PhaseLabel
 
 
 # These arrays are kept for ChantResolver compatibility. In this prototype they
@@ -54,6 +52,11 @@ var enemy: EnemyUnit
 # This guard prevents multiple result panels or duplicate end signals.
 var has_combat_ended: bool = false
 
+# RoundManager still reports these values, but the active scene presents flow
+# through the central objective label instead of old header labels.
+var current_round_number: int = 0
+var current_phase_text: String = ""
+
 
 # Godot calls this after child nodes have entered the tree.
 func _ready() -> void:
@@ -66,7 +69,7 @@ func _ready() -> void:
 	_collect_units()
 	_connect_unit_signals()
 	_pass_balance_to_combat_nodes()
-	discovery_manager.configure(chant_resolver.spell_recipes)
+	discovery_manager.configure(chant_resolver.spell_recipes, balance)
 
 	round_manager.configure(
 		self,
@@ -148,13 +151,12 @@ func check_combat_end() -> bool:
 	return false
 
 
-# RoundManager updates these labels as phases change.
 func set_round_number(number: int) -> void:
-	round_label.text = "Round %d" % number
+	current_round_number = number
 
 
 func set_phase_text(phase_name: String) -> void:
-	phase_label.text = phase_name
+	current_phase_text = phase_name
 
 
 # This terminal path disables round input and opens the result controls.
@@ -225,6 +227,7 @@ func _connect_unit_signals() -> void:
 func _pass_balance_to_combat_nodes() -> void:
 	round_manager.balance = balance
 	chant_resolver.balance = balance
+	discovery_manager.balance = balance
 	ui_controller.balance = balance
 
 	for mage: MageUnit in mages:

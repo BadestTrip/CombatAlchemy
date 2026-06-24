@@ -8,15 +8,11 @@ script = ExtResource("2_effect")
 effect_type = 5
 amount = 3
 
-[sub_resource type="Resource" id="Effect_discard"]
-script = ExtResource("2_effect")
-effect_type = 8
-
 [resource]
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["asha", "asha", "nox"])
 result_name = "Choked Flame"
 result_type = "disaster"
-player_description = "Heals the target enemy and discards a random mage card."
+player_description = "Heals the target enemy."
 discovery_flavor_text = "The flame turns inward and feeds the wrong side."
-effects = Array[ExtResource("2_effect")]([SubResource("Effect_heal"), SubResource("Effect_discard")])
+effects = Array[ExtResource("2_effect")]([SubResource("Effect_heal")])

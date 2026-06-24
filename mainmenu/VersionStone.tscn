@@ -40,7 +40,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.82, 0.55, 1)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 24
-text = "v0.1.0"
+text = "v0.1.1"
 
 [node name="FocusTitleLabel" type="Label" parent="Margin/TextColumn" unique_id=62658664]
 unique_name_in_owner = true
