@@ -14,13 +14,13 @@ extends PanelContainer
 
 
 # The short project version displayed at the top of the plaque.
-@export var version_text: String = "v0.1.1":
+@export var version_text: String = "v0.1.2":
 	set(value):
 		version_text = value
 		_refresh_labels()
 
 # The current development focus displayed under the version.
-@export var focus_text: String = "Combat Experimentation":
+@export var focus_text: String = "OverWorld":
 	set(value):
 		focus_text = value
 		_refresh_labels()

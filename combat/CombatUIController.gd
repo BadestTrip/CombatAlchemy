@@ -24,6 +24,7 @@ class_name CombatUIController
 @onready var result_panel: PanelContainer = %ResultPanel
 @onready var result_label: Label = %ResultLabel
 @onready var restart_button: Button = %RestartButton
+@onready var return_button: Button = %ReturnButton
 @onready var main_menu_button: Button = %MainMenuButton
 @onready var spellbook_button: Button = %SpellbookButton
 @onready var cast_history_button: Button = %CastHistoryButton
@@ -69,6 +70,7 @@ func _ready() -> void:
 	cast_button.pressed.connect(_on_cast_pressed)
 	clear_button.pressed.connect(_on_clear_pressed)
 	restart_button.pressed.connect(_on_restart_pressed)
+	return_button.pressed.connect(_on_return_pressed)
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
 	spellbook_button.pressed.connect(_on_spellbook_pressed)
 	cast_history_button.pressed.connect(_on_cast_history_pressed)
@@ -193,6 +195,7 @@ func show_result(victory: bool) -> void:
 		Color(0.52, 0.9, 0.48) if victory else Color(1.0, 0.42, 0.36)
 	)
 	restart_button.disabled = false
+	return_button.disabled = not victory
 	main_menu_button.disabled = false
 
 
@@ -648,12 +651,21 @@ func _update_objective_text(forced_text: String = "") -> void:
 
 func _on_restart_pressed() -> void:
 	restart_button.disabled = true
+	return_button.disabled = true
 	main_menu_button.disabled = true
 	GameManager.restart_combat()
 
 
+func _on_return_pressed() -> void:
+	restart_button.disabled = true
+	return_button.disabled = true
+	main_menu_button.disabled = true
+	GameManager.go_to_overworld()
+
+
 func _on_main_menu_pressed() -> void:
 	restart_button.disabled = true
+	return_button.disabled = true
 	main_menu_button.disabled = true
 	GameManager.go_to_main_menu()
 
