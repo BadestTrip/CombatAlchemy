@@ -2,24 +2,25 @@ extends Control
 class_name FloatingUnitHUD
 
 
-@export_group("Target")
+# Target and node references are wiring, not balance tuning.
 @export var target_unit: Node
-@export var offset: Vector2 = Vector2(0.0, -120.0)
-
-@export_group("Node References")
 @export var name_label: Label
 @export var hp_bar: ProgressBar
 @export var shield_label: Label
 
-@export_group("Update")
-@export var use_signal_updates: bool = true
-
+var use_signal_updates: bool = true
 
 func _ready() -> void:
 	set_process(false)
 	_resolve_nodes()
 	if target_unit != null:
 		bind_unit(target_unit)
+
+
+func apply_balance(balance: CombatBalanceData) -> void:
+	if balance == null:
+		return
+	use_signal_updates = balance.hud_use_signal_updates
 
 
 func bind_unit(unit: Node) -> void:

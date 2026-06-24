@@ -7,32 +7,23 @@ signal wheel_expanded
 signal wheel_retracted
 
 
-@export_group("Data")
-@export var symbol_library: SymbolLibraryData
-
 @export_group("Node References")
 @export var rune_button_container: Control
 @export var toggle_button: Button
-
-@export_group("Wheel Layout")
-@export var wheel_radius: float = 500.0
-@export var rune_button_size: Vector2 = Vector2(90.0, 90.0)
-@export var start_angle_degrees: float = -90.0
-@export var clockwise: bool = true
-
-@export_group("Wheel Behavior")
-@export var starts_expanded: bool = true
-@export var auto_retract_after_rune_pick: bool = false
-@export var tween_seconds: float = 0.2
-
-@export_group("Performance")
-@export var rebuild_buttons_on_ready_only: bool = true
 
 
 var _buttons: Array[Button] = []
 var _is_expanded: bool = true
 var _input_locked: bool = false
-var _tween: Tween
+var symbol_library: SymbolLibraryData
+var balance: CombatBalanceData
+var wheel_radius: float = 220.0
+var rune_button_size: Vector2 = Vector2(145.0, 72.0)
+var start_angle_degrees: float = -90.0
+var clockwise: bool = true
+var starts_expanded: bool = true
+var auto_retract_after_rune_pick: bool = false
+var tween_seconds: float = 0.2
 
 
 func _ready() -> void:
@@ -45,8 +36,13 @@ func _ready() -> void:
 	set_expanded(starts_expanded, false)
 
 
-func initialize(library: SymbolLibraryData) -> void:
+func initialize(
+	library: SymbolLibraryData,
+	balance_ref: CombatBalanceData = null
+) -> void:
 	symbol_library = library
+	balance = balance_ref
+	_apply_balance_settings()
 	_resolve_nodes()
 	build_rune_buttons()
 	set_expanded(starts_expanded, false)
@@ -57,34 +53,46 @@ func build_rune_buttons() -> void:
 		return
 	if symbol_library == null or symbol_library.symbols.is_empty():
 		return
-	if rebuild_buttons_on_ready_only and not _buttons.is_empty():
+	if not _buttons.is_empty():
+		_update_existing_buttons()
+		layout_rune_buttons()
 		_refresh_button_states()
 		return
 
-	_clear_buttons()
-	rune_button_container.custom_minimum_size = Vector2(
-		(wheel_radius + rune_button_size.x) * 2.0,
-		(wheel_radius + rune_button_size.y) * 2.0
-	)
-
+	_apply_balance_settings()
+	rune_button_container.custom_minimum_size = _container_size()
 	for rune: SymbolCardData in symbol_library.symbols:
 		if rune == null:
 			continue
 		var button := Button.new()
-		button.custom_minimum_size = rune_button_size
-		button.size = rune_button_size
-		button.text = _format_rune_text(rune)
-		button.tooltip_text = "%s rune" % rune.spoken_word
 		button.focus_mode = Control.FOCUS_NONE
-		if rune.placeholder_icon != null:
-			button.icon = rune.placeholder_icon
-			button.expand_icon = true
 		button.pressed.connect(_on_rune_button_pressed.bind(rune))
 		rune_button_container.add_child(button)
 		_buttons.append(button)
+		_apply_rune_button_data(button, rune)
 
-	_layout_buttons()
+	layout_rune_buttons()
 	_refresh_button_states()
+
+
+func layout_rune_buttons() -> void:
+	if rune_button_container == null or _buttons.is_empty():
+		return
+
+	_apply_balance_settings()
+	rune_button_container.custom_minimum_size = _container_size()
+	var center := rune_button_container.custom_minimum_size * 0.5
+	var angle_step := TAU / float(_buttons.size())
+	var direction := 1.0 if clockwise else -1.0
+	var start_angle := deg_to_rad(start_angle_degrees)
+
+	for index: int in range(_buttons.size()):
+		var button := _buttons[index]
+		button.custom_minimum_size = rune_button_size
+		button.size = rune_button_size
+		var angle := start_angle + angle_step * float(index) * direction
+		var offset := Vector2(cos(angle), sin(angle)) * wheel_radius
+		button.position = center + offset - rune_button_size * 0.5
 
 
 func set_expanded(expanded: bool, animated: bool = true) -> void:
@@ -93,35 +101,35 @@ func set_expanded(expanded: bool, animated: bool = true) -> void:
 		return
 
 	_is_expanded = expanded
-	if _tween != null:
-		_tween.kill()
-		_tween = null
+	rune_button_container.visible = expanded
+	rune_button_container.modulate.a = 1.0
+	rune_button_container.scale = Vector2.ONE
+	rune_button_container.mouse_filter = (
+		Control.MOUSE_FILTER_STOP if expanded else Control.MOUSE_FILTER_IGNORE
+	)
 
-	if expanded:
-		rune_button_container.visible = true
-		rune_button_container.mouse_filter = Control.MOUSE_FILTER_STOP
-	else:
-		rune_button_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	var target_alpha := 1.0 if expanded else 0.0
-	var target_scale := Vector2.ONE if expanded else Vector2(0.86, 0.86)
 	if animated and tween_seconds > 0.0:
-		_tween = create_tween()
-		_tween.set_parallel(true)
-		_tween.tween_property(rune_button_container, "modulate:a", target_alpha, tween_seconds)
-		_tween.tween_property(rune_button_container, "scale", target_scale, tween_seconds)
-		_tween.set_parallel(false)
+		var tween := create_tween()
+		var start_scale := Vector2(0.92, 0.92) if expanded else Vector2.ONE
+		var end_scale := Vector2.ONE if expanded else Vector2(0.92, 0.92)
+		rune_button_container.scale = start_scale
+		rune_button_container.visible = true
+		tween.tween_property(rune_button_container, "scale", end_scale, tween_seconds)
 		if not expanded:
-			_tween.tween_callback(func() -> void:
-				rune_button_container.visible = false
+			tween.parallel().tween_property(
+				rune_button_container,
+				"modulate:a",
+				0.0,
+				tween_seconds
 			)
-	else:
-		rune_button_container.modulate.a = target_alpha
-		rune_button_container.scale = target_scale
-		rune_button_container.visible = expanded
+			tween.tween_callback(func() -> void:
+				rune_button_container.visible = false
+				rune_button_container.modulate.a = 1.0
+				rune_button_container.scale = Vector2.ONE
+			)
 
 	if toggle_button != null:
-		toggle_button.text = "Hide Runes" if expanded else "Show Runes"
+		toggle_button.text = "Hide Runes" if expanded else "Runes"
 	_refresh_button_states()
 
 	if expanded:
@@ -152,27 +160,80 @@ func _resolve_nodes() -> void:
 		toggle_button = find_child("RuneWheelToggleButton", true, false) as Button
 
 
-func _layout_buttons() -> void:
-	if rune_button_container == null or _buttons.is_empty():
+func _apply_balance_settings() -> void:
+	if balance == null:
 		return
+	wheel_radius = maxf(1.0, balance.rune_wheel_radius)
+	start_angle_degrees = balance.rune_wheel_start_angle_degrees
+	clockwise = balance.rune_wheel_clockwise
+	starts_expanded = balance.rune_wheel_starts_expanded
+	auto_retract_after_rune_pick = balance.auto_retract_wheel_after_rune_pick
+	tween_seconds = maxf(0.0, balance.rune_wheel_tween_seconds)
+	rune_button_size = Vector2(_button_width(), _button_height())
 
-	var center := rune_button_container.custom_minimum_size * 0.5
-	var angle_step := TAU / float(_buttons.size())
-	var direction := 1.0 if clockwise else -1.0
-	var start_angle := deg_to_rad(start_angle_degrees)
 
-	for index: int in range(_buttons.size()):
-		var angle := start_angle + angle_step * float(index) * direction
-		var offset := Vector2(cos(angle), sin(angle)) * wheel_radius
-		var button := _buttons[index]
-		button.position = center + offset - rune_button_size * 0.5
-		button.size = rune_button_size
+func _update_existing_buttons() -> void:
+	_apply_balance_settings()
+	for index: int in range(mini(_buttons.size(), symbol_library.symbols.size())):
+		var rune: SymbolCardData = symbol_library.symbols[index]
+		if rune != null:
+			_apply_rune_button_data(_buttons[index], rune)
+
+
+func _apply_rune_button_data(button: Button, rune: SymbolCardData) -> void:
+	button.custom_minimum_size = rune_button_size
+	button.size = rune_button_size
+	button.text = _format_rune_text(rune)
+	button.tooltip_text = _format_rune_tooltip(rune)
+	button.icon = rune.placeholder_icon
+	button.expand_icon = rune.placeholder_icon != null
 
 
 func _format_rune_text(rune: SymbolCardData) -> String:
-	if rune.spoken_word.is_empty():
-		return rune.symbol_id.to_upper()
-	return rune.spoken_word
+	var lines: PackedStringArray = []
+	if _show_visual_hints() and not rune.visual_hint.is_empty():
+		lines.append(rune.visual_hint)
+	lines.append(rune.spoken_word if not rune.spoken_word.is_empty() else rune.symbol_id.to_upper())
+	if _show_display_names() and not rune.display_name.is_empty():
+		lines.append(rune.display_name)
+	return "\n".join(lines)
+
+
+func _format_rune_tooltip(rune: SymbolCardData) -> String:
+	var lines: PackedStringArray = []
+	lines.append(rune.spoken_word if not rune.spoken_word.is_empty() else rune.symbol_id.to_upper())
+	if not rune.display_name.is_empty():
+		lines.append(rune.display_name)
+	if not rune.visual_hint.is_empty():
+		lines.append("Hint: %s" % rune.visual_hint)
+	return "\n".join(lines)
+
+
+func _button_width() -> float:
+	if balance == null:
+		return maxf(1.0, rune_button_size.x)
+	return maxf(1.0, balance.rune_button_width)
+
+
+func _button_height() -> float:
+	if balance == null:
+		return maxf(1.0, rune_button_size.y)
+	return maxf(1.0, balance.rune_button_height)
+
+
+func _show_display_names() -> bool:
+	return balance == null or balance.show_card_display_names
+
+
+func _show_visual_hints() -> bool:
+	return balance == null or balance.show_card_visual_hints
+
+
+func _container_size() -> Vector2:
+	return Vector2(
+		(wheel_radius + rune_button_size.x) * 2.0,
+		(wheel_radius + rune_button_size.y) * 2.0
+	)
 
 
 func _refresh_button_states() -> void:
@@ -189,10 +250,3 @@ func _on_rune_button_pressed(rune: SymbolCardData) -> void:
 	rune_selected.emit(rune)
 	if auto_retract_after_rune_pick:
 		set_expanded(false)
-
-
-func _clear_buttons() -> void:
-	for button: Button in _buttons:
-		if is_instance_valid(button):
-			button.queue_free()
-	_buttons.clear()

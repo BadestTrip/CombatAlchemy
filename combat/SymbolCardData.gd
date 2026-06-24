@@ -21,7 +21,7 @@ class_name SymbolCardData
 # Keep hidden design meaning here for developers. The combat UI never shows it.
 @export_multiline var developer_note: String = ""
 
-# This is available for future card presentation without changing deck logic.
+# This is available for future rune presentation without changing effect logic.
 @export var card_color: Color = Color.WHITE
 
 # Optional prototype rune art used by the rune wheel. Final art can replace this

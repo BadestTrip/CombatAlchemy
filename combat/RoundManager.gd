@@ -52,11 +52,6 @@ signal enemy_phase_started
 signal round_ended(round_number: int)
 
 
-# Assign CombatBalance_Default.tres here to tune phase delays and rune behavior.
-@export_group("Balance")
-@export var balance: CombatBalanceData
-
-
 # These states make button permissions and round order explicit.
 enum RoundState {
 	ROUND_START,
@@ -74,7 +69,7 @@ var current_state: RoundState = RoundState.ROUND_START
 # The first call to _start_next_round changes this from 0 to 1.
 var round_number: int = 0
 
-# The three chant slots now hold freely chosen runes, not cards from mage hands.
+# The three chant slots hold freely chosen runes from the wheel.
 var selected_runes: Array[SymbolCardData] = []
 
 # The UI marks this slot and rune clicks place or replace here.
@@ -89,6 +84,7 @@ var chant_resolver: ChantResolver
 var discovery_manager: SpellDiscoveryManager
 var ui_controller: CombatUIController
 var combat_log: CombatLog
+var balance: CombatBalanceData
 
 # Used to distinguish explicit slot replacement from the "first empty slot"
 # shortcut when the player simply clicks runes in sequence.
@@ -214,8 +210,7 @@ func can_cast() -> bool:
 	return true
 
 
-# The Cast button calls this. Selected runes are sent directly to ChantResolver;
-# nothing is discarded and no new cards are drawn.
+# The Cast button calls this. Selected runes are sent directly to ChantResolver.
 func cast_chant() -> void:
 	if get_tree().paused:
 		return
@@ -403,7 +398,7 @@ func _supported_chant_rune_count() -> int:
 	return 3
 
 
-# Keep the requested Inspector knob visible without allowing an unsafe UI mismatch.
+# Keep the balance knob visible without allowing an unsafe UI mismatch.
 func _validate_chant_slot_count() -> void:
 	if _get_balance().required_chant_cards != _supported_chant_rune_count():
 		push_warning(

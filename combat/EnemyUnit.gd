@@ -33,22 +33,6 @@ signal intent_changed
 # Set this in the Inspector to the player-facing enemy name.
 @export var enemy_name: String = "Enemy"
 
-# Set this in the Inspector to starting and maximum enemy HP.
-@export var max_hp: int = 15
-
-# Set this in the Inspector to normal attack damage before modifiers.
-@export var base_attack: int = 3
-
-# Set this in the Inspector to shield granted when combat begins.
-@export var starting_shield: int = 0
-
-# Set the probability that this enemy chooses Guard instead of an attack.
-@export_range(0.0, 1.0, 0.01) var guard_chance: float = 0.25
-
-# Set the shield granted by a Guard intent.
-@export var guard_shield: int = 3
-
-
 # Current HP is initialized from max_hp when the scene loads.
 # This is runtime state and should not be exposed in Inspector.
 var current_hp: int = 0
@@ -79,6 +63,13 @@ var last_action_log: String = ""
 # Damage this round becomes was_attacked_last_round at round end.
 var _was_attacked_this_round: bool = false
 
+# Combat stats are loaded from CombatBalanceData during scene setup.
+var max_hp: int = 15
+var base_attack: int = 3
+var starting_shield: int = 0
+var guard_chance: float = 0.25
+var guard_shield: int = 3
+
 
 # Godot calls _ready when the scene is loaded.
 func _ready() -> void:
@@ -90,18 +81,14 @@ func _ready() -> void:
 
 
 # CombatManager passes global defaults after child _ready methods have run.
-# Explicit non-default Inspector values remain local overrides.
 func apply_balance_defaults(balance: CombatBalanceData) -> void:
 	if balance == null:
 		return
-	if max_hp == 15:
-		max_hp = balance.default_enemy_max_hp
-	if base_attack == 3:
-		base_attack = balance.default_enemy_base_attack
-	if guard_chance == 0.25:
-		guard_chance = balance.enemy_guard_chance
-	if guard_shield == 3:
-		guard_shield = balance.enemy_guard_shield
+	max_hp = balance.default_enemy_max_hp
+	starting_shield = balance.default_enemy_starting_shield
+	base_attack = balance.default_enemy_base_attack
+	guard_chance = balance.enemy_guard_chance
+	guard_shield = balance.enemy_guard_shield
 	current_hp = max_hp
 	shield = starting_shield
 	is_alive = current_hp > 0
@@ -129,7 +116,7 @@ func generate_intent(living_mages: Array[MageUnit]) -> void:
 			"type": "skip",
 			"description": "%s is silenced and cannot form an intent." % enemy_name
 		}
-	# Guard probability and shield are exported design values, not runtime state.
+	# Guard probability and shield are balance-driven design values.
 	elif randf() < clampf(guard_chance, 0.0, 1.0):
 		current_intent = {
 			"type": "guard",

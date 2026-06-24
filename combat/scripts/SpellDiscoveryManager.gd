@@ -19,14 +19,6 @@ signal cast_history_updated(history: Array[Dictionary])
 signal spellbook_updated
 
 
-# These Inspector values control discovery presentation and history retention.
-@export_group("Discovery")
-@export var reveal_initially_discovered_spells: bool = true
-@export var max_cast_history_entries: int = 20
-@export var track_fallback_casts: bool = true
-@export var announce_new_discoveries: bool = true
-
-
 # Keys map to true for quick first-discovery checks.
 # This is runtime state and is intentionally not exported or saved.
 var discovered_spell_keys: Dictionary = {}
@@ -38,11 +30,18 @@ var cast_history: Array[Dictionary] = []
 # The authored recipe list is supplied by CombatManager from ChantResolver.
 var _spell_recipes: Array[SpellRecipeData] = []
 var _recipes_by_key: Dictionary = {}
+var balance: CombatBalanceData
+var _fallback_balance: CombatBalanceData
 
 
 # CombatManager calls this once before combat starts.
-func configure(recipes: Array[SpellRecipeData]) -> void:
+func configure(
+	recipes: Array[SpellRecipeData],
+	balance_ref: CombatBalanceData = null
+) -> void:
 	_spell_recipes = recipes
+	if balance_ref != null:
+		balance = balance_ref
 	_rebuild_recipe_lookup()
 	_reveal_initial_recipes()
 
@@ -67,7 +66,7 @@ func record_chant_result(
 		was_new_discovery = true
 		spellbook_updated.emit()
 
-	var should_track := is_known or track_fallback_casts
+	var should_track := is_known or _get_balance().track_fallback_casts
 	if should_track:
 		var spoken_words: Array[String] = []
 		for word: Variant in result.get("spoken_words", []):
@@ -93,7 +92,7 @@ func record_chant_result(
 			history_snapshot.append(history_entry.duplicate(true))
 		cast_history_updated.emit(history_snapshot)
 
-	if was_new_discovery and announce_new_discoveries:
+	if was_new_discovery and _get_balance().announce_new_discoveries:
 		spell_discovered.emit(recipe, result)
 
 
@@ -130,7 +129,7 @@ func _rebuild_recipe_lookup() -> void:
 # Initially discovered recipes appear without triggering first-cast popups.
 func _reveal_initial_recipes() -> void:
 	discovered_spell_keys.clear()
-	if reveal_initially_discovered_spells:
+	if _get_balance().reveal_initially_discovered_spells:
 		for recipe: SpellRecipeData in _spell_recipes:
 			if recipe != null and recipe.initially_discovered:
 				discovered_spell_keys[recipe.get_chant_key()] = true
@@ -139,6 +138,17 @@ func _reveal_initial_recipes() -> void:
 
 # Keep only the newest configured number of attempts.
 func _trim_cast_history() -> void:
-	var limit := maxi(1, max_cast_history_entries)
+	var limit := maxi(1, _get_balance().max_cast_history_entries)
 	while cast_history.size() > limit:
 		cast_history.pop_front()
+
+
+func _get_balance() -> CombatBalanceData:
+	if balance != null:
+		return balance
+	if _fallback_balance == null:
+		_fallback_balance = CombatBalanceData.new()
+		push_warning(
+			"SpellDiscoveryManager has no CombatBalanceData assigned; using script defaults."
+		)
+	return _fallback_balance

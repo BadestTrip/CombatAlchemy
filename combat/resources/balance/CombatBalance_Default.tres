@@ -4,7 +4,6 @@
 
 [resource]
 script = ExtResource("1_balance")
-starting_hand_size = 4
-max_hand_size = 4
+rune_wheel_radius = 400.0
 show_card_display_names = false
 show_card_visual_hints = false
