@@ -47,6 +47,7 @@
 [ext_resource type="PackedScene" uid="uid://bsnod8l07k2md" path="res://mainmenu/Settings.tscn" id="46_settings"]
 [ext_resource type="Script" uid="uid://b6pevmp70xcyf" path="res://combat/scripts/ui/RuneWheelController.gd" id="48_rune_wheel"]
 [ext_resource type="Script" uid="uid://bvdaat3ddx1qg" path="res://combat/scripts/ui/FloatingUnitHUD.gd" id="49_floating_hud"]
+[ext_resource type="Script" uid="uid://ban1286l0lwac" path="res://combat/scripts/tutorial/CombatTutorialController.gd" id="50_tutorial"]
 [ext_resource type="Texture2D" uid="uid://cjnbtwthds1lf" path="res://sprites/characters/placeholder_mage_spritey.png" id="54_mage_placeholder"]
 [ext_resource type="Texture2D" uid="uid://c7wjn7t52je3b" path="res://sprites/characters/placeholder_enemy_adept_sprite.png" id="55_enemy_placeholder"]
 
@@ -268,7 +269,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.68, 0.86, 1, 1)
 theme_override_font_sizes/font_size = 16
-text = "Choose a rune for Slot 1."
 horizontal_alignment = 1
 metadata/_edit_use_anchors_ = true
 
@@ -498,6 +498,19 @@ layout_mode = 2
 toggle_mode = true
 text = "Cast History"
 
+[node name="TutorialOverlay" type="ColorRect" parent="." unique_id=2008953040]
+unique_name_in_owner = true
+visible = false
+z_index = 40
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.56)
+
 [node name="ResultPanel" type="PanelContainer" parent="." unique_id=1103795130]
 unique_name_in_owner = true
 visible = false
@@ -721,6 +734,10 @@ spell_recipes = Array[ExtResource("9_qomwh")]([ExtResource("10_ev5v8"), ExtResou
 [node name="SpellDiscoveryManager" type="Node" parent="." unique_id=871974269]
 unique_name_in_owner = true
 script = ExtResource("44_discovery")
+
+[node name="CombatTutorialController" type="Node" parent="." unique_id=708644915]
+unique_name_in_owner = true
+script = ExtResource("50_tutorial")
 
 [node name="Mages" type="Node" parent="." unique_id=2136153042]
 unique_name_in_owner = true
