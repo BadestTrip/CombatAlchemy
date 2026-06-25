@@ -1,0 +1,132 @@
+[gd_scene format=3 uid="uid://d0q0wwa4qno6j"]
+
+[ext_resource type="Script" uid="uid://dgxvd8igtra4t" path="res://overworld/OverworldPlayer.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://dkufda3lar084" path="res://overworld/DuelInteractable.gd" id="2_duel"]
+[ext_resource type="Script" uid="uid://b86dt8t08aoil" path="res://globals/LevelMusic.gd" id="3_ak3if"]
+[ext_resource type="AudioStream" uid="uid://dslndjsgbg6ik" path="res://music/OverWorldBetaOST.mp3" id="4_dgl0l"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(40, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_duel"]
+size = Vector2(210, 160)
+
+[node name="OverworldPrototype" type="Node2D" unique_id=631620731]
+
+[node name="Background" type="ColorRect" parent="." unique_id=324108043]
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.075, 0.08, 0.075, 1)
+
+[node name="WalkableArea" type="ColorRect" parent="." unique_id=712218277]
+offset_left = 96.0
+offset_top = 120.0
+offset_right = 1824.0
+offset_bottom = 940.0
+color = Color(0.14, 0.18, 0.13, 1)
+
+[node name="PathMarker" type="ColorRect" parent="." unique_id=1342383105]
+offset_left = 280.0
+offset_top = 500.0
+offset_right = 1540.0
+offset_bottom = 580.0
+color = Color(0.22, 0.2, 0.15, 1)
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=667655062]
+position = Vector2(360, 540)
+script = ExtResource("1_player")
+
+[node name="DustTrail" type="CPUParticles2D" parent="Player" unique_id=733687375]
+position = Vector2(0, 24)
+emitting = false
+amount = 1800
+lifetime = 10.0
+emission_shape = 1
+emission_sphere_radius = 15.0
+direction = Vector2(0, 1)
+spread = 55.0
+gravity = Vector2(-15, 1)
+initial_velocity_min = 6.0
+initial_velocity_max = 18.0
+damping_min = 12.0
+damping_max = 26.0
+scale_amount_min = 0.45
+scale_amount_max = 1.15
+color = Color(1, 0.76, 0.24, 0.42)
+
+[node name="PlayerVisual" type="ColorRect" parent="Player" unique_id=360647182]
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+color = Color(0.45, 0.72, 1, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=1555482732]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="DuelStone" type="Area2D" parent="." unique_id=2092531967]
+position = Vector2(1420, 540)
+script = ExtResource("2_duel")
+prompt_label_path = NodePath("../HUD/InteractionPrompt")
+
+[node name="StoneVisual" type="ColorRect" parent="DuelStone" unique_id=445519729]
+offset_left = -54.0
+offset_top = -70.0
+offset_right = 54.0
+offset_bottom = 70.0
+color = Color(0.55, 0.48, 0.38, 1)
+
+[node name="StoneTop" type="ColorRect" parent="DuelStone" unique_id=829447125]
+offset_left = -38.0
+offset_top = -92.0
+offset_right = 38.0
+offset_bottom = -62.0
+color = Color(0.72, 0.58, 0.34, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DuelStone" unique_id=215172287]
+shape = SubResource("RectangleShape2D_duel")
+
+[node name="ObjectLabel" type="Label" parent="DuelStone" unique_id=2086739612]
+offset_left = -96.0
+offset_top = 82.0
+offset_right = 96.0
+offset_bottom = 112.0
+theme_override_colors/font_color = Color(0.95, 0.82, 0.48, 1)
+theme_override_font_sizes/font_size = 20
+text = "Training Adept"
+horizontal_alignment = 1
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=781330185]
+
+[node name="Title" type="Label" parent="HUD" unique_id=63216422]
+offset_left = 64.0
+offset_top = 44.0
+offset_right = 520.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(0.95, 0.82, 0.48, 1)
+theme_override_font_sizes/font_size = 34
+text = "Training Grounds"
+
+[node name="Hint" type="Label" parent="HUD" unique_id=1372673207]
+offset_left = 64.0
+offset_top = 92.0
+offset_right = 760.0
+offset_bottom = 130.0
+theme_override_colors/font_color = Color(0.78, 0.86, 0.74, 1)
+theme_override_font_sizes/font_size = 20
+text = "Walk to the training adept. Use WASD or arrow keys."
+
+[node name="InteractionPrompt" type="Label" parent="HUD" unique_id=696583073]
+visible = false
+offset_left = 720.0
+offset_top = 850.0
+offset_right = 1200.0
+offset_bottom = 900.0
+theme_override_colors/font_color = Color(1, 0.9, 0.52, 1)
+theme_override_font_sizes/font_size = 28
+text = "Press E to begin duel"
+horizontal_alignment = 1
+
+[node name="LevelMusic" type="Node2D" parent="." unique_id=1281674120 groups=["level_music"]]
+script = ExtResource("3_ak3if")
+music = ExtResource("4_dgl0l")

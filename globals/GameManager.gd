@@ -2,13 +2,15 @@ extends Node
 
 enum GameState {
 	MAIN_MENU,
+	OVERWORLD,
 	COMBAT
 }
 
 var current_state: GameState = GameState.MAIN_MENU
 
 const START_MENU_SCENE: String = "res://mainmenu/StartMenu.tscn"
-const COMBAT_SCENE: String = "res://combat/CombatScene.tscn"
+const OVERWORLD_SCENE_PATH: String = "res://overworld/OverworldPrototype.tscn"
+const COMBAT_SCENE_PATH: String = "res://combat/CombatScene.tscn"
 
 const SCENE_TRANSITION_NODE_PATH: String = "/root/SceneTransition"
 
@@ -20,11 +22,19 @@ func go_to_main_menu() -> void:
 
 
 func start_new_game() -> void:
-	_change_state_and_scene(GameState.COMBAT, COMBAT_SCENE)
+	_change_state_and_scene(GameState.OVERWORLD, OVERWORLD_SCENE_PATH)
+
+
+func go_to_overworld() -> void:
+	_change_state_and_scene(GameState.OVERWORLD, OVERWORLD_SCENE_PATH)
+
+
+func start_duel_from_overworld() -> void:
+	_change_state_and_scene(GameState.COMBAT, COMBAT_SCENE_PATH)
 
 
 func restart_combat() -> void:
-	_change_state_and_scene(GameState.COMBAT, COMBAT_SCENE)
+	_change_state_and_scene(GameState.COMBAT, COMBAT_SCENE_PATH)
 
 
 func quit_game() -> void:
