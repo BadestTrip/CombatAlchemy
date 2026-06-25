@@ -5,6 +5,10 @@ extends VBoxContainer
 class_name CombatUIController
 
 
+signal secondary_panel_opened(panel_id: String)
+signal spell_result_shown(result: Dictionary)
+
+
 @export_group("Runes")
 @export var symbol_library: SymbolLibraryData
 
@@ -54,11 +58,15 @@ var _shout_is_playing: bool = false
 
 var _combat_log_button: Button
 var _log_panel: Control
+var _enemy_intent_bubble: Control
 var _enemy_intent_label: Label
 var _shout_label: Label
 var _spell_result_banner: Control
 var _spell_result_title_label: Label
 var _spell_result_category_label: Label
+var _tutorial_objective_text: String = ""
+var tutorial_objective_active: bool = false
+var _spell_result_banner_tutorial_hold: bool = false
 
 
 func _ready() -> void:
@@ -79,6 +87,7 @@ func _ready() -> void:
 
 	_resolve_scene_nodes()
 	_connect_scene_node_signals()
+	set_tutorial_objective_active(false)
 
 	result_panel.visible = false
 	if _log_panel != null:
@@ -197,7 +206,6 @@ func show_result(victory: bool) -> void:
 
 
 func play_chant_shout(runes: Array[SymbolCardData]) -> void:
-	_update_objective_text("Resolving chant...")
 	if _shout_label == null or _shout_is_playing:
 		return
 
@@ -238,7 +246,8 @@ func show_spell_result(result: Dictionary) -> void:
 
 	_spell_result_banner.visible = true
 	_spell_result_banner.modulate.a = 1.0
-	if _get_balance().spell_result_banner_seconds > 0.0:
+	spell_result_shown.emit(result)
+	if _get_balance().spell_result_banner_seconds > 0.0 and not _spell_result_banner_tutorial_hold:
 		_result_banner_tween = create_tween()
 		_result_banner_tween.tween_interval(_get_balance().spell_result_banner_seconds)
 		_result_banner_tween.tween_property(_spell_result_banner, "modulate:a", 0.0, 0.18)
@@ -250,6 +259,54 @@ func show_spell_result(result: Dictionary) -> void:
 func set_pause_menu_open(is_open: bool) -> void:
 	_pause_menu_open = is_open
 	_update_combat_input_state()
+
+
+func get_tutorial_target(target_id: String) -> Control:
+	return _tutorial_target_for_id(target_id)
+
+
+func set_tutorial_objective_active(active: bool) -> void:
+	tutorial_objective_active = active
+	if objective_label != null:
+		objective_label.visible = active
+
+
+func set_objective_text_override(text: String) -> void:
+	_tutorial_objective_text = text
+	_update_objective_text()
+
+
+func clear_objective_text_override() -> void:
+	_tutorial_objective_text = ""
+	_update_objective_text()
+
+
+func is_secondary_panel_open(panel_id: String) -> bool:
+	var panel := _secondary_panel_for_id(panel_id)
+	return panel != null and panel.visible
+
+
+func hold_spell_result_banner_for_tutorial(should_hold: bool) -> void:
+	_spell_result_banner_tutorial_hold = should_hold
+	if _spell_result_banner == null:
+		return
+
+	if should_hold:
+		if _result_banner_tween != null:
+			_result_banner_tween.kill()
+			_result_banner_tween = null
+		_spell_result_banner.visible = true
+		_spell_result_banner.modulate.a = 1.0
+		return
+
+	if _spell_result_banner.visible and _get_balance().spell_result_banner_seconds > 0.0:
+		if _result_banner_tween != null:
+			_result_banner_tween.kill()
+		_result_banner_tween = create_tween()
+		_result_banner_tween.tween_property(_spell_result_banner, "modulate:a", 0.0, 0.18)
+		_result_banner_tween.tween_callback(func() -> void:
+			_spell_result_banner.visible = false
+		)
 
 
 func _resolve_scene_nodes() -> void:
@@ -264,6 +321,7 @@ func _resolve_scene_nodes() -> void:
 
 	_combat_log_button = _find_scene_node("CombatLogButton") as Button
 	_log_panel = _find_scene_node("LogPanel") as Control
+	_enemy_intent_bubble = _find_scene_node("EnemyIntentBubble") as Control
 	_enemy_intent_label = _find_scene_node("IntentLabel") as Label
 	_shout_label = _find_scene_node("ChantShoutText") as Label
 	_spell_result_banner = _find_scene_node("SpellResultBanner") as Control
@@ -429,6 +487,8 @@ func _toggle_secondary_panel(panel_id: String) -> void:
 				_refresh_spellbook()
 	_update_secondary_button_states()
 	_update_combat_input_state()
+	if should_open:
+		secondary_panel_opened.emit(panel_id)
 
 
 func _close_secondary_panels() -> void:
@@ -610,7 +670,7 @@ func _on_cast_availability_changed(_can_cast: bool) -> void:
 
 
 func _on_round_casting_started() -> void:
-	_update_objective_text("Resolving chant...")
+	_update_objective_text()
 
 
 func _on_round_casting_finished() -> void:
@@ -622,28 +682,23 @@ func _on_player_phase_started() -> void:
 
 
 func _on_enemy_phase_started() -> void:
-	_update_objective_text("Enemy phase.")
+	_update_objective_text()
 
 
 func _update_objective_text(forced_text: String = "") -> void:
 	if objective_label == null:
 		return
+	if not tutorial_objective_active:
+		objective_label.visible = false
+		return
+	objective_label.visible = true
+	if not _tutorial_objective_text.is_empty():
+		objective_label.text = _tutorial_objective_text
+		return
 	if not forced_text.is_empty():
 		objective_label.text = forced_text
 		return
-	if round_manager == null:
-		objective_label.text = "Ready."
-		return
-	if round_manager.current_state == RoundManager.RoundState.ENEMY_PHASE:
-		objective_label.text = "Enemy phase."
-		return
-	if round_manager.current_state == RoundManager.RoundState.RESOLVING_CHANT:
-		objective_label.text = "Resolving chant..."
-		return
-	if round_manager.can_cast():
-		objective_label.text = "Cast the chant."
-		return
-	objective_label.text = "Choose a rune for Slot %d." % (round_manager.selected_slot_index + 1)
+	objective_label.text = ""
 
 
 func _on_restart_pressed() -> void:
@@ -675,6 +730,34 @@ func _find_scene_node(node_name: String) -> Node:
 	if scene == null:
 		return null
 	return scene.find_child(node_name, true, false)
+
+
+func _tutorial_target_for_id(target_id: String) -> Control:
+	match target_id:
+		"chant_slot_1":
+			return chant_slot_1
+		"chant_slot_2":
+			return chant_slot_2
+		"chant_slot_3":
+			return chant_slot_3
+		"cast_button":
+			return cast_button
+		"clear_button":
+			return clear_button
+		"enemy_intent":
+			if _enemy_intent_bubble != null:
+				return _enemy_intent_bubble
+			return _enemy_intent_label
+		"combat_log_button":
+			return _combat_log_button
+		"cast_history_button":
+			return cast_history_button
+		"spellbook_button":
+			return spellbook_button
+		"spell_result_banner":
+			return _spell_result_banner
+		_:
+			return null
 
 
 func _get_balance() -> CombatBalanceData:
