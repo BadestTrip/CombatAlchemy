@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="CombatTutorialPresentationData" format=3 uid="uid://brupfbqc805g1"]
+
+[ext_resource type="Script" uid="uid://b8gc8bjbrlcr7" path="res://combat/resources/tutorial/CombatTutorialPresentationData.gd" id="1_presentation"]
+
+[resource]
+script = ExtResource("1_presentation")
+text_free_experiment = "Now experiment on your own. Good Luck, little one!"

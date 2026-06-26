@@ -11,6 +11,9 @@ var learned_chant_keys: Dictionary = {}
 var session_cast_history: Array[Dictionary] = []
 var first_combat_tutorial_completed: bool = false
 var training_duel_won: bool = false
+var miniboss_lair_defeated: bool = false
+var pending_encounter: EncounterData
+var defeated_encounter_ids: Dictionary = {}
 
 const SCENE_TRANSITION_NODE_PATH: String = "/root/SceneTransition"
 const DEFAULT_SCENE_REGISTRY_PATH: String = "res://globals/resources/SceneRegistry_Default.tres"
@@ -22,6 +25,7 @@ var _loaded_scene_registry: SceneRegistryData
 
 
 func go_to_main_menu() -> void:
+	clear_pending_encounter()
 	_change_state_and_scene(GameState.MAIN_MENU, _get_main_menu_scene())
 
 
@@ -31,10 +35,15 @@ func start_new_game() -> void:
 
 
 func go_to_overworld() -> void:
+	clear_pending_encounter()
 	_change_state_and_scene(GameState.OVERWORLD, _get_overworld_scene())
 
 
-func start_duel_from_overworld(combat_scene: PackedScene = null) -> void:
+func start_duel_from_overworld(
+	encounter_data: EncounterData = null,
+	combat_scene: PackedScene = null
+) -> void:
+	pending_encounter = encounter_data
 	if combat_scene != null:
 		_change_state_and_scene(GameState.COMBAT, combat_scene)
 		return
@@ -54,6 +63,23 @@ func reset_session_progress() -> void:
 	session_cast_history.clear()
 	first_combat_tutorial_completed = false
 	training_duel_won = false
+	miniboss_lair_defeated = false
+	defeated_encounter_ids.clear()
+	clear_pending_encounter()
+
+
+func mark_encounter_defeated(encounter_id: String) -> void:
+	if encounter_id.is_empty():
+		return
+	defeated_encounter_ids[encounter_id] = true
+
+
+func has_defeated_encounter(encounter_id: String) -> bool:
+	return defeated_encounter_ids.has(encounter_id)
+
+
+func clear_pending_encounter() -> void:
+	pending_encounter = null
 
 
 func remember_learned_chant(chant_key: String) -> void:

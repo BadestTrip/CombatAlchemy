@@ -7,6 +7,7 @@
 script = ExtResource("1_balance")
 rune_button_width = 216.0
 rune_button_height = 216.0
+rune_wheel_starts_expanded = false
 rune_wheel_radius = 395.0
 discovery_popup_auto_hide_seconds = 10.0
 chant_balance_library = ExtResource("2_chant_balance")

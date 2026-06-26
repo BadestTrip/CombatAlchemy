@@ -842,12 +842,26 @@ func _find_scene_node(node_name: String) -> Node:
 
 func _tutorial_target_for_id(target_id: String) -> Control:
 	match target_id:
+		"rune_toggle_button", "runes_button":
+			if rune_wheel_controller != null:
+				return rune_wheel_controller.toggle_button
+			return null
+		"rune_palette":
+			if rune_wheel_controller != null:
+				return rune_wheel_controller.rune_button_container
+			return null
+		"chant_slots":
+			return chant_slot_1.get_parent() as Control
 		"chant_slot_1":
 			return chant_slot_1
 		"chant_slot_2":
 			return chant_slot_2
 		"chant_slot_3":
 			return chant_slot_3
+		"chant_preview":
+			return chant_preview
+		"circle_actions":
+			return cast_button.get_parent() as Control
 		"cast_button":
 			return cast_button
 		"clear_button":
@@ -864,6 +878,18 @@ func _tutorial_target_for_id(target_id: String) -> Control:
 			return spellbook_button
 		"spell_result_banner":
 			return _spell_result_banner
+		"log_panel", "combat_log_panel":
+			return _log_panel
+		"cast_history_panel":
+			return cast_history_panel
+		"spellbook_panel":
+			return spellbook_panel
+		"debug_chants_button":
+			return debug_chants_button
+		"debug_chants_panel":
+			return debug_chants_panel
+		"spell_discovery_popup":
+			return discovery_popup
 		_:
 			return null
 

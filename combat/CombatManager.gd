@@ -69,6 +69,7 @@ func _ready() -> void:
 	_collect_units()
 	_connect_unit_signals()
 	_pass_balance_to_combat_nodes()
+	_apply_pending_encounter()
 	discovery_manager.configure(chant_resolver.get_active_recipes(), balance)
 
 	round_manager.configure(
@@ -166,7 +167,7 @@ func _end_combat(victory: bool) -> void:
 
 	has_combat_ended = true
 	if victory:
-		GameManager.training_duel_won = true
+		_mark_victory_progress()
 	round_manager.end_combat()
 	set_phase_text("Combat ended")
 	combat_log.append_separator()
@@ -236,6 +237,47 @@ func _pass_balance_to_combat_nodes() -> void:
 		mage.apply_balance_defaults(balance)
 	for current_enemy: EnemyUnit in enemies:
 		current_enemy.apply_balance_defaults(balance)
+
+
+func _apply_pending_encounter() -> void:
+	var encounter := GameManager.pending_encounter
+	if encounter == null or enemy == null:
+		return
+
+	enemy.enemy_name = encounter.enemy_name
+	enemy.max_hp = encounter.enemy_max_hp
+	enemy.current_hp = encounter.enemy_max_hp
+	enemy.base_attack = encounter.enemy_base_attack
+	enemy.starting_shield = encounter.enemy_starting_shield
+	enemy.shield = encounter.enemy_starting_shield
+	enemy.guard_chance = encounter.enemy_guard_chance
+	enemy.guard_shield = encounter.enemy_guard_shield
+	enemy.is_alive = enemy.current_hp > 0
+	enemy.current_intent.clear()
+	enemy.stats_changed.emit()
+	enemy.intent_changed.emit()
+	_apply_encounter_enemy_sprite(encounter)
+
+
+func _apply_encounter_enemy_sprite(encounter: EncounterData) -> void:
+	if encounter == null or encounter.enemy_sprite == null:
+		return
+	var visual := find_child("EnemyUnitVisual", true, false) as TextureRect
+	if visual != null:
+		visual.texture = encounter.enemy_sprite
+
+
+func _mark_victory_progress() -> void:
+	var encounter := GameManager.pending_encounter
+	if encounter == null:
+		GameManager.training_duel_won = true
+		return
+
+	GameManager.mark_encounter_defeated(encounter.encounter_id)
+	if encounter.marks_training_duel_won:
+		GameManager.training_duel_won = true
+	if encounter.marks_miniboss_defeated:
+		GameManager.miniboss_lair_defeated = true
 
 
 func _on_mage_damaged(mage: MageUnit, amount: int) -> void:
