@@ -150,6 +150,8 @@ func _maybe_start_tutorial() -> void:
 		return
 	if GameManager.first_combat_tutorial_completed:
 		return
+	if not _is_tutorial_encounter():
+		return
 	if round_manager.round_number > 1:
 		return
 	if round_manager.current_state != RoundManager.RoundState.PLANNING:
@@ -687,6 +689,11 @@ func _get_presentation() -> CombatTutorialPresentationData:
 			"CombatTutorialController has no CombatTutorialPresentationData assigned; using script defaults."
 		)
 	return _fallback_presentation
+
+
+func _is_tutorial_encounter() -> bool:
+	var encounter := GameManager.pending_encounter
+	return encounter == null or encounter.is_tutorial_fight
 
 
 func _on_planning_started() -> void:
