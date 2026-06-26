@@ -1,14 +1,8 @@
-[gd_resource type="Resource" script_class="MainMenuStyleData" format=3]
+[gd_resource type="Resource" script_class="MainMenuStyleData" format=3 uid="uid://ut3caq211l7y"]
 
-[ext_resource type="Script" path="res://mainmenu/resources/MainMenuStyleData.gd" id="1_menu_style"]
+[ext_resource type="Script" uid="uid://dv1fjywlovi3k" path="res://mainmenu/resources/MainMenuStyleData.gd" id="1_menu_style"]
 [ext_resource type="Texture2D" uid="uid://bmrxptp10isrx" path="res://sprites/mage_cliff_hell_yeah.png" id="2_background"]
 
 [resource]
 script = ExtResource("1_menu_style")
 background_texture = ExtResource("2_background")
-rune_circle_opacity = 0.52
-rune_circle_rotation_speed = 3.0
-shader_enabled = false
-shader_effect_strength = 1.0
-vignette_strength = 0.38
-pulse_speed = 4.5

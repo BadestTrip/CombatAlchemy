@@ -1,11 +1,9 @@
-[gd_resource type="Resource" script_class="ProjectInfoData" format=3]
+[gd_resource type="Resource" script_class="ProjectInfoData" format=3 uid="uid://dgvb1jf60rj4r"]
 
-[ext_resource type="Script" path="res://globals/resources/ProjectInfoData.gd" id="1_project_info"]
+[ext_resource type="Script" uid="uid://ddxwmhhrv24yu" path="res://globals/resources/ProjectInfoData.gd" id="1_project_info"]
 
 [resource]
 script = ExtResource("1_project_info")
-project_version = "v0.1.3"
-current_focus = "Architecture Cleanup"
+project_version = "Version 0.1.4"
+current_focus = "Overworld V0.2"
 build_label = "Prototype"
-show_focus = true
-show_build_label = true

@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="ChantLibraryData" format=3]
+[gd_resource type="Resource" script_class="ChantLibraryData" format=3 uid="uid://gabdbu1y87c8"]
 
-[ext_resource type="Script" path="res://combat/resources/ChantLibraryData.gd" id="1_chant_library"]
+[ext_resource type="Script" uid="uid://b1xkt2kbfrlvs" path="res://combat/resources/ChantLibraryData.gd" id="1_chant_library"]
 [ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="2_recipe"]
 [ext_resource type="Resource" uid="uid://btgjurl4ii2vr" path="res://combat/resources/spells/RazorComet.tres" id="3_razor_comet"]
 [ext_resource type="Resource" uid="uid://cgjn21f5wwxym" path="res://combat/resources/spells/HeavyWord.tres" id="4_heavy_word"]

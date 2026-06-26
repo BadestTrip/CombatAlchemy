@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bbdflu1w5nhgw" path="res://mainmenu/VersionStone.gd" id="1_version_stone"]
 [ext_resource type="FontFile" uid="uid://bi7jlcgpmn18i" path="res://extra/yoster.ttf" id="2_font"]
-[ext_resource type="Resource" path="res://globals/resources/ProjectInfo_Default.tres" id="3_project_info"]
+[ext_resource type="Resource" uid="uid://dgvb1jf60rj4r" path="res://globals/resources/ProjectInfo_Default.tres" id="3_project_info"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_version_stone"]
 bg_color = Color(0.16, 0.12, 0.08, 0.68)
