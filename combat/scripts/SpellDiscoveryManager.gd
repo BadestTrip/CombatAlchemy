@@ -1,6 +1,6 @@
 # SpellDiscoveryManager.gd
 # Attach this script to the SpellDiscoveryManager node in CombatScene.tscn.
-# It owns runtime-only spell discoveries and cast history for the current combat.
+# It mirrors session-only spell discoveries and cast history from GameManager.
 # Nothing here is saved permanently yet.
 extends Node
 class_name SpellDiscoveryManager
@@ -43,6 +43,7 @@ func configure(
 	if balance_ref != null:
 		balance = balance_ref
 	_rebuild_recipe_lookup()
+	_load_session_memory()
 	_reveal_initial_recipes()
 
 
@@ -63,6 +64,7 @@ func record_chant_result(
 	var was_new_discovery := false
 	if is_known and recipe != null and not discovered_spell_keys.has(chant_key):
 		discovered_spell_keys[chant_key] = true
+		GameManager.remember_learned_chant(chant_key)
 		was_new_discovery = true
 		spellbook_updated.emit()
 
@@ -83,14 +85,11 @@ func record_chant_result(
 			"target": target_name
 		}
 		cast_history.append(entry)
+		GameManager.remember_cast_history_entry(entry)
 		_trim_cast_history()
+		GameManager.replace_session_cast_history(cast_history)
 
-		# Preserve the signal's typed Array[Dictionary] contract while still
-		# sending detached snapshots that presentation code cannot mutate.
-		var history_snapshot: Array[Dictionary] = []
-		for history_entry: Dictionary in cast_history:
-			history_snapshot.append(history_entry.duplicate(true))
-		cast_history_updated.emit(history_snapshot)
+		cast_history_updated.emit(_get_cast_history_snapshot())
 
 	if was_new_discovery and _get_balance().announce_new_discoveries:
 		spell_discovered.emit(recipe, result)
@@ -110,6 +109,14 @@ func get_recipe_for_key(chant_key: String) -> SpellRecipeData:
 	return _recipes_by_key.get(chant_key) as SpellRecipeData
 
 
+func get_all_active_recipes() -> Array[SpellRecipeData]:
+	var active_recipes: Array[SpellRecipeData] = []
+	for recipe: SpellRecipeData in _spell_recipes:
+		if recipe != null:
+			active_recipes.append(recipe)
+	return active_recipes
+
+
 # Build a safe lookup and warn about malformed or duplicate recipe data.
 func _rebuild_recipe_lookup() -> void:
 	_recipes_by_key.clear()
@@ -126,13 +133,22 @@ func _rebuild_recipe_lookup() -> void:
 		_recipes_by_key[chant_key] = recipe
 
 
+func _load_session_memory() -> void:
+	discovered_spell_keys = GameManager.get_learned_chant_keys_snapshot()
+	cast_history = GameManager.get_session_cast_history_snapshot()
+	_trim_cast_history()
+	GameManager.replace_session_cast_history(cast_history)
+	cast_history_updated.emit(_get_cast_history_snapshot())
+
+
 # Initially discovered recipes appear without triggering first-cast popups.
 func _reveal_initial_recipes() -> void:
-	discovered_spell_keys.clear()
 	if _get_balance().reveal_initially_discovered_spells:
 		for recipe: SpellRecipeData in _spell_recipes:
 			if recipe != null and recipe.initially_discovered:
-				discovered_spell_keys[recipe.get_chant_key()] = true
+				var chant_key := recipe.get_chant_key()
+				discovered_spell_keys[chant_key] = true
+				GameManager.remember_learned_chant(chant_key)
 	spellbook_updated.emit()
 
 
@@ -141,6 +157,15 @@ func _trim_cast_history() -> void:
 	var limit := maxi(1, _get_balance().max_cast_history_entries)
 	while cast_history.size() > limit:
 		cast_history.pop_front()
+
+
+func _get_cast_history_snapshot() -> Array[Dictionary]:
+	# Preserve the signal's typed Array[Dictionary] contract while still
+	# sending detached snapshots that presentation code cannot mutate.
+	var history_snapshot: Array[Dictionary] = []
+	for history_entry: Dictionary in cast_history:
+		history_snapshot.append(history_entry.duplicate(true))
+	return history_snapshot
 
 
 func _get_balance() -> CombatBalanceData:

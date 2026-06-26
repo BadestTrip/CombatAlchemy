@@ -38,6 +38,10 @@ signal spell_result_shown(result: Dictionary)
 @onready var cast_history_panel: PanelContainer = %CastHistoryPanel
 @onready var cast_history_list: RichTextLabel = %CastHistoryList
 @onready var cast_history_close_button: Button = %CastHistoryCloseButton
+@onready var debug_chants_button: Button = %DebugChantsButton
+@onready var debug_chants_panel: PanelContainer = %DebugChantsPanel
+@onready var debug_chants_list: RichTextLabel = %DebugChantsList
+@onready var debug_chants_close_button: Button = %DebugChantsCloseButton
 @onready var discovery_popup: PanelContainer = %SpellDiscoveryPopup
 @onready var discovery_popup_label: Label = %DiscoveryPopupLabel
 @onready var discovery_close_button: Button = %DiscoveryCloseButton
@@ -54,6 +58,7 @@ var _slot_buttons: Array[Button] = []
 var _round_input_enabled: bool = false
 var _pause_menu_open: bool = false
 var _fallback_balance: CombatBalanceData
+var _fallback_chant_balance: ChantBalanceLibraryData
 var _result_banner_tween: Tween
 var _shout_is_playing: bool = false
 
@@ -82,8 +87,10 @@ func _ready() -> void:
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
 	spellbook_button.pressed.connect(_on_spellbook_pressed)
 	cast_history_button.pressed.connect(_on_cast_history_pressed)
+	debug_chants_button.pressed.connect(_on_debug_chants_pressed)
 	spellbook_close_button.pressed.connect(_close_secondary_panels)
 	cast_history_close_button.pressed.connect(_close_secondary_panels)
+	debug_chants_close_button.pressed.connect(_close_secondary_panels)
 	discovery_close_button.pressed.connect(_close_discovery_popup)
 	discovery_auto_hide_timer.timeout.connect(_close_discovery_popup)
 
@@ -96,6 +103,7 @@ func _ready() -> void:
 		_log_panel.visible = false
 	spellbook_panel.visible = false
 	cast_history_panel.visible = false
+	debug_chants_panel.visible = false
 	discovery_popup.visible = false
 	if _shout_label != null:
 		_shout_label.visible = false
@@ -137,6 +145,8 @@ func configure(
 
 	_refresh_spellbook()
 	_refresh_cast_history()
+	_refresh_debug_chants()
+	_refresh_debug_chants_button()
 	refresh_all()
 
 
@@ -156,6 +166,7 @@ func refresh_all() -> void:
 	refresh_enemy_intents()
 	_refresh_chant_slots()
 	refresh_cast_controls()
+	_refresh_debug_chants_button()
 	_update_objective_text()
 
 
@@ -422,6 +433,7 @@ func _is_secondary_panel_open() -> bool:
 		(_log_panel != null and _log_panel.visible)
 		or spellbook_panel.visible
 		or cast_history_panel.visible
+		or debug_chants_panel.visible
 	)
 
 
@@ -472,6 +484,10 @@ func _on_cast_history_pressed() -> void:
 	_toggle_secondary_panel("history")
 
 
+func _on_debug_chants_pressed() -> void:
+	_toggle_secondary_panel("debug_chants")
+
+
 func _toggle_secondary_panel(panel_id: String) -> void:
 	if _pause_menu_open:
 		return
@@ -488,6 +504,8 @@ func _toggle_secondary_panel(panel_id: String) -> void:
 				_refresh_cast_history()
 			"chants":
 				_refresh_spellbook()
+			"debug_chants":
+				_refresh_debug_chants()
 	_update_secondary_button_states()
 	_update_combat_input_state()
 	if should_open:
@@ -499,6 +517,7 @@ func _close_secondary_panels() -> void:
 		_log_panel.visible = false
 	spellbook_panel.visible = false
 	cast_history_panel.visible = false
+	debug_chants_panel.visible = false
 	_update_secondary_button_states()
 	_update_combat_input_state()
 
@@ -511,6 +530,8 @@ func _secondary_panel_for_id(panel_id: String) -> Control:
 			return cast_history_panel
 		"chants":
 			return spellbook_panel
+		"debug_chants":
+			return debug_chants_panel
 		_:
 			return null
 
@@ -522,6 +543,8 @@ func _update_secondary_button_states() -> void:
 		cast_history_button.button_pressed = cast_history_panel.visible
 	if spellbook_button != null:
 		spellbook_button.button_pressed = spellbook_panel.visible
+	if debug_chants_button != null:
+		debug_chants_button.button_pressed = debug_chants_panel.visible
 
 
 func _on_spell_discovered(
@@ -632,6 +655,78 @@ func _refresh_cast_history(history: Array[Dictionary] = []) -> void:
 				String(entry.get("target", "None"))
 			]
 		)
+
+
+func _refresh_debug_chants_button() -> void:
+	if debug_chants_button == null:
+		return
+	var should_show := _get_balance().debug_show_all_chants_button
+	debug_chants_button.visible = should_show
+	if not should_show and debug_chants_panel != null:
+		debug_chants_panel.visible = false
+		debug_chants_button.button_pressed = false
+
+
+func _refresh_debug_chants() -> void:
+	if debug_chants_list == null:
+		return
+	debug_chants_list.clear()
+	if discovery_manager == null:
+		debug_chants_list.append_text("Discovery manager is not configured.")
+		return
+
+	var recipes := discovery_manager.get_all_active_recipes()
+	if recipes.is_empty():
+		debug_chants_list.append_text("No active authored chants.")
+		return
+
+	for recipe: SpellRecipeData in recipes:
+		debug_chants_list.append_text(_format_debug_chant_entry(recipe) + "\n\n")
+
+
+func _format_debug_chant_entry(recipe: SpellRecipeData) -> String:
+	var lines: PackedStringArray = [
+		_format_recipe_chant(recipe),
+		recipe.result_name,
+		"Type: %s" % recipe.result_type
+	]
+	var balance_text := _debug_balance_summary(recipe)
+	if not balance_text.is_empty():
+		lines.append(balance_text)
+	elif not recipe.player_description.is_empty():
+		lines.append(recipe.player_description)
+	return "\n".join(lines)
+
+
+func _debug_balance_summary(recipe: SpellRecipeData) -> String:
+	var chant_balance := _get_chant_balance()
+	match recipe.get_chant_key():
+		"asha_voro_keth":
+			return "Damage: %d" % chant_balance.razor_comet_damage
+		"voro_bavo_keth":
+			return "Damage: %d" % chant_balance.heavy_word_damage
+		"elum_iri_bavo":
+			return "Heal all mages: %d" % chant_balance.holy_pigeon_heal_all_mages
+		"elum_bavo_voro":
+			return "Shield all mages: %d" % chant_balance.stone_halo_shield
+		"keth_mira_zun":
+			return "Damage: %d\nStun chance: %d%%\nStun duration: %d" % [
+				chant_balance.severed_thunder_damage,
+				int(chant_balance.severed_thunder_stun_chance * 100.0),
+				chant_balance.severed_thunder_stun_duration
+			]
+		"zun_zun_zun":
+			return "Enemy damage: %d\nMage damage: %d" % [
+				chant_balance.thunder_vomit_enemy_damage,
+				chant_balance.thunder_vomit_mage_damage
+			]
+		"bavo_bavo_bavo":
+			return (
+				"Confuse duration: %d"
+				% chant_balance.great_belly_confuse_duration
+			)
+		_:
+			return ""
 
 
 func _format_recipe_chant(recipe: SpellRecipeData) -> String:
@@ -781,3 +876,15 @@ func _get_balance() -> CombatBalanceData:
 			"CombatUIController has no CombatBalanceData assigned; using script defaults."
 		)
 	return _fallback_balance
+
+
+func _get_chant_balance() -> ChantBalanceLibraryData:
+	var settings := _get_balance()
+	if settings.chant_balance_library != null:
+		return settings.chant_balance_library
+	if _fallback_chant_balance == null:
+		_fallback_chant_balance = ChantBalanceLibraryData.new()
+		push_warning(
+			"CombatUIController has no ChantBalanceLibraryData assigned; using script defaults."
+		)
+	return _fallback_chant_balance

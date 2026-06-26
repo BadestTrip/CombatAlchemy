@@ -5,13 +5,13 @@
 
 [sub_resource type="Resource" id="Effect_shield"]
 script = ExtResource("2_effect")
-effect_type = 4
+effect_type = 3
 amount = 8
 
 [resource]
 script = ExtResource("1_recipe")
 chant_symbols = Array[String](["elum", "bavo", "voro"])
 result_name = "Stone Halo"
-player_description = "Grants a large shield to one random living mage."
-discovery_flavor_text = "A heavy ring chooses one mage and refuses to move."
+player_description = "Grants a large shield to every living mage."
+discovery_flavor_text = "A heavy ring settles over every living mage and refuses to move."
 effects = Array[ExtResource("2_effect")]([SubResource("Effect_shield")])

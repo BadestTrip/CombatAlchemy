@@ -23,6 +23,7 @@ var previous_successful_spell_key: String = ""
 # A missing Inspector resource uses this safe in-memory default.
 var balance: CombatBalanceData
 var _fallback_balance: CombatBalanceData
+var _fallback_chant_balance: ChantBalanceLibraryData
 
 
 # Godot calls this after exported recipe resources have been assigned.
@@ -147,15 +148,16 @@ func _apply_recipe_effects(
 	for effect: SpellEffectData in recipe.effects:
 		if effect == null:
 			continue
+		var balanced_effect := _balanced_effect_for_recipe(recipe, effect)
 		if effect.effect_type == SpellEffectData.EffectType.IDIOT_STAR_RANDOM_OUTCOME:
 			_apply_idiot_star_outcome(recipe.effects, target, context, log_lines)
 			return
 
-		var clamped_chance := clampf(effect.chance, 0.0, 1.0)
+		var clamped_chance := clampf(balanced_effect.chance, 0.0, 1.0)
 		if clamped_chance < 1.0 and randf() >= clamped_chance:
 			continue
 
-		_apply_effect(effect, target, context, log_lines)
+		_apply_effect(balanced_effect, target, context, log_lines)
 
 
 # Each match branch explains which exported effect fields it consumes.
@@ -320,6 +322,49 @@ func _apply_effect(
 		SpellEffectData.EffectType.IDIOT_STAR_RANDOM_OUTCOME:
 			# The recipe-level loop handles this grouped effect before dispatch.
 			pass
+
+
+func _balanced_effect_for_recipe(
+	recipe: SpellRecipeData,
+	effect: SpellEffectData
+) -> SpellEffectData:
+	var balanced_effect := effect.duplicate(true) as SpellEffectData
+	if balanced_effect == null:
+		return effect
+
+	var chant_balance := _get_chant_balance()
+	match recipe.get_chant_key():
+		"asha_voro_keth":
+			if effect.effect_type == SpellEffectData.EffectType.DAMAGE_TARGET:
+				balanced_effect.amount = chant_balance.razor_comet_damage
+		"voro_bavo_keth":
+			if effect.effect_type == SpellEffectData.EffectType.DAMAGE_TARGET:
+				balanced_effect.amount = chant_balance.heavy_word_damage
+		"elum_iri_bavo":
+			if effect.effect_type == SpellEffectData.EffectType.HEAL_ALL_MAGES:
+				balanced_effect.amount = chant_balance.holy_pigeon_heal_all_mages
+		"elum_bavo_voro":
+			if (
+				effect.effect_type == SpellEffectData.EffectType.SHIELD_ALL_MAGES
+				or effect.effect_type == SpellEffectData.EffectType.SHIELD_RANDOM_MAGE
+			):
+				balanced_effect.amount = chant_balance.stone_halo_shield
+		"keth_mira_zun":
+			if effect.effect_type == SpellEffectData.EffectType.DAMAGE_TARGET:
+				balanced_effect.amount = chant_balance.severed_thunder_damage
+			elif effect.effect_type == SpellEffectData.EffectType.APPLY_STATUS_TARGET:
+				balanced_effect.chance = chant_balance.severed_thunder_stun_chance
+				balanced_effect.status_duration = chant_balance.severed_thunder_stun_duration
+		"zun_zun_zun":
+			if effect.effect_type == SpellEffectData.EffectType.DAMAGE_ALL_ENEMIES:
+				balanced_effect.amount = chant_balance.thunder_vomit_enemy_damage
+			elif effect.effect_type == SpellEffectData.EffectType.DAMAGE_ALL_MAGES:
+				balanced_effect.amount = chant_balance.thunder_vomit_mage_damage
+		"bavo_bavo_bavo":
+			if effect.effect_type == SpellEffectData.EffectType.APPLY_STATUS_TARGET:
+				balanced_effect.status_duration = chant_balance.great_belly_confuse_duration
+
+	return balanced_effect
 
 
 # Unknown chants keep the original five-priority fallback behavior.
@@ -760,3 +805,15 @@ func _get_balance() -> CombatBalanceData:
 			"ChantResolver has no CombatBalanceData assigned; using script defaults."
 		)
 	return _fallback_balance
+
+
+func _get_chant_balance() -> ChantBalanceLibraryData:
+	var settings := _get_balance()
+	if settings.chant_balance_library != null:
+		return settings.chant_balance_library
+	if _fallback_chant_balance == null:
+		_fallback_chant_balance = ChantBalanceLibraryData.new()
+		push_warning(
+			"ChantResolver has no ChantBalanceLibraryData assigned; using script defaults."
+		)
+	return _fallback_chant_balance

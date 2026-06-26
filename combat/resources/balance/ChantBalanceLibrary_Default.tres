@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="ChantBalanceLibraryData" format=3]
+
+[ext_resource type="Script" path="res://combat/resources/ChantBalanceLibraryData.gd" id="1_chant_balance"]
+
+[resource]
+script = ExtResource("1_chant_balance")
