@@ -1,10 +1,12 @@
 # PauseMenu.gd
-# Attach this script to CombatScene/PauseMenu.
-# It reuses the existing Settings.tscn audio controls and owns the paused state.
+# Shared pause menu for combat and overworld scenes. It reuses the existing
+# Settings.tscn audio controls and owns the paused state.
 extends Control
 
-# Combat UI listens through this direct reference so input is blocked explicitly.
-@onready var combat_ui: CombatUIController = %CombatUI
+@export_enum("combat", "overworld") var pause_context: String = "combat"
+@export var combat_ui_path: NodePath
+
+@onready var combat_ui: CombatUIController = _resolve_combat_ui()
 @onready var pause_buttons: Control = $CenterContainer
 @onready var resume_btn: Button = $CenterContainer/VBoxContainer/Resume
 @onready var restart_btn: Button = $CenterContainer/VBoxContainer/Restart
@@ -19,6 +21,7 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	visible = false
 	settings_menu.visible = false
+	_configure_for_context()
 	resume_btn.pressed.connect(_on_resume)
 	restart_btn.pressed.connect(_on_restart)
 	settings_btn.pressed.connect(_on_settings)
@@ -49,29 +52,33 @@ func _open() -> void:
 	pause_buttons.visible = true
 	settings_menu.visible = false
 	get_tree().paused = true
-	combat_ui.set_pause_menu_open(true)
+	_set_combat_pause_state(true)
 	resume_btn.grab_focus()
 
 func _on_resume() -> void:
 	visible = false
 	settings_menu.visible = false
 	get_tree().paused = false
-	combat_ui.set_pause_menu_open(false)
+	_set_combat_pause_state(false)
 
 func _on_restart() -> void:
 	get_tree().paused = false
 	visible = false
-	combat_ui.set_pause_menu_open(false)
-	GameManager.restart_combat()
+	_set_combat_pause_state(false)
+	if pause_context == "combat":
+		GameManager.restart_combat()
+	else:
+		GameManager.start_new_game()
 
 func _on_menu() -> void:
 	get_tree().paused = false
 	visible = false
-	combat_ui.set_pause_menu_open(false)
+	_set_combat_pause_state(false)
 	GameManager.go_to_main_menu()
 
 func _on_quit() -> void:
 	get_tree().paused = false
+	_set_combat_pause_state(false)
 	GameManager.quit_game()
 
 
@@ -85,3 +92,19 @@ func _on_settings_closed() -> void:
 	settings_menu.visible = false
 	pause_buttons.visible = true
 	settings_btn.grab_focus()
+
+
+func _configure_for_context() -> void:
+	restart_btn.visible = pause_context == "combat"
+	restart_btn.disabled = pause_context != "combat"
+
+
+func _set_combat_pause_state(is_open: bool) -> void:
+	if combat_ui != null:
+		combat_ui.set_pause_menu_open(is_open)
+
+
+func _resolve_combat_ui() -> CombatUIController:
+	if String(combat_ui_path).is_empty():
+		return null
+	return get_node_or_null(combat_ui_path) as CombatUIController

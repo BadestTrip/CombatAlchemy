@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_project_info")
-project_version = "Version 0.1.4"
-current_focus = "Overworld V0.2"
+project_version = "Version 0.1.6"
+current_focus = "First MVP Loop"
 build_label = "Prototype"

@@ -13,8 +13,6 @@
 [ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="42_hva8a"]
 [ext_resource type="Script" uid="uid://bf737wkc22lw" path="res://combat/scripts/SpellDiscoveryManager.gd" id="44_discovery"]
 [ext_resource type="AudioStream" uid="uid://c36fy0n0rxco3" path="res://music/combat_scene_not_final.mp3" id="45_ftuvk"]
-[ext_resource type="Script" uid="uid://bin7tkhjryrkc" path="res://test/PauseMenu.gd" id="45_pause"]
-[ext_resource type="PackedScene" uid="uid://bsnod8l07k2md" path="res://mainmenu/Settings.tscn" id="46_settings"]
 [ext_resource type="Script" uid="uid://b6pevmp70xcyf" path="res://combat/scripts/ui/RuneWheelController.gd" id="48_rune_wheel"]
 [ext_resource type="Script" uid="uid://bvdaat3ddx1qg" path="res://combat/scripts/ui/FloatingUnitHUD.gd" id="49_floating_hud"]
 [ext_resource type="Script" uid="uid://ban1286l0lwac" path="res://combat/scripts/tutorial/CombatTutorialController.gd" id="50_tutorial"]
@@ -22,6 +20,7 @@
 [ext_resource type="Resource" uid="uid://brupfbqc805g1" path="res://combat/resources/tutorial/CombatTutorialPresentation_Default.tres" id="52_tutorial_presentation"]
 [ext_resource type="Texture2D" uid="uid://cjnbtwthds1lf" path="res://sprites/characters/placeholder_mage_spritey.png" id="54_mage_placeholder"]
 [ext_resource type="Texture2D" uid="uid://c7wjn7t52je3b" path="res://sprites/characters/placeholder_enemy_adept_sprite.png" id="55_enemy_placeholder"]
+[ext_resource type="PackedScene" path="res://ui/PauseMenu.tscn" id="56_pause_menu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rune_circle"]
 bg_color = Color(0.18, 0.16, 0.12, 0.55)
@@ -808,75 +807,10 @@ unique_name_in_owner = true
 script = ExtResource("41_lo2c2")
 enemy_name = "Training Adept"
 
-[node name="PauseMenu" type="Control" parent="." unique_id=1807509113]
-process_mode = 3
-visible = false
+[node name="PauseMenu" parent="." instance=ExtResource("56_pause_menu")]
 z_index = 30
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("45_pause")
-
-[node name="PauseShade" type="ColorRect" parent="PauseMenu" unique_id=302625919]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.72)
-
-[node name="CenterContainer" type="CenterContainer" parent="PauseMenu" unique_id=368763922]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/CenterContainer" unique_id=276893496]
-custom_minimum_size = Vector2(420, 0)
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="PauseTitle" type="Label" parent="PauseMenu/CenterContainer/VBoxContainer" unique_id=170829447]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
-theme_override_font_sizes/font_size = 34
-text = "Paused"
-horizontal_alignment = 1
-
-[node name="Resume" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer" unique_id=169800316]
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-text = "Resume"
-
-[node name="Restart" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer" unique_id=808156417]
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-text = "Restart Combat"
-
-[node name="Settings" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer" unique_id=26333627]
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-text = "Settings"
-
-[node name="MainMenu" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer" unique_id=315665430]
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-text = "Main Menu"
-
-[node name="Quit" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer" unique_id=1147295848]
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-text = "Quit Game"
-
-[node name="SettingsMenu" parent="PauseMenu" unique_id=262763306 instance=ExtResource("46_settings")]
-visible = false
-layout_mode = 1
+pause_context = "combat"
+combat_ui_path = NodePath("../CombatUI")
 
 [node name="LevelMusic" parent="." unique_id=238704293 instance=ExtResource("42_hva8a")]
 music = ExtResource("45_ftuvk")

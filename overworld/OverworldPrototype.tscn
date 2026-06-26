@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://c5gx2xh2v4fex" path="res://sprites/locations/mini_boss_lair_TRUE_TRANSPARENT.png" id="5_dtish"]
 [ext_resource type="Resource" uid="uid://dt6ivk8uoute5" path="res://combat/resources/encounters/TrainingAdept_Encounter.tres" id="6_training_encounter"]
 [ext_resource type="Resource" uid="uid://dj12dxealc6bd" path="res://combat/resources/encounters/MinibossLair_Encounter.tres" id="7_miniboss_encounter"]
+[ext_resource type="PackedScene" path="res://ui/PauseMenu.tscn" id="8_pause_menu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_duel"]
 size = Vector2(133.62299, 83.21927)
@@ -162,6 +163,9 @@ theme_override_colors/font_color = Color(1, 0.9, 0.52, 1)
 theme_override_font_sizes/font_size = 28
 text = "Press E to begin duel"
 horizontal_alignment = 1
+
+[node name="PauseMenu" parent="HUD" unique_id=1054862604 instance=ExtResource("8_pause_menu")]
+pause_context = "overworld"
 
 [node name="LevelMusic" type="Node2D" parent="." unique_id=1281674120 groups=["level_music"]]
 script = ExtResource("3_ak3if")
