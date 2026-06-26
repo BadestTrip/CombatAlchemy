@@ -6,12 +6,9 @@ class_name TutorialHighlighter
 @export var tutorial_focus_layer: Control
 
 @export_range(0.0, 1.0, 0.01) var overlay_alpha: float = 0.56
-
-
-const GOLD_BASE: Color = Color(1.18, 1.06, 0.72, 1.0)
-const GOLD_PEAK: Color = Color(1.45, 1.22, 0.55, 1.0)
-const GOLD_FONT: Color = Color(1.0, 0.86, 0.32, 1.0)
-const GOLD_SOFT: Color = Color(1.0, 0.72, 0.2, 0.18)
+@export var highlight_scale: float = 1.045
+@export var highlight_pulse_seconds: float = 0.48
+@export var highlight_gold: Color = Color(1.0, 0.82, 0.28, 1.0)
 
 
 var _focused_target: Control
@@ -35,6 +32,21 @@ func _exit_tree() -> void:
 
 func _process(_delta: float) -> void:
 	refresh_focus_position()
+
+
+func apply_presentation(settings: CombatTutorialPresentationData) -> void:
+	if settings == null:
+		return
+
+	_resolve_nodes()
+	overlay_alpha = settings.dim_overlay_alpha
+	highlight_scale = maxf(1.0, settings.highlight_scale)
+	highlight_pulse_seconds = maxf(0.01, settings.highlight_pulse_seconds)
+	highlight_gold = settings.highlight_gold
+	if tutorial_overlay != null and is_instance_valid(tutorial_overlay):
+		var overlay_color := settings.dim_overlay_color
+		overlay_color.a = overlay_alpha
+		tutorial_overlay.color = overlay_color
 
 
 func set_overlay_visible(is_visible: bool) -> void:
@@ -168,7 +180,7 @@ func _create_texture_button_proxy(target: TextureButton) -> TextureButton:
 	proxy.texture_click_mask = target.texture_click_mask
 	proxy.ignore_texture_size = target.ignore_texture_size
 	proxy.stretch_mode = target.stretch_mode
-	proxy.modulate = GOLD_BASE
+	proxy.modulate = _highlight_base_color()
 	return proxy
 
 
@@ -206,7 +218,7 @@ func _create_label_proxy(target: Label) -> Label:
 		)
 	else:
 		proxy.add_theme_font_size_override("font_size", 24)
-	proxy.add_theme_color_override("font_color", GOLD_FONT)
+	proxy.add_theme_color_override("font_color", highlight_gold)
 	return proxy
 
 
@@ -227,7 +239,7 @@ func _create_frame_proxy(target: Control) -> PanelContainer:
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.add_theme_color_override("font_color", GOLD_FONT)
+		label.add_theme_color_override("font_color", highlight_gold)
 
 		margin.add_child(label)
 		proxy.add_child(margin)
@@ -259,13 +271,13 @@ func _apply_button_gold_style(proxy: Button) -> void:
 		"font_disabled_color",
 		"font_focus_color"
 	]:
-		proxy.add_theme_color_override(color_name, GOLD_FONT)
+		proxy.add_theme_color_override(color_name, highlight_gold)
 
 
 func _make_gold_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = GOLD_SOFT
-	style.border_color = GOLD_FONT
+	style.bg_color = Color(highlight_gold.r, highlight_gold.g, highlight_gold.b, 0.18)
+	style.border_color = highlight_gold
 	style.border_width_left = 3
 	style.border_width_top = 3
 	style.border_width_right = 3
@@ -282,10 +294,33 @@ func _start_proxy_pulse() -> void:
 		return
 
 	_focus_proxy.scale = Vector2.ONE
-	_focus_proxy.modulate = GOLD_BASE
+	_focus_proxy.modulate = _highlight_base_color()
 	_pulse_tween = create_tween()
 	_pulse_tween.set_loops()
-	_pulse_tween.tween_property(_focus_proxy, "scale", Vector2(1.045, 1.045), 0.45)
-	_pulse_tween.parallel().tween_property(_focus_proxy, "modulate", GOLD_PEAK, 0.45)
-	_pulse_tween.tween_property(_focus_proxy, "scale", Vector2.ONE, 0.45)
-	_pulse_tween.parallel().tween_property(_focus_proxy, "modulate", GOLD_BASE, 0.45)
+	_pulse_tween.tween_property(
+		_focus_proxy,
+		"scale",
+		Vector2(highlight_scale, highlight_scale),
+		highlight_pulse_seconds
+	)
+	_pulse_tween.parallel().tween_property(
+		_focus_proxy,
+		"modulate",
+		_highlight_peak_color(),
+		highlight_pulse_seconds
+	)
+	_pulse_tween.tween_property(_focus_proxy, "scale", Vector2.ONE, highlight_pulse_seconds)
+	_pulse_tween.parallel().tween_property(
+		_focus_proxy,
+		"modulate",
+		_highlight_base_color(),
+		highlight_pulse_seconds
+	)
+
+
+func _highlight_base_color() -> Color:
+	return Color(highlight_gold.r * 1.18, highlight_gold.g * 1.18, highlight_gold.b * 1.18, 1.0)
+
+
+func _highlight_peak_color() -> Color:
+	return Color(highlight_gold.r * 1.45, highlight_gold.g * 1.45, highlight_gold.b * 1.45, 1.0)

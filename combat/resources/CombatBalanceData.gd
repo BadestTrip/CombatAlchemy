@@ -25,7 +25,7 @@ class_name CombatBalanceData
 
 # These values control the central retractable rune wheel.
 @export_group("Rune Wheel UI")
-@export var rune_wheel_starts_expanded: bool = true
+@export var rune_wheel_starts_expanded: bool = false
 @export var auto_expand_wheel_on_slot_click: bool = true
 @export var auto_retract_wheel_after_rune_pick: bool = false
 @export var rune_wheel_radius: float = 220.0
