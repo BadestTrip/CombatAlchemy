@@ -5,8 +5,14 @@ extends Resource
 class_name SpellEffectData
 
 
-# These generic operations cover the current authored chants.
-# A few extra operations preserve existing MVP behavior without hardcoded values.
+# Active prototype effect types:
+# DAMAGE_TARGET, DAMAGE_ALL_ENEMIES, DAMAGE_ALL_MAGES, SHIELD_ALL_MAGES,
+# APPLY_STATUS_TARGET, LOG_ONLY, and HEAL_ALL_MAGES cover the current 7 chants.
+#
+# Legacy/archive effect types are kept for compatibility with older experiments
+# and saved resources. Do not remove enum values casually because Godot stores
+# enum indices in .tres files. The enum order is historical, so active and
+# legacy values are mixed below.
 enum EffectType {
 	DAMAGE_TARGET = 0,
 	DAMAGE_ALL_ENEMIES = 1,

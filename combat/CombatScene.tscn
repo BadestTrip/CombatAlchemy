@@ -7,14 +7,7 @@
 [ext_resource type="Script" uid="uid://d4ae0nx3egclw" path="res://combat/RoundManager.gd" id="5_ssh5j"]
 [ext_resource type="Resource" uid="uid://f1frsjbdcext" path="res://combat/resources/symbols/SymbolLibrary_Default.tres" id="7_0rlu1"]
 [ext_resource type="Script" uid="uid://cwqc6y17g0xgk" path="res://combat/ChantResolver.gd" id="8_atnl1"]
-[ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="9_qomwh"]
-[ext_resource type="Resource" uid="uid://btgjurl4ii2vr" path="res://combat/resources/spells/RazorComet.tres" id="10_ev5v8"]
-[ext_resource type="Resource" uid="uid://cgjn21f5wwxym" path="res://combat/resources/spells/HeavyWord.tres" id="17_qjqlw"]
-[ext_resource type="Resource" uid="uid://fbdouux5u0or" path="res://combat/resources/spells/StoneHalo.tres" id="21_0glsu"]
-[ext_resource type="Resource" uid="uid://c2iqnbdic1q46" path="res://combat/resources/spells/ThunderVomit.tres" id="22_ahggg"]
-[ext_resource type="Resource" uid="uid://cufwjhrssv27v" path="res://combat/resources/spells/SeveredThunder.tres" id="29_6ua2i"]
-[ext_resource type="Resource" uid="uid://c5i3c4s2to8b5" path="res://combat/resources/spells/GreatBelly.tres" id="31_v31dn"]
-[ext_resource type="Resource" uid="uid://ckfgntjpcuj1x" path="res://combat/resources/spells/HolyPigeon.tres" id="36_tbdm8"]
+[ext_resource type="Resource" path="res://combat/resources/chants/ChantLibrary_Default.tres" id="9_chant_library"]
 [ext_resource type="Script" uid="uid://ou85bt34vocp" path="res://combat/MageUnit.gd" id="40_qrgab"]
 [ext_resource type="Script" uid="uid://c6p1vnisdne8n" path="res://combat/EnemyUnit.gd" id="41_lo2c2"]
 [ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="42_hva8a"]
@@ -234,7 +227,19 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_rune_circle")
 
-[node name="ObjectiveLabel" type="Label" parent="CombatSpace/RuneCircleRoot" unique_id=1811661347]
+[node name="TutorialLayer" type="Control" parent="." unique_id=1135085833]
+unique_name_in_owner = true
+z_index = 40
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ObjectiveLabel" type="Label" parent="TutorialLayer" unique_id=1811661347]
+visible = false
 z_index = 3
 layout_mode = 1
 anchors_preset = -1
@@ -482,7 +487,7 @@ layout_mode = 2
 toggle_mode = true
 text = "Debug Chants"
 
-[node name="TutorialOverlay" type="ColorRect" parent="." unique_id=2008953040]
+[node name="TutorialOverlay" type="ColorRect" parent="TutorialLayer" unique_id=2008953040]
 unique_name_in_owner = true
 visible = false
 z_index = 40
@@ -759,7 +764,7 @@ script = ExtResource("5_ssh5j")
 [node name="ChantResolver" type="Node" parent="." unique_id=1199369047]
 unique_name_in_owner = true
 script = ExtResource("8_atnl1")
-spell_recipes = Array[ExtResource("9_qomwh")]([ExtResource("10_ev5v8"), ExtResource("17_qjqlw"), ExtResource("36_tbdm8"), ExtResource("21_0glsu"), ExtResource("29_6ua2i"), ExtResource("22_ahggg"), ExtResource("31_v31dn")])
+chant_library = ExtResource("9_chant_library")
 
 [node name="SpellDiscoveryManager" type="Node" parent="." unique_id=871974269]
 unique_name_in_owner = true

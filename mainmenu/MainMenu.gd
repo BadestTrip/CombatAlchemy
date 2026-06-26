@@ -12,13 +12,18 @@
 # Inspector tuning notes:
 #   - transition_duration controls how long the ink reveal takes after pressing
 #     New Game. A value between 0.6 and 1.0 seconds keeps it quick.
+#   - menu_style owns high-level menu visuals so the scene is less hardcoded.
 extends Control
 
 
 # Duration forwarded into globals/InkwashTransition.gd before scene changes.
 @export_range(0.1, 3.0, 0.05) var transition_duration: float = 2
+@export var menu_style: MainMenuStyleData
 
 
+@onready var background: TextureRect = $Background
+@onready var shader_layer: ColorRect = $Shader
+@onready var rune_circle: RuneCircle = $RuneCircle as RuneCircle
 @onready var continue_btn: TextureButton = $UI/FlowContainer/HFlowContainer/Continue
 @onready var play_btn: TextureButton = $UI/FlowContainer/HFlowContainer/NewGame
 @onready var settings_btn: TextureButton = $UI/FlowContainer/HFlowContainer/Options
@@ -33,9 +38,12 @@ var _transition_started: bool = false
 
 # Godot calls this when the main menu enters the scene.
 func _ready() -> void:
+	_apply_menu_style()
 	play_btn.pressed.connect(_on_play)
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
+	if settings_menu.has_signal("close_requested"):
+		settings_menu.connect("close_requested", _on_settings_closed)
 
 
 # New Game uses GameManager so existing scene loading and autoload state stay intact.
@@ -67,6 +75,35 @@ func _on_quit() -> void:
 	if _transition_started:
 		return
 	GameManager.quit_game()
+
+
+func _on_settings_closed() -> void:
+	settings_menu.visible = false
+	UI.visible = true
+	settings_btn.grab_focus()
+
+
+func _apply_menu_style() -> void:
+	if menu_style == null:
+		return
+	if background != null and menu_style.background_texture != null:
+		background.texture = menu_style.background_texture
+	if rune_circle != null:
+		rune_circle.rune_opacity = menu_style.rune_circle_opacity
+		rune_circle.rotation_speed_degrees = menu_style.rune_circle_rotation_speed
+	if shader_layer != null:
+		shader_layer.visible = menu_style.shader_enabled
+		var shader_material := shader_layer.material as ShaderMaterial
+		if shader_material != null:
+			shader_material.set_shader_parameter(
+				"effect_strength",
+				menu_style.shader_effect_strength
+			)
+			shader_material.set_shader_parameter(
+				"vignette_strength",
+				menu_style.vignette_strength
+			)
+			shader_material.set_shader_parameter("pulse_speed", menu_style.pulse_speed)
 
 
 # Disable every main-menu button that could be clicked during a transition.

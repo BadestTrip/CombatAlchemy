@@ -16,6 +16,7 @@ signal spell_result_shown(result: Dictionary)
 @export var rune_wheel_controller: RuneWheelController
 @export var player_hud: FloatingUnitHUD
 @export var enemy_hud: FloatingUnitHUD
+# Tutorial-only objective text. Normal combat should leave this hidden.
 @export var objective_label: Label
 
 
@@ -706,7 +707,7 @@ func _debug_balance_summary(recipe: SpellRecipeData) -> String:
 		"voro_bavo_keth":
 			return "Damage: %d" % chant_balance.heavy_word_damage
 		"elum_iri_bavo":
-			return "Heal all mages: %d" % chant_balance.holy_pigeon_heal_all_mages
+			return "Heal all mages: %d" % chant_balance.holy_pigeon_heal
 		"elum_bavo_voro":
 			return "Shield all mages: %d" % chant_balance.stone_halo_shield
 		"keth_mira_zun":
@@ -716,9 +717,9 @@ func _debug_balance_summary(recipe: SpellRecipeData) -> String:
 				chant_balance.severed_thunder_stun_duration
 			]
 		"zun_zun_zun":
-			return "Enemy damage: %d\nMage damage: %d" % [
+			return "Enemy damage: %d\nSelf damage: %d" % [
 				chant_balance.thunder_vomit_enemy_damage,
-				chant_balance.thunder_vomit_mage_damage
+				chant_balance.thunder_vomit_self_damage
 			]
 		"bavo_bavo_bavo":
 			return (

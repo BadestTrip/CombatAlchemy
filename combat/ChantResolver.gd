@@ -10,8 +10,10 @@ class_name ChantResolver
 signal chant_resolved(result: Dictionary)
 
 
-# Add SpellRecipeData resources here. Order inside each recipe remains meaningful.
+# ChantLibraryData is the normal active authored chant registry. spell_recipes
+# remains only as a temporary fallback for older scene instances.
 @export_group("Spell Recipes")
+@export var chant_library: ChantLibraryData
 @export var spell_recipes: Array[SpellRecipeData] = []
 
 # Authored chant keys map directly to editable SpellRecipeData resources.
@@ -24,6 +26,7 @@ var previous_successful_spell_key: String = ""
 var balance: CombatBalanceData
 var _fallback_balance: CombatBalanceData
 var _fallback_chant_balance: ChantBalanceLibraryData
+var _warned_missing_chant_library: bool = false
 
 
 # Godot calls this after exported recipe resources have been assigned.
@@ -90,7 +93,7 @@ func resolve_chant(
 func _build_spellbook() -> void:
 	spellbook.clear()
 
-	for recipe: SpellRecipeData in spell_recipes:
+	for recipe: SpellRecipeData in get_active_recipes():
 		if recipe == null:
 			continue
 
@@ -104,6 +107,17 @@ func _build_spellbook() -> void:
 
 		# The dictionary stores the Resource itself so every effect remains editable.
 		spellbook[key] = recipe
+
+
+func get_active_recipes() -> Array[SpellRecipeData]:
+	if chant_library != null and not chant_library.active_recipes.is_empty():
+		return chant_library.active_recipes
+	if not _warned_missing_chant_library:
+		push_warning(
+			"ChantResolver has no ChantLibraryData assigned; using spell_recipes fallback."
+		)
+		_warned_missing_chant_library = true
+	return spell_recipes
 
 
 # Known chants apply their effect resources in array order.
@@ -342,7 +356,7 @@ func _balanced_effect_for_recipe(
 				balanced_effect.amount = chant_balance.heavy_word_damage
 		"elum_iri_bavo":
 			if effect.effect_type == SpellEffectData.EffectType.HEAL_ALL_MAGES:
-				balanced_effect.amount = chant_balance.holy_pigeon_heal_all_mages
+				balanced_effect.amount = chant_balance.holy_pigeon_heal
 		"elum_bavo_voro":
 			if (
 				effect.effect_type == SpellEffectData.EffectType.SHIELD_ALL_MAGES
@@ -359,7 +373,7 @@ func _balanced_effect_for_recipe(
 			if effect.effect_type == SpellEffectData.EffectType.DAMAGE_ALL_ENEMIES:
 				balanced_effect.amount = chant_balance.thunder_vomit_enemy_damage
 			elif effect.effect_type == SpellEffectData.EffectType.DAMAGE_ALL_MAGES:
-				balanced_effect.amount = chant_balance.thunder_vomit_mage_damage
+				balanced_effect.amount = chant_balance.thunder_vomit_self_damage
 		"bavo_bavo_bavo":
 			if effect.effect_type == SpellEffectData.EffectType.APPLY_STATUS_TARGET:
 				balanced_effect.status_duration = chant_balance.great_belly_confuse_duration
