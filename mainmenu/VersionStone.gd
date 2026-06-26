@@ -8,33 +8,27 @@
 #   - MainMenu.tscn places this scene in a corner.
 #
 # Inspector tuning notes:
-#   - version_text and focus_text can be edited per instance.
-#   - show_focus hides or reveals the current-focus section.
+#   - Assign ProjectInfo_Default.tres so version/focus text has one source.
+#   - Label text inside VersionStone.tscn is only a placeholder.
 extends PanelContainer
 
 
-# The short project version displayed at the top of the plaque.
-@export var version_text: String = "v0.1.2":
-	set(value):
-		version_text = value
-		_refresh_labels()
+const FALLBACK_VERSION_TEXT: String = "Version unavailable"
+const FALLBACK_FOCUS_TEXT: String = "Focus unavailable"
 
-# The current development focus displayed under the version.
-@export var focus_text: String = "OverWorld":
-	set(value):
-		focus_text = value
-		_refresh_labels()
 
-# Toggle this off if a build should show only the version number.
-@export var show_focus: bool = true:
+@export var project_info: ProjectInfoData:
 	set(value):
-		show_focus = value
+		project_info = value
 		_refresh_labels()
 
 
 @onready var version_label: Label = %VersionLabel
 @onready var focus_title_label: Label = %FocusTitleLabel
 @onready var focus_label: Label = %FocusLabel
+
+
+var _warned_missing_project_info: bool = false
 
 
 # Godot calls this when the scene enters the tree.
@@ -44,12 +38,35 @@ func _ready() -> void:
 	_refresh_labels()
 
 
-# Push exported text values into the label nodes.
+# Push ProjectInfoData values into the label nodes.
 func _refresh_labels() -> void:
 	if not is_node_ready():
 		return
 
+	var info := _get_project_info()
+	var version_text := FALLBACK_VERSION_TEXT
+	var focus_text := FALLBACK_FOCUS_TEXT
+	var should_show_focus := false
+
+	if info != null:
+		version_text = info.project_version
+		if info.show_build_label and not info.build_label.is_empty():
+			version_text = "%s - %s" % [version_text, info.build_label]
+		focus_text = info.current_focus
+		should_show_focus = info.show_focus
+
 	version_label.text = version_text
-	focus_title_label.visible = show_focus
-	focus_label.visible = show_focus
+	focus_title_label.visible = should_show_focus
+	focus_label.visible = should_show_focus
 	focus_label.text = focus_text
+
+
+func _get_project_info() -> ProjectInfoData:
+	if project_info != null:
+		return project_info
+	if not _warned_missing_project_info:
+		push_warning(
+			"VersionStone has no ProjectInfoData assigned; using placeholders."
+		)
+		_warned_missing_project_info = true
+	return null

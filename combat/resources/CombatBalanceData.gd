@@ -1,6 +1,8 @@
 # CombatBalanceData.gd
-# Create this as a Resource and assign it to CombatScene in Inspector.
-# It contains design-time tuning values, never temporary combat state.
+# General combat, UI, enemy, discovery, and fallback tuning.
+# Known authored chant numbers belong in ChantBalanceLibraryData, referenced
+# below, so designers do not add spell-specific values to this large resource.
+# This resource contains design-time tuning values, never temporary combat state.
 extends Resource
 class_name CombatBalanceData
 

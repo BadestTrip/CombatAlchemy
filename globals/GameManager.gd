@@ -12,34 +12,37 @@ var session_cast_history: Array[Dictionary] = []
 var first_combat_tutorial_completed: bool = false
 var training_duel_won: bool = false
 
-const START_MENU_SCENE: String = "res://mainmenu/StartMenu.tscn"
-const OVERWORLD_SCENE_PATH: String = "res://overworld/OverworldPrototype.tscn"
-const COMBAT_SCENE_PATH: String = "res://combat/CombatScene.tscn"
-
 const SCENE_TRANSITION_NODE_PATH: String = "/root/SceneTransition"
+const DEFAULT_SCENE_REGISTRY_PATH: String = "res://globals/resources/SceneRegistry_Default.tres"
 
 @export var use_ink_transition: bool = true
+@export var scene_registry: SceneRegistryData
+
+var _loaded_scene_registry: SceneRegistryData
 
 
 func go_to_main_menu() -> void:
-	_change_state_and_scene(GameState.MAIN_MENU, START_MENU_SCENE)
+	_change_state_and_scene(GameState.MAIN_MENU, _get_main_menu_scene())
 
 
 func start_new_game() -> void:
 	reset_session_progress()
-	_change_state_and_scene(GameState.OVERWORLD, OVERWORLD_SCENE_PATH)
+	_change_state_and_scene(GameState.OVERWORLD, _get_overworld_scene())
 
 
 func go_to_overworld() -> void:
-	_change_state_and_scene(GameState.OVERWORLD, OVERWORLD_SCENE_PATH)
+	_change_state_and_scene(GameState.OVERWORLD, _get_overworld_scene())
 
 
-func start_duel_from_overworld() -> void:
-	_change_state_and_scene(GameState.COMBAT, COMBAT_SCENE_PATH)
+func start_duel_from_overworld(combat_scene: PackedScene = null) -> void:
+	if combat_scene != null:
+		_change_state_and_scene(GameState.COMBAT, combat_scene)
+		return
+	_change_state_and_scene(GameState.COMBAT, _get_combat_scene())
 
 
 func restart_combat() -> void:
-	_change_state_and_scene(GameState.COMBAT, COMBAT_SCENE_PATH)
+	_change_state_and_scene(GameState.COMBAT, _get_combat_scene())
 
 
 func quit_game() -> void:
@@ -84,7 +87,12 @@ func get_session_cast_history_snapshot() -> Array[Dictionary]:
 	return snapshot
 
 
-func _change_state_and_scene(next_state: GameState, scene_path: String) -> void:
+func _change_state_and_scene(next_state: GameState, scene: PackedScene) -> void:
+	if scene == null:
+		push_error("GameManager could not change scene; registry scene is missing.")
+		return
+
+	var scene_path := scene.resource_path
 	var transition_node := get_node_or_null(SCENE_TRANSITION_NODE_PATH)
 
 	if use_ink_transition and transition_node != null:
@@ -95,11 +103,50 @@ func _change_state_and_scene(next_state: GameState, scene_path: String) -> void:
 
 	current_state = next_state
 
-	if use_ink_transition and transition_node != null and transition_node.has_method("transition_to_scene"):
+	if (
+		use_ink_transition
+		and not scene_path.is_empty()
+		and transition_node != null
+		and transition_node.has_method("transition_to_scene")
+	):
 		transition_node.call("transition_to_scene", scene_path)
 		return
 
-	var error := get_tree().change_scene_to_file(scene_path)
+	var error := OK
+	if scene_path.is_empty():
+		error = get_tree().change_scene_to_packed(scene)
+	else:
+		error = get_tree().change_scene_to_file(scene_path)
 
 	if error != OK:
 		push_error("GameManager could not change scene to: " + scene_path)
+
+
+func _get_main_menu_scene() -> PackedScene:
+	var registry := _get_scene_registry()
+	return registry.main_menu_scene if registry != null else null
+
+
+func _get_overworld_scene() -> PackedScene:
+	var registry := _get_scene_registry()
+	return registry.overworld_scene if registry != null else null
+
+
+func _get_combat_scene() -> PackedScene:
+	var registry := _get_scene_registry()
+	return registry.combat_scene if registry != null else null
+
+
+func _get_scene_registry() -> SceneRegistryData:
+	if scene_registry != null:
+		return scene_registry
+	if _loaded_scene_registry != null:
+		return _loaded_scene_registry
+
+	_loaded_scene_registry = load(DEFAULT_SCENE_REGISTRY_PATH) as SceneRegistryData
+	if _loaded_scene_registry == null:
+		push_error(
+			"GameManager could not load SceneRegistryData at %s."
+			% DEFAULT_SCENE_REGISTRY_PATH
+		)
+	return _loaded_scene_registry

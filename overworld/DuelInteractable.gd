@@ -3,6 +3,10 @@ class_name DuelInteractable
 
 
 @export var prompt_label_path: NodePath
+@export var prompt_before_victory: String = "Press E to begin duel"
+@export var prompt_after_victory: String = "Press E to duel again"
+@export var use_game_manager_duel_flow: bool = true
+@export var custom_combat_scene: PackedScene
 
 
 @onready var prompt_label: Label = get_node_or_null(prompt_label_path) as Label
@@ -27,7 +31,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# Scene changes stay routed through GameManager so transitions and global
 	# flow remain in one place as the overworld grows later.
-	GameManager.start_duel_from_overworld()
+	if use_game_manager_duel_flow:
+		GameManager.start_duel_from_overworld()
+	elif custom_combat_scene != null:
+		GameManager.start_duel_from_overworld(custom_combat_scene)
+	else:
+		push_warning("DuelInteractable has no custom combat scene assigned.")
 
 
 func _on_body_entered(body: Node) -> void:
@@ -46,4 +55,9 @@ func _on_body_exited(body: Node) -> void:
 
 func _set_prompt_visible(is_visible: bool) -> void:
 	if prompt_label != null:
+		prompt_label.text = (
+			prompt_after_victory
+			if GameManager.training_duel_won
+			else prompt_before_victory
+		)
 		prompt_label.visible = is_visible

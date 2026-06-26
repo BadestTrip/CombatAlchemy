@@ -69,7 +69,7 @@ func _ready() -> void:
 	_collect_units()
 	_connect_unit_signals()
 	_pass_balance_to_combat_nodes()
-	discovery_manager.configure(chant_resolver.spell_recipes, balance)
+	discovery_manager.configure(chant_resolver.get_active_recipes(), balance)
 
 	round_manager.configure(
 		self,

@@ -2,6 +2,8 @@ extends Node
 class_name CombatTutorialController
 
 
+# This is a hardcoded first-combat tutorial. If we add more tutorials, move
+# steps, copy, and target ids to TutorialSequenceData.
 enum TutorialStep {
 	INACTIVE,
 	INTRO,
@@ -24,6 +26,22 @@ enum TutorialStep {
 const FIRST_CHANT_KEY: String = "asha_voro_keth"
 const FIRST_RESULT_NAME: String = "Razor Comet"
 const CONTINUE_PROMPT: String = "\n\nPress Space / Click to continue"
+
+const TEXT_INTRO: String = "This is your first duel.\nYou cast magic by forming three-rune chants."
+const TEXT_CHOOSE_ASHA: String = "First chant: ASHA -> VORO -> KETH\nClick ASHA."
+const TEXT_CHOOSE_VORO: String = "Good. Now click VORO."
+const TEXT_CHOOSE_KETH: String = "Now click KETH."
+const TEXT_CAST_FIRST_CHANT: String = "The chant is ready.\nClick Cast."
+const TEXT_EXPLAIN_RESULT: String = "Razor Comet is a learned spell.\nKnown rune orders create known results."
+const TEXT_EXPLAIN_ENEMY_INTENT: String = "Enemy intent shows what the enemy will do after your chant."
+const TEXT_OPEN_LOG: String = "Open Log to read what happened."
+const TEXT_EXPLAIN_LOG: String = "The Log records combat events and spell effects."
+const TEXT_OPEN_HISTORY: String = "Open History to see chants you tried."
+const TEXT_EXPLAIN_HISTORY: String = "History remembers your attempted chants this fight."
+const TEXT_OPEN_SPELLBOOK: String = "Open Chants to see learned spells."
+const TEXT_EXPLAIN_SPELLBOOK: String = "Discovered spells are listed here."
+const TEXT_FREE_EXPERIMENT: String = "Now experiment with any three runes. Good Luck, little one."
+
 const OVERLAY_Z_INDEX: int = 40
 const HIGHLIGHT_Z_INDEX: int = 80
 const OBJECTIVE_Z_INDEX: int = 90
@@ -46,6 +64,8 @@ var _has_finished: bool = false
 var _waiting_for_continue: bool = false
 var _tutorial_mode_active: bool = false
 
+# TODO: Extract the fields and helper methods below into TutorialHighlighter
+# once tutorial scope grows beyond this single first-combat sequence.
 var _active_target: Control
 var _active_target_id: String = ""
 var _highlight_tween: Tween
@@ -185,70 +205,70 @@ func _apply_current_step() -> void:
 	match _current_step:
 		TutorialStep.INTRO:
 			_show_waiting_text(
-				"This is your first duel.\nYou cast magic by forming three-rune chants.",
+				TEXT_INTRO,
 				TutorialStep.CHOOSE_ASHA
 			)
 		TutorialStep.CHOOSE_ASHA:
-			_show_guidance_text("First chant: ASHA -> VORO -> KETH\nClick ASHA.")
+			_show_guidance_text(TEXT_CHOOSE_ASHA)
 			_highlight_rune("asha")
 		TutorialStep.CHOOSE_VORO:
-			_show_guidance_text("Good. Now click VORO.")
+			_show_guidance_text(TEXT_CHOOSE_VORO)
 			_highlight_rune("voro")
 		TutorialStep.CHOOSE_KETH:
-			_show_guidance_text("Now click KETH.")
+			_show_guidance_text(TEXT_CHOOSE_KETH)
 			_highlight_rune("keth")
 		TutorialStep.CAST_FIRST_CHANT:
-			_show_guidance_text("The chant is ready.\nClick Cast.")
+			_show_guidance_text(TEXT_CAST_FIRST_CHANT)
 			_highlight_ui_target("cast_button")
 		TutorialStep.EXPLAIN_RESULT:
 			ui_controller.hold_spell_result_banner_for_tutorial(true)
 			_show_waiting_text(
-				"Razor Comet is a learned spell.\nKnown rune orders create known results.",
+				TEXT_EXPLAIN_RESULT,
 				TutorialStep.EXPLAIN_ENEMY_INTENT
 			)
 			_highlight_ui_target("spell_result_banner")
 		TutorialStep.EXPLAIN_ENEMY_INTENT:
 			ui_controller.hold_spell_result_banner_for_tutorial(false)
 			_show_waiting_text(
-				"Enemy intent shows what the enemy will do after your chant.",
+				TEXT_EXPLAIN_ENEMY_INTENT,
 				TutorialStep.OPEN_LOG
 			)
 			_highlight_ui_target("enemy_intent")
 		TutorialStep.OPEN_LOG:
-			_show_guidance_text("Open Log to read what happened.")
+			_show_guidance_text(TEXT_OPEN_LOG)
 			_highlight_ui_target("combat_log_button")
 			if ui_controller.is_secondary_panel_open("log"):
 				_set_step(TutorialStep.EXPLAIN_LOG)
 		TutorialStep.EXPLAIN_LOG:
 			_show_waiting_text(
-				"The Log records combat events and spell effects.",
+				TEXT_EXPLAIN_LOG,
 				TutorialStep.OPEN_HISTORY
 			)
 			_highlight_ui_target("combat_log_button")
 		TutorialStep.OPEN_HISTORY:
-			_show_guidance_text("Open History to see chants you tried.")
+			_show_guidance_text(TEXT_OPEN_HISTORY)
 			_highlight_ui_target("cast_history_button")
 			if ui_controller.is_secondary_panel_open("history"):
 				_set_step(TutorialStep.EXPLAIN_HISTORY)
 		TutorialStep.EXPLAIN_HISTORY:
 			_show_waiting_text(
-				"History remembers your attempted chants this fight.",
+				TEXT_EXPLAIN_HISTORY,
 				TutorialStep.OPEN_SPELLBOOK
 			)
 			_highlight_ui_target("cast_history_button")
 		TutorialStep.OPEN_SPELLBOOK:
-			_show_guidance_text("Open Chants to see learned spells.")
+			_show_guidance_text(TEXT_OPEN_SPELLBOOK)
 			_highlight_ui_target("spellbook_button")
 			if ui_controller.is_secondary_panel_open("chants"):
 				_set_step(TutorialStep.EXPLAIN_SPELLBOOK)
 		TutorialStep.EXPLAIN_SPELLBOOK:
 			_show_waiting_text(
-				"Discovered spells are listed here.",
+				TEXT_EXPLAIN_SPELLBOOK,
 				TutorialStep.FREE_EXPERIMENT
 			)
 			_highlight_ui_target("spellbook_button")
 		TutorialStep.FREE_EXPERIMENT:
-			_show_waiting_text("Now experiment with any three runes. Good Luck, little one.", TutorialStep.INACTIVE)
+			_show_waiting_text(TEXT_FREE_EXPERIMENT, TutorialStep.INACTIVE)
 		_:
 			pass
 
@@ -302,6 +322,8 @@ func _highlight_rune(symbol_id: String) -> void:
 	_start_highlight(rune_button, "rune_%s" % symbol_id)
 
 
+# Highlight/dim behavior is intentionally isolated in this section so it can
+# move into TutorialHighlighter.gd without changing tutorial step flow.
 func _highlight_ui_target(target_id: String) -> void:
 	if ui_controller == null:
 		return

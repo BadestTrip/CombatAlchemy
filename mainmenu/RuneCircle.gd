@@ -13,9 +13,14 @@
 #   - rotation_speed_degrees controls the slow menu animation.
 #   - rune_opacity and pulse settings keep the seal subtle instead of noisy.
 extends Control
+class_name RuneCircle
 
 
-# Rune text shown around the circle. These are the existing chant/rune words.
+# SymbolLibraryData is the main source of rune names. rune_words is only a
+# fallback so this decorative scene can still render if no library is assigned.
+@export var symbol_library: SymbolLibraryData
+
+# Fallback rune text shown around the circle if symbol_library is missing.
 @export var rune_words: Array[String] = [
 	"ASHA",
 	"VORO",
@@ -53,8 +58,9 @@ extends Control
 @export var ring_width: float = 2.0
 
 
-# Runtime-created labels. They are rebuilt from rune_words in _ready().
+# Runtime-created labels. They are rebuilt from SymbolLibraryData in _ready().
 var _rune_labels: Array[Label] = []
+var _active_rune_words: Array[String] = []
 
 # Internal animation state measured in degrees for readability.
 var _current_rotation_degrees: float = 0.0
@@ -66,6 +72,7 @@ var _current_alpha: float = 1.0
 func _ready() -> void:
 	# This decoration should never block menu button clicks.
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_refresh_active_rune_words()
 	_rebuild_rune_labels()
 	_update_alpha()
 	_update_label_layout()
@@ -97,13 +104,13 @@ func _draw() -> void:
 	draw_arc(center, outer_radius, 0.0, TAU, 128, line_color, ring_width, true)
 	draw_arc(center, inner_radius, 0.0, TAU, 128, line_color, ring_width * 0.7, true)
 
-	if rune_words.is_empty():
+	if _active_rune_words.is_empty():
 		return
 
 	# Small radial tick marks make the circle read as a ritual diagram.
-	for index: int in range(rune_words.size()):
+	for index: int in range(_active_rune_words.size()):
 		var angle := (
-			TAU * float(index) / float(rune_words.size())
+			TAU * float(index) / float(_active_rune_words.size())
 			+ deg_to_rad(_current_rotation_degrees)
 		)
 		var direction := Vector2(cos(angle), sin(angle))
@@ -116,13 +123,13 @@ func _draw() -> void:
 		)
 
 
-# Rebuild labels from the exported rune_words array.
+# Rebuild labels from the active rune word list.
 func _rebuild_rune_labels() -> void:
 	for child: Node in get_children():
 		child.queue_free()
 	_rune_labels.clear()
 
-	for rune_word: String in rune_words:
+	for rune_word: String in _active_rune_words:
 		var label := Label.new()
 		label.name = "Rune_%s" % rune_word
 		label.text = rune_word
@@ -134,6 +141,21 @@ func _rebuild_rune_labels() -> void:
 		label.add_theme_font_size_override("font_size", rune_font_size)
 		add_child(label)
 		_rune_labels.append(label)
+
+
+func _refresh_active_rune_words() -> void:
+	_active_rune_words.clear()
+	if symbol_library != null:
+		for rune: SymbolCardData in symbol_library.symbols:
+			if rune == null:
+				continue
+			if not rune.spoken_word.is_empty():
+				_active_rune_words.append(rune.spoken_word)
+			elif not rune.symbol_id.is_empty():
+				_active_rune_words.append(rune.symbol_id.to_upper())
+
+	if _active_rune_words.is_empty():
+		_active_rune_words = rune_words.duplicate()
 
 
 # Place each generated label around the circle.

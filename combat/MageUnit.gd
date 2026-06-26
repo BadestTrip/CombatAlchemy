@@ -2,6 +2,8 @@
 # Attach this script to the player Mage node under CombatScene/Mages.
 # It stores health, shield, and life state. The class name stays MageUnit for
 # compatibility, but the active prototype treats this as the one player unit.
+# TODO: Rename to PlayerUnit in a dedicated migration when all references can
+# be updated together.
 extends Node
 class_name MageUnit
 
@@ -35,7 +37,7 @@ var current_hp: int = 0
 # This is runtime state and should not be exposed in Inspector.
 var shield: int = 0
 
-# Dead player units are not valid enemy targets.
+# Dead MageUnit instances are no longer valid player units.
 # This is runtime state and should not be exposed in Inspector.
 var is_alive: bool = true
 

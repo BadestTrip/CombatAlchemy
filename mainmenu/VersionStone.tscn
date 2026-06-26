@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bbdflu1w5nhgw" path="res://mainmenu/VersionStone.gd" id="1_version_stone"]
 [ext_resource type="FontFile" uid="uid://bi7jlcgpmn18i" path="res://extra/yoster.ttf" id="2_font"]
+[ext_resource type="Resource" path="res://globals/resources/ProjectInfo_Default.tres" id="3_project_info"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_version_stone"]
 bg_color = Color(0.16, 0.12, 0.08, 0.68)
@@ -20,6 +21,7 @@ custom_minimum_size = Vector2(300, 120)
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_version_stone")
 script = ExtResource("1_version_stone")
+project_info = ExtResource("3_project_info")
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=1024358746]
 layout_mode = 2
@@ -40,7 +42,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.82, 0.55, 1)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 24
-text = "v0.1.1"
+text = "Version Placeholder"
 
 [node name="FocusTitleLabel" type="Label" parent="Margin/TextColumn" unique_id=62658664]
 unique_name_in_owner = true
@@ -56,5 +58,5 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.91, 0.82, 0.66, 1)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 18
-text = "Combat Experimentation"
+text = "Focus Placeholder"
 autowrap_mode = 2
