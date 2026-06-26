@@ -9,14 +9,13 @@
 [ext_resource type="Texture2D" uid="uid://bibigfillsbin" path="res://sprites/buttons/continue_hover.png" id="11_hubol"]
 [ext_resource type="Texture2D" uid="uid://pw18bovqf6jb" path="res://sprites/buttons/ink_scroll_new_game_hover.png" id="11_mj7cn"]
 [ext_resource type="Texture2D" uid="uid://bimd6mxy6153u" path="res://sprites/buttons/options_normal.png" id="15_8vx4p"]
-[ext_resource type="PackedScene" uid="uid://bvs737efe1vl6" path="res://mainmenu/Banner.tscn" id="16_5pajh"]
 [ext_resource type="Texture2D" uid="uid://yh0d82d44v4r" path="res://sprites/buttons/options_pressed.png" id="16_tdapf"]
 [ext_resource type="Texture2D" uid="uid://bnqs4owyniifh" path="res://sprites/buttons/options_hover.png" id="17_v41fp"]
 [ext_resource type="Texture2D" uid="uid://b7i85w5xy13d1" path="res://sprites/buttons/quit_normal.png" id="18_7shrw"]
 [ext_resource type="Texture2D" uid="uid://duh6h8ux1h0vk" path="res://sprites/buttons/quit_pressed.png" id="19_viowm"]
 [ext_resource type="Texture2D" uid="uid://mk0ffsryt0mu" path="res://sprites/buttons/quit_hover.png" id="20_1n6yq"]
 [ext_resource type="PackedScene" path="res://mainmenu/RuneCircle.tscn" id="21_rune_circle"]
-[ext_resource type="PackedScene" path="res://mainmenu/VersionStone.tscn" id="22_version_stone"]
+[ext_resource type="PackedScene" uid="uid://btyxtwij5kbf7" path="res://mainmenu/VersionStone.tscn" id="22_version_stone"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wd801"]
 shader = ExtResource("2_o168s")
@@ -51,10 +50,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_t26b7")
-
-[node name="Banner" parent="." unique_id=2074483130 instance=ExtResource("16_5pajh")]
-visible = false
-position = Vector2(244.75787, 402.77768)
 
 [node name="Shader" type="ColorRect" parent="." unique_id=1849148694]
 visible = false

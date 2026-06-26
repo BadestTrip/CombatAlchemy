@@ -7,6 +7,10 @@ enum GameState {
 }
 
 var current_state: GameState = GameState.MAIN_MENU
+var learned_chant_keys: Dictionary = {}
+var session_cast_history: Array[Dictionary] = []
+var first_combat_tutorial_completed: bool = false
+var training_duel_won: bool = false
 
 const START_MENU_SCENE: String = "res://mainmenu/StartMenu.tscn"
 const OVERWORLD_SCENE_PATH: String = "res://overworld/OverworldPrototype.tscn"
@@ -22,6 +26,7 @@ func go_to_main_menu() -> void:
 
 
 func start_new_game() -> void:
+	reset_session_progress()
 	_change_state_and_scene(GameState.OVERWORLD, OVERWORLD_SCENE_PATH)
 
 
@@ -39,6 +44,44 @@ func restart_combat() -> void:
 
 func quit_game() -> void:
 	get_tree().quit()
+
+
+func reset_session_progress() -> void:
+	learned_chant_keys.clear()
+	session_cast_history.clear()
+	first_combat_tutorial_completed = false
+	training_duel_won = false
+
+
+func remember_learned_chant(chant_key: String) -> void:
+	if chant_key.is_empty():
+		return
+	learned_chant_keys[chant_key] = true
+
+
+func has_learned_chant(chant_key: String) -> bool:
+	return learned_chant_keys.has(chant_key)
+
+
+func get_learned_chant_keys_snapshot() -> Dictionary:
+	return learned_chant_keys.duplicate(true)
+
+
+func remember_cast_history_entry(entry: Dictionary) -> void:
+	session_cast_history.append(entry.duplicate(true))
+
+
+func replace_session_cast_history(entries: Array[Dictionary]) -> void:
+	session_cast_history.clear()
+	for entry: Dictionary in entries:
+		session_cast_history.append(entry.duplicate(true))
+
+
+func get_session_cast_history_snapshot() -> Array[Dictionary]:
+	var snapshot: Array[Dictionary] = []
+	for entry: Dictionary in session_cast_history:
+		snapshot.append(entry.duplicate(true))
+	return snapshot
 
 
 func _change_state_and_scene(next_state: GameState, scene_path: String) -> void:

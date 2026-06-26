@@ -9,35 +9,12 @@
 [ext_resource type="Script" uid="uid://cwqc6y17g0xgk" path="res://combat/ChantResolver.gd" id="8_atnl1"]
 [ext_resource type="Script" uid="uid://b31nffuogpojp" path="res://combat/resources/SpellRecipeData.gd" id="9_qomwh"]
 [ext_resource type="Resource" uid="uid://btgjurl4ii2vr" path="res://combat/resources/spells/RazorComet.tres" id="10_ev5v8"]
-[ext_resource type="Resource" uid="uid://dr66um68j7mjo" path="res://combat/resources/spells/BrightCut.tres" id="11_coq2u"]
-[ext_resource type="Resource" uid="uid://bioryibtcd885" path="res://combat/resources/spells/HollowPush.tres" id="12_27l7s"]
-[ext_resource type="Resource" uid="uid://cyw4s2nrkvsyr" path="res://combat/resources/spells/Crackbolt.tres" id="13_mgvld"]
-[ext_resource type="Resource" uid="uid://d3xqidemkc5yn" path="res://combat/resources/spells/ReturnGlow.tres" id="14_i4xye"]
-[ext_resource type="Resource" uid="uid://dn1aqhrt7ty03" path="res://combat/resources/spells/ReversedBlade.tres" id="15_w723g"]
-[ext_resource type="Resource" uid="uid://bs434v18y1mqu" path="res://combat/resources/spells/Scatterflare.tres" id="16_2gnrj"]
 [ext_resource type="Resource" uid="uid://cgjn21f5wwxym" path="res://combat/resources/spells/HeavyWord.tres" id="17_qjqlw"]
-[ext_resource type="Resource" uid="uid://7b33tm0ihsyf" path="res://combat/resources/spells/QuietWard.tres" id="18_x6s81"]
-[ext_resource type="Resource" uid="uid://dltge0kqotew6" path="res://combat/resources/spells/SparkRain.tres" id="19_uipah"]
-[ext_resource type="Resource" uid="uid://c3xbwxaoc3rf1" path="res://combat/resources/spells/DoubleSever.tres" id="20_38lk7"]
 [ext_resource type="Resource" uid="uid://fbdouux5u0or" path="res://combat/resources/spells/StoneHalo.tres" id="21_0glsu"]
 [ext_resource type="Resource" uid="uid://c2iqnbdic1q46" path="res://combat/resources/spells/ThunderVomit.tres" id="22_ahggg"]
-[ext_resource type="Resource" uid="uid://bfb5msl85mgeo" path="res://combat/resources/spells/BadReflection.tres" id="23_h7yb6"]
-[ext_resource type="Resource" uid="uid://cgi2xp01gdu0c" path="res://combat/resources/spells/MeatLightning.tres" id="24_5f6ws"]
-[ext_resource type="Resource" uid="uid://b4g5vufevcot5" path="res://combat/resources/spells/ChokedFlame.tres" id="25_aofff"]
-[ext_resource type="Resource" uid="uid://s8p7j64345n4" path="res://combat/resources/spells/MirrorBloat.tres" id="26_n50u6"]
-[ext_resource type="Resource" uid="uid://blx4ank13w781" path="res://combat/resources/spells/InfiniteWink.tres" id="27_p17b8"]
-[ext_resource type="Resource" uid="uid://djh8v35vvgg26" path="res://combat/resources/spells/BlackSunrise.tres" id="28_jr2jv"]
 [ext_resource type="Resource" uid="uid://cufwjhrssv27v" path="res://combat/resources/spells/SeveredThunder.tres" id="29_6ua2i"]
-[ext_resource type="Resource" uid="uid://1de5st71gim2" path="res://combat/resources/spells/IdiotStar.tres" id="30_ho547"]
 [ext_resource type="Resource" uid="uid://c5i3c4s2to8b5" path="res://combat/resources/spells/GreatBelly.tres" id="31_v31dn"]
-[ext_resource type="Resource" uid="uid://bjdwdxmvrlimi" path="res://combat/resources/spells/TinyParade.tres" id="32_now20"]
-[ext_resource type="Resource" uid="uid://dp5qhxeh6dm4s" path="res://combat/resources/spells/SelfPortrait.tres" id="33_txdav"]
-[ext_resource type="Resource" uid="uid://bcjulc40ho6rj" path="res://combat/resources/spells/HotPotato.tres" id="34_bhrft"]
-[ext_resource type="Resource" uid="uid://cvm7c5lwt0ka6" path="res://combat/resources/spells/WrongDoor.tres" id="35_q87u8"]
 [ext_resource type="Resource" uid="uid://ckfgntjpcuj1x" path="res://combat/resources/spells/HolyPigeon.tres" id="36_tbdm8"]
-[ext_resource type="Resource" uid="uid://bxml8hpgi8s3i" path="res://combat/resources/spells/SilentFrog.tres" id="37_80wt3"]
-[ext_resource type="Resource" uid="uid://dtphdu0wek70r" path="res://combat/resources/spells/SwordWithFace.tres" id="38_5e57c"]
-[ext_resource type="Resource" uid="uid://c12o8jy60dqwd" path="res://combat/resources/spells/GlowingMistake.tres" id="39_d6lhu"]
 [ext_resource type="Script" uid="uid://ou85bt34vocp" path="res://combat/MageUnit.gd" id="40_qrgab"]
 [ext_resource type="Script" uid="uid://c6p1vnisdne8n" path="res://combat/EnemyUnit.gd" id="41_lo2c2"]
 [ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="42_hva8a"]
@@ -498,6 +475,13 @@ layout_mode = 2
 toggle_mode = true
 text = "Cast History"
 
+[node name="DebugChantsButton" type="Button" parent="SecondaryUI/ToggleButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+toggle_mode = true
+text = "Debug Chants"
+
 [node name="TutorialOverlay" type="ColorRect" parent="." unique_id=2008953040]
 unique_name_in_owner = true
 visible = false
@@ -674,6 +658,52 @@ custom_minimum_size = Vector2(900, 430)
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="DebugChantsPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 20
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.18
+anchor_top = 0.1
+anchor_right = 0.82
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DebugChantsMargin" type="MarginContainer" parent="DebugChantsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="DebugChantsColumn" type="VBoxContainer" parent="DebugChantsPanel/DebugChantsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DebugChantsHeader" type="HBoxContainer" parent="DebugChantsPanel/DebugChantsMargin/DebugChantsColumn"]
+layout_mode = 2
+
+[node name="DebugChantsTitle" type="Label" parent="DebugChantsPanel/DebugChantsMargin/DebugChantsColumn/DebugChantsHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
+theme_override_font_sizes/font_size = 28
+text = "All Active Chants"
+
+[node name="DebugChantsCloseButton" type="Button" parent="DebugChantsPanel/DebugChantsMargin/DebugChantsColumn/DebugChantsHeader"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 42)
+layout_mode = 2
+text = "Close"
+
+[node name="DebugChantsList" type="RichTextLabel" parent="DebugChantsPanel/DebugChantsMargin/DebugChantsColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(900, 580)
+layout_mode = 2
+size_flags_vertical = 3
+
 [node name="SpellDiscoveryPopup" type="PanelContainer" parent="." unique_id=31228172]
 unique_name_in_owner = true
 visible = false
@@ -729,7 +759,7 @@ script = ExtResource("5_ssh5j")
 [node name="ChantResolver" type="Node" parent="." unique_id=1199369047]
 unique_name_in_owner = true
 script = ExtResource("8_atnl1")
-spell_recipes = Array[ExtResource("9_qomwh")]([ExtResource("10_ev5v8"), ExtResource("11_coq2u"), ExtResource("12_27l7s"), ExtResource("13_mgvld"), ExtResource("14_i4xye"), ExtResource("15_w723g"), ExtResource("16_2gnrj"), ExtResource("17_qjqlw"), ExtResource("18_x6s81"), ExtResource("19_uipah"), ExtResource("20_38lk7"), ExtResource("21_0glsu"), ExtResource("22_ahggg"), ExtResource("23_h7yb6"), ExtResource("24_5f6ws"), ExtResource("25_aofff"), ExtResource("26_n50u6"), ExtResource("27_p17b8"), ExtResource("28_jr2jv"), ExtResource("29_6ua2i"), ExtResource("30_ho547"), ExtResource("31_v31dn"), ExtResource("32_now20"), ExtResource("33_txdav"), ExtResource("34_bhrft"), ExtResource("35_q87u8"), ExtResource("36_tbdm8"), ExtResource("37_80wt3"), ExtResource("38_5e57c"), ExtResource("39_d6lhu")])
+spell_recipes = Array[ExtResource("9_qomwh")]([ExtResource("10_ev5v8"), ExtResource("17_qjqlw"), ExtResource("36_tbdm8"), ExtResource("21_0glsu"), ExtResource("29_6ua2i"), ExtResource("22_ahggg"), ExtResource("31_v31dn")])
 
 [node name="SpellDiscoveryManager" type="Node" parent="." unique_id=871974269]
 unique_name_in_owner = true

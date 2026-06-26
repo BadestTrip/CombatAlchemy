@@ -165,6 +165,8 @@ func _end_combat(victory: bool) -> void:
 		return
 
 	has_combat_ended = true
+	if victory:
+		GameManager.training_duel_won = true
 	round_manager.end_combat()
 	set_phase_text("Combat ended")
 	combat_log.append_separator()

@@ -40,6 +40,9 @@ class_name CombatBalanceData
 @export var track_fallback_casts: bool = true
 @export var announce_new_discoveries: bool = true
 
+@export_group("Active Chant Balance")
+@export var chant_balance_library: ChantBalanceLibraryData
+
 # These values control the cast presentation sequence.
 @export_group("Chant Presentation")
 @export var shout_each_rune_seconds: float = 0.45
@@ -86,3 +89,4 @@ class_name CombatBalanceData
 @export_group("UI Debug")
 @export var show_card_display_names: bool = true
 @export var show_card_visual_hints: bool = true
+@export var debug_show_all_chants_button: bool = true

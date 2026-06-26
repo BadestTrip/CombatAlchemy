@@ -126,6 +126,8 @@ func _connect_signals() -> void:
 func _maybe_start_tutorial() -> void:
 	if _has_started or _has_finished or round_manager == null:
 		return
+	if GameManager.first_combat_tutorial_completed:
+		return
 	if round_manager.round_number > 1:
 		return
 	if round_manager.current_state != RoundManager.RoundState.PLANNING:
@@ -152,6 +154,7 @@ func _enter_tutorial_mode() -> void:
 
 func _finish_tutorial() -> void:
 	_has_finished = true
+	GameManager.first_combat_tutorial_completed = true
 	_current_step = TutorialStep.INACTIVE
 	_waiting_for_continue = false
 	_pending_continue_step = TutorialStep.INACTIVE
