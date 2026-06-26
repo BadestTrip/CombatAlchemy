@@ -25,10 +25,6 @@ var starts_expanded: bool = true
 var auto_retract_after_rune_pick: bool = false
 var tween_seconds: float = 0.2
 var _rune_buttons_by_id: Dictionary = {}
-var _highlighted_rune_id: String = ""
-var _highlighted_rune_button: Button
-var _highlighted_rune_scale: Vector2 = Vector2.ONE
-var _highlighted_rune_modulate: Color = Color.WHITE
 
 
 func _ready() -> void:
@@ -79,8 +75,6 @@ func build_rune_buttons() -> void:
 
 	layout_rune_buttons()
 	_refresh_button_states()
-	if not _highlighted_rune_id.is_empty():
-		_apply_rune_highlight(_highlighted_rune_id)
 
 
 func layout_rune_buttons() -> void:
@@ -165,28 +159,6 @@ func get_rune_button_by_id(symbol_id: String) -> Button:
 	return _rune_buttons_by_id.get(symbol_id.to_lower()) as Button
 
 
-func highlight_rune_by_id(symbol_id: String) -> void:
-	clear_rune_highlight()
-	_highlighted_rune_id = symbol_id.to_lower()
-	_apply_rune_highlight(_highlighted_rune_id)
-
-
-func clear_rune_highlight() -> void:
-	if _highlighted_rune_button != null:
-		_highlighted_rune_button.scale = _highlighted_rune_scale
-		_highlighted_rune_button.modulate = _highlighted_rune_modulate
-		_highlighted_rune_button.remove_theme_color_override("font_color")
-		_highlighted_rune_button.remove_theme_color_override("font_hover_color")
-		_highlighted_rune_button.remove_theme_color_override("font_pressed_color")
-		_highlighted_rune_button.remove_theme_color_override("font_disabled_color")
-		_highlighted_rune_button.remove_theme_stylebox_override("normal")
-		_highlighted_rune_button.remove_theme_stylebox_override("hover")
-		_highlighted_rune_button.remove_theme_stylebox_override("pressed")
-		_highlighted_rune_button.remove_theme_stylebox_override("disabled")
-	_highlighted_rune_button = null
-	_highlighted_rune_id = ""
-
-
 func _resolve_nodes() -> void:
 	if rune_button_container == null:
 		rune_button_container = find_child("RunePalette", true, false) as Control
@@ -207,11 +179,6 @@ func _apply_balance_settings() -> void:
 
 
 func _update_existing_buttons() -> void:
-	var highlighted_id := _highlighted_rune_id
-	if _highlighted_rune_button != null:
-		clear_rune_highlight()
-		_highlighted_rune_id = highlighted_id
-
 	_apply_balance_settings()
 	_rune_buttons_by_id.clear()
 	for index: int in range(mini(_buttons.size(), symbol_library.symbols.size())):
@@ -219,9 +186,6 @@ func _update_existing_buttons() -> void:
 		if rune != null:
 			_apply_rune_button_data(_buttons[index], rune)
 			_rune_buttons_by_id[String(rune.symbol_id).to_lower()] = _buttons[index]
-	if not highlighted_id.is_empty():
-		_highlighted_rune_id = highlighted_id
-		_apply_rune_highlight(highlighted_id)
 
 
 func _apply_rune_button_data(button: Button, rune: SymbolCardData) -> void:
@@ -286,45 +250,6 @@ func _refresh_button_states() -> void:
 		button.disabled = disabled
 	if toggle_button != null:
 		toggle_button.disabled = _input_locked
-
-
-func _apply_rune_highlight(symbol_id: String) -> void:
-	var button := _rune_buttons_by_id.get(symbol_id) as Button
-	if button == null:
-		return
-
-	_highlighted_rune_button = button
-	_highlighted_rune_scale = button.scale
-	_highlighted_rune_modulate = button.modulate
-
-	button.pivot_offset = button.size * 0.5
-	button.scale = Vector2(1.08, 1.08)
-	button.modulate = Color(1.18, 1.08, 0.78, 1.0)
-	button.add_theme_color_override("font_color", Color(1.0, 0.84, 0.32, 1.0))
-	button.add_theme_color_override("font_hover_color", Color(1.0, 0.92, 0.48, 1.0))
-	button.add_theme_color_override("font_pressed_color", Color(1.0, 0.78, 0.22, 1.0))
-	button.add_theme_color_override("font_disabled_color", Color(1.0, 0.78, 0.24, 0.75))
-
-	var style := _make_tutorial_highlight_style()
-	button.add_theme_stylebox_override("normal", style)
-	button.add_theme_stylebox_override("hover", style)
-	button.add_theme_stylebox_override("pressed", style)
-	button.add_theme_stylebox_override("disabled", style)
-
-
-func _make_tutorial_highlight_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(1.0, 0.72, 0.2, 0.16)
-	style.border_color = Color(1.0, 0.82, 0.28, 0.95)
-	style.border_width_left = 3
-	style.border_width_top = 3
-	style.border_width_right = 3
-	style.border_width_bottom = 3
-	style.corner_radius_top_left = 10
-	style.corner_radius_top_right = 10
-	style.corner_radius_bottom_right = 10
-	style.corner_radius_bottom_left = 10
-	return style
 
 
 func _on_rune_button_pressed(rune: SymbolCardData) -> void:
