@@ -2,11 +2,15 @@
 
 [ext_resource type="Script" uid="uid://dgxvd8igtra4t" path="res://overworld/OverworldPlayer.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://dkufda3lar084" path="res://overworld/DuelInteractable.gd" id="2_duel"]
+[ext_resource type="Texture2D" uid="uid://7ca0l6tnv8mj" path="res://sprites/characters/overworld_character_TRUE_TRANSPARENT.png" id="2_g5h36"]
 [ext_resource type="Script" uid="uid://b86dt8t08aoil" path="res://globals/LevelMusic.gd" id="3_ak3if"]
+[ext_resource type="Texture2D" uid="uid://clydq7jqrlyg3" path="res://sprites/locations/training_grounds_camp_isometric_TRUE_TRANSPARENT.png" id="3_fouo6"]
 [ext_resource type="AudioStream" uid="uid://dslndjsgbg6ik" path="res://music/OverWorldBetaOST.mp3" id="4_dgl0l"]
+[ext_resource type="Texture2D" uid="uid://c5gx2xh2v4fex" path="res://sprites/locations/mini_boss_lair_TRUE_TRANSPARENT.png" id="5_dtish"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
-size = Vector2(40, 40)
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_bhunq"]
+radius = 8.0
+height = 32.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_duel"]
 size = Vector2(210, 160)
@@ -36,6 +40,17 @@ color = Color(0.22, 0.2, 0.15, 1)
 position = Vector2(360, 540)
 script = ExtResource("1_player")
 
+[node name="CharacterOverworldSprite" type="TextureRect" parent="Player" unique_id=2124430483]
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+texture = ExtResource("2_g5h36")
+expand_mode = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=1555482732]
+shape = SubResource("CapsuleShape2D_bhunq")
+
 [node name="DustTrail" type="CPUParticles2D" parent="Player" unique_id=733687375]
 position = Vector2(0, 24)
 emitting = false
@@ -54,39 +69,24 @@ scale_amount_min = 0.45
 scale_amount_max = 1.15
 color = Color(1, 0.76, 0.24, 0.42)
 
-[node name="PlayerVisual" type="ColorRect" parent="Player" unique_id=360647182]
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-color = Color(0.45, 0.72, 1, 1)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=1555482732]
-shape = SubResource("RectangleShape2D_player")
-
-[node name="DuelStone" type="Area2D" parent="." unique_id=2092531967]
+[node name="TrainigCamp" type="Area2D" parent="." unique_id=2092531967]
 position = Vector2(1420, 540)
 script = ExtResource("2_duel")
 prompt_label_path = NodePath("../HUD/InteractionPrompt")
 
-[node name="StoneVisual" type="ColorRect" parent="DuelStone" unique_id=445519729]
-offset_left = -54.0
-offset_top = -70.0
-offset_right = 54.0
-offset_bottom = 70.0
-color = Color(0.55, 0.48, 0.38, 1)
+[node name="TrainingCampSprite" type="TextureRect" parent="TrainigCamp" unique_id=52765287]
+offset_left = -106.0
+offset_top = -89.0
+offset_right = 116.0
+offset_bottom = 89.0
+texture = ExtResource("3_fouo6")
+expand_mode = 1
 
-[node name="StoneTop" type="ColorRect" parent="DuelStone" unique_id=829447125]
-offset_left = -38.0
-offset_top = -92.0
-offset_right = 38.0
-offset_bottom = -62.0
-color = Color(0.72, 0.58, 0.34, 1)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DuelStone" unique_id=215172287]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TrainigCamp" unique_id=215172287]
+position = Vector2(6, 2)
 shape = SubResource("RectangleShape2D_duel")
 
-[node name="ObjectLabel" type="Label" parent="DuelStone" unique_id=2086739612]
+[node name="ObjectLabel" type="Label" parent="TrainigCamp" unique_id=2086739612]
 offset_left = -96.0
 offset_top = 82.0
 offset_right = 96.0
@@ -94,6 +94,33 @@ offset_bottom = 112.0
 theme_override_colors/font_color = Color(0.95, 0.82, 0.48, 1)
 theme_override_font_sizes/font_size = 20
 text = "Training Adept"
+horizontal_alignment = 1
+
+[node name="MiniBossLair" type="Area2D" parent="." unique_id=361229670]
+position = Vector2(963.2113, 232.73688)
+script = ExtResource("2_duel")
+prompt_label_path = NodePath("../HUD/InteractionPrompt")
+
+[node name="MiniBossLairSprite" type="TextureRect" parent="MiniBossLair" unique_id=369950464]
+offset_left = -106.0
+offset_top = -89.0
+offset_right = 116.0
+offset_bottom = 89.0
+texture = ExtResource("5_dtish")
+expand_mode = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MiniBossLair" unique_id=1174305942]
+position = Vector2(6, 2)
+shape = SubResource("RectangleShape2D_duel")
+
+[node name="ObjectLabel" type="Label" parent="MiniBossLair" unique_id=526314630]
+offset_left = -96.0
+offset_top = 82.0
+offset_right = 96.0
+offset_bottom = 112.0
+theme_override_colors/font_color = Color(0.95, 0.82, 0.48, 1)
+theme_override_font_sizes/font_size = 20
+text = "MiniBoss Lair"
 horizontal_alignment = 1
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=781330185]
