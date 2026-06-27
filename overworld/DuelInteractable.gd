@@ -8,6 +8,8 @@ class_name DuelInteractable
 @export var use_game_manager_duel_flow: bool = true
 @export var custom_combat_scene: PackedScene
 @export var encounter_data: EncounterData
+@export var requires_training_duel_won: bool = false
+@export var locked_prompt: String = "Train first before entering the lair."
 
 
 @onready var prompt_label: Label = get_node_or_null(prompt_label_path) as Label
@@ -29,6 +31,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	get_viewport().set_input_as_handled()
+
+	if _is_locked():
+		_set_prompt_visible(true)
+		return
 
 	# Scene changes stay routed through GameManager so transitions and global
 	# flow remain in one place as the overworld grows later.
@@ -54,12 +60,18 @@ func _on_body_exited(body: Node) -> void:
 
 func _set_prompt_visible(is_visible: bool) -> void:
 	if prompt_label != null:
-		prompt_label.text = (
-			prompt_after_victory
-			if _is_defeated()
-			else prompt_before_victory
-		)
+		prompt_label.text = _get_prompt_text()
 		prompt_label.visible = is_visible
+
+
+func _get_prompt_text() -> String:
+	if _is_locked():
+		return locked_prompt
+	return prompt_after_victory if _is_defeated() else prompt_before_victory
+
+
+func _is_locked() -> bool:
+	return requires_training_duel_won and not GameManager.training_duel_won
 
 
 func _is_defeated() -> bool:

@@ -76,6 +76,8 @@ prompt_label_path = NodePath("../HUD/InteractionPrompt")
 prompt_before_victory = "Press E to enter the miniboss lair"
 prompt_after_victory = "The lair is quiet. Press E to challenge again"
 encounter_data = ExtResource("7_miniboss_encounter")
+requires_training_duel_won = true
+locked_prompt = "The lair rejects you. Complete your training first."
 
 [node name="MiniBossLairSprite" type="TextureRect" parent="MiniBossLair" unique_id=369950464]
 offset_left = -106.0
