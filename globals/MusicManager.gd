@@ -42,15 +42,17 @@ func _apply_from(root: Node) -> void:
 	_silence_local_music_players(root)
 
 	var lm: LevelMusic = _find_level_music(root)
-	if lm == null:
-		return
-
-	var stream_in: AudioStream = lm.get_music()
+	var stream_in: AudioStream = _get_encounter_music_override()
+	if stream_in == null and lm != null:
+		stream_in = lm.get_music()
 	if stream_in == null:
 		return
 
-	var xfade: float = lm.get_crossfade()
-	var vol_db: float = lm.get_volume_db()
+	var xfade: float = 0.8
+	var vol_db: float = default_volume_db
+	if lm != null:
+		xfade = lm.get_crossfade()
+		vol_db = lm.get_volume_db()
 
 	crossfade_to(stream_in, xfade, vol_db)
 
@@ -60,6 +62,17 @@ func _find_level_music(root: Node) -> LevelMusic:
 		if root.is_ancestor_of(n):
 			return n as LevelMusic
 	return null
+
+func _get_encounter_music_override() -> AudioStream:
+	if GameManager == null:
+		return null
+	if GameManager.current_state != GameManager.GameState.COMBAT:
+		return null
+
+	var encounter := GameManager.pending_encounter
+	if encounter == null:
+		return null
+	return encounter.combat_music
 
 func _kill_tween() -> void:
 	if _tween != null and _tween.is_valid():
