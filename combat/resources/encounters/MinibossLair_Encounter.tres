@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d2n840pgsxygf" path="res://combat/resources/EncounterData.gd" id="1_encounter"]
 [ext_resource type="Texture2D" uid="uid://dweoepaulchsb" path="res://sprites/characters/mini_boss_TRUE_TRANSPARENT.png" id="1_phl3y"]
+[ext_resource type="AudioStream" uid="uid://wu2mahruvq0b" path="res://music/MiniBossLairOst.mp3" id="1_yvo4f"]
 
 [resource]
 script = ExtResource("1_encounter")
@@ -13,4 +14,5 @@ enemy_base_attack = 5
 enemy_guard_chance = 0.2
 enemy_guard_shield = 4
 enemy_sprite = ExtResource("1_phl3y")
+combat_music = ExtResource("1_yvo4f")
 marks_miniboss_defeated = true

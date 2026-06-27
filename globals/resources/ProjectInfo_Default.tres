@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_project_info")
 project_version = "Version 0.1.6"
-current_focus = "First MVP Loop"
+current_focus = "Core systems enchantment"
 build_label = "Prototype"

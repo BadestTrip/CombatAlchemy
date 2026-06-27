@@ -10,6 +10,7 @@
 [ext_resource type="Resource" uid="uid://dt6ivk8uoute5" path="res://combat/resources/encounters/TrainingAdept_Encounter.tres" id="6_training_encounter"]
 [ext_resource type="Resource" uid="uid://dj12dxealc6bd" path="res://combat/resources/encounters/MinibossLair_Encounter.tres" id="7_miniboss_encounter"]
 [ext_resource type="PackedScene" path="res://ui/PauseMenu.tscn" id="8_pause_menu"]
+[ext_resource type="Script" path="res://overworld/OverworldStateController.gd" id="9_state_controller"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_duel"]
 size = Vector2(133.62299, 83.21927)
@@ -19,6 +20,7 @@ radius = 14.0
 height = 62.0
 
 [node name="OverworldPrototype" type="Node2D" unique_id=631620731]
+script = ExtResource("9_state_controller")
 
 [node name="Background" type="ColorRect" parent="." unique_id=324108043]
 offset_right = 1920.0

@@ -8,11 +8,11 @@
 [ext_resource type="Resource" uid="uid://f1frsjbdcext" path="res://combat/resources/symbols/SymbolLibrary_Default.tres" id="7_0rlu1"]
 [ext_resource type="Script" uid="uid://cwqc6y17g0xgk" path="res://combat/ChantResolver.gd" id="8_atnl1"]
 [ext_resource type="Resource" uid="uid://gabdbu1y87c8" path="res://combat/resources/chants/ChantLibrary_Default.tres" id="9_chant_library"]
+[ext_resource type="AudioStream" uid="uid://wdbjucpuwkl3" path="res://music/TrainingMusic.mp3" id="21_v5awy"]
 [ext_resource type="Script" uid="uid://ou85bt34vocp" path="res://combat/MageUnit.gd" id="40_qrgab"]
 [ext_resource type="Script" uid="uid://c6p1vnisdne8n" path="res://combat/EnemyUnit.gd" id="41_lo2c2"]
 [ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="42_hva8a"]
 [ext_resource type="Script" uid="uid://bf737wkc22lw" path="res://combat/scripts/SpellDiscoveryManager.gd" id="44_discovery"]
-[ext_resource type="AudioStream" uid="uid://c36fy0n0rxco3" path="res://music/combat_scene_not_final.mp3" id="45_ftuvk"]
 [ext_resource type="Script" uid="uid://b6pevmp70xcyf" path="res://combat/scripts/ui/RuneWheelController.gd" id="48_rune_wheel"]
 [ext_resource type="Script" uid="uid://bvdaat3ddx1qg" path="res://combat/scripts/ui/FloatingUnitHUD.gd" id="49_floating_hud"]
 [ext_resource type="Script" uid="uid://ban1286l0lwac" path="res://combat/scripts/tutorial/CombatTutorialController.gd" id="50_tutorial"]
@@ -807,10 +807,10 @@ unique_name_in_owner = true
 script = ExtResource("41_lo2c2")
 enemy_name = "Training Adept"
 
-[node name="PauseMenu" parent="." instance=ExtResource("56_pause_menu")]
+[node name="PauseMenu" parent="." unique_id=869663113 instance=ExtResource("56_pause_menu")]
 z_index = 30
-pause_context = "combat"
+layout_mode = 1
 combat_ui_path = NodePath("../CombatUI")
 
 [node name="LevelMusic" parent="." unique_id=238704293 instance=ExtResource("42_hva8a")]
-music = ExtResource("45_ftuvk")
+music = ExtResource("21_v5awy")
