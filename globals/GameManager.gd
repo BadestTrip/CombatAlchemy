@@ -14,6 +14,8 @@ var training_duel_won: bool = false
 var miniboss_lair_defeated: bool = false
 var pending_encounter: EncounterData
 var defeated_encounter_ids: Dictionary = {}
+var has_overworld_player_return_position: bool = false
+var overworld_player_return_position: Vector2 = Vector2.ZERO
 
 const SCENE_TRANSITION_NODE_PATH: String = "/root/SceneTransition"
 const DEFAULT_SCENE_REGISTRY_PATH: String = "res://globals/resources/SceneRegistry_Default.tres"
@@ -66,6 +68,7 @@ func reset_session_progress() -> void:
 	miniboss_lair_defeated = false
 	defeated_encounter_ids.clear()
 	clear_pending_encounter()
+	clear_overworld_player_return_position()
 
 
 func mark_encounter_defeated(encounter_id: String) -> void:
@@ -80,6 +83,20 @@ func has_defeated_encounter(encounter_id: String) -> bool:
 
 func clear_pending_encounter() -> void:
 	pending_encounter = null
+
+
+func remember_overworld_player_position(return_position: Vector2) -> void:
+	overworld_player_return_position = return_position
+	has_overworld_player_return_position = true
+
+
+func get_overworld_player_return_position() -> Vector2:
+	return overworld_player_return_position
+
+
+func clear_overworld_player_return_position() -> void:
+	has_overworld_player_return_position = false
+	overworld_player_return_position = Vector2.ZERO
 
 
 func remember_learned_chant(chant_key: String) -> void:

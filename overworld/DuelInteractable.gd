@@ -16,6 +16,7 @@ class_name DuelInteractable
 
 
 var _player_in_range: bool = false
+var _player_body: Node2D
 
 
 func _ready() -> void:
@@ -39,6 +40,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Scene changes stay routed through GameManager so transitions and global
 	# flow remain in one place as the overworld grows later.
 	if use_game_manager_duel_flow or custom_combat_scene != null:
+		_remember_player_return_position()
 		GameManager.start_duel_from_overworld(encounter_data, custom_combat_scene)
 	else:
 		push_warning("DuelInteractable has no custom combat scene assigned.")
@@ -48,12 +50,15 @@ func _on_body_entered(body: Node) -> void:
 	if not body.is_in_group("overworld_player"):
 		return
 	_player_in_range = true
+	_player_body = body as Node2D
 	_set_prompt_visible(true)
 
 
 func _on_body_exited(body: Node) -> void:
 	if not body.is_in_group("overworld_player"):
 		return
+	if body == _player_body:
+		_player_body = null
 	_player_in_range = false
 	_set_prompt_visible(false)
 
@@ -78,3 +83,8 @@ func _is_defeated() -> bool:
 	if encounter_data != null and not encounter_data.encounter_id.is_empty():
 		return GameManager.has_defeated_encounter(encounter_data.encounter_id)
 	return GameManager.training_duel_won
+
+
+func _remember_player_return_position() -> void:
+	if _player_body != null:
+		GameManager.remember_overworld_player_position(_player_body.global_position)

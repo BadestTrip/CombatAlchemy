@@ -23,6 +23,7 @@ var _last_horizontal_facing: float = -1.0
 func _ready() -> void:
 	add_to_group("overworld_player")
 	_prepare_character_sprite()
+	_restore_session_position()
 
 
 func _physics_process(delta: float) -> void:
@@ -53,6 +54,15 @@ func _prepare_character_sprite() -> void:
 	# TextureRect does not support flip_h, so scale flips should happen around
 	# the visual center to avoid a small sideways jump.
 	character_sprite.pivot_offset = character_sprite.size * 0.5
+
+
+func _restore_session_position() -> void:
+	if not GameManager.has_overworld_player_return_position:
+		return
+
+	global_position = GameManager.get_overworld_player_return_position()
+	position.x = clampf(position.x, walk_bounds_min.x, walk_bounds_max.x)
+	position.y = clampf(position.y, walk_bounds_min.y, walk_bounds_max.y)
 
 
 func _update_dust_trail(direction: Vector2, is_moving: bool) -> void:
