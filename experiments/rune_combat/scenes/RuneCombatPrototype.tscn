@@ -25,7 +25,7 @@
 script = ExtResource("1_controller")
 state_machine_path = NodePath("Systems/RuneCombatStateMachine")
 combat_input_path = NodePath("Systems/RuneCombatInput")
-rune_wheel_path = NodePath("UI/MainLayout/LeftPanel/RuneWheelUI")
+rune_wheel_path = NodePath("UI/FloatingRuneWheel")
 chant_builder_path = NodePath("Systems/ChantBuilder")
 spell_resolver_path = NodePath("Systems/SpellResolver")
 spell_executor_path = NodePath("Systems/SpellExecutor")
@@ -39,6 +39,8 @@ player_status_label_path = NodePath("UI/MainLayout/RightPanel/UnitStatus/PlayerS
 enemy_status_label_path = NodePath("UI/MainLayout/RightPanel/UnitStatus/EnemyStatus")
 state_label_path = NodePath("UI/MainLayout/RightPanel/StateLabel")
 effects_parent_path = NodePath("Arena")
+battlefield_dimmer_path = NodePath("UI/BattlefieldDimmer")
+prepared_label_path = NodePath("UI/MainLayout/RightPanel/PreparedLabel")
 
 [node name="Arena" type="Node2D" parent="." unique_id=2103649087]
 
@@ -121,6 +123,17 @@ combat_rule_controller_path = NodePath("../CombatRuleController")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1210929074]
 
+[node name="BattlefieldDimmer" type="ColorRect" parent="UI"]
+visible = false
+z_index = 10
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.35)
+
 [node name="MainLayout" type="HBoxContainer" parent="UI" unique_id=1544929574]
 anchors_preset = 15
 anchor_right = 1.0
@@ -142,11 +155,12 @@ text = "Rune Combat Prototype"
 
 [node name="Instructions" type="Label" parent="UI/MainLayout/LeftPanel" unique_id=1998802526]
 layout_mode = 2
-text = "Move with WASD/arrows. Point with mouse. 1-5 add runes. Space casts toward mouse. C clears. Backspace removes last. Right click/Tab toggles wheel state."
+text = "Hold Tab: open rune wheel / slow time.
+While holding Tab: press 1-5 or click runes to build a chant.
+While holding Tab: press Space to prepare chant.
+After preparing: aim with mouse, press Space or Left Mouse Button to shoot.
+C clears. Backspace removes last rune while chanting."
 autowrap_mode = 3
-
-[node name="RuneWheelUI" parent="UI/MainLayout/LeftPanel" unique_id=1671091273 instance=ExtResource("17_wheel_scene")]
-layout_mode = 2
 
 [node name="ChantBarUI" parent="UI/MainLayout/LeftPanel" unique_id=1772812373 instance=ExtResource("18_chant_scene")]
 layout_mode = 2
@@ -180,7 +194,7 @@ text = "Stability: Stable (0)"
 
 [node name="Effect" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox" unique_id=1117185619]
 layout_mode = 2
-text = "Damage 0  Shield 0"
+text = "Effect none  Damage 0  Shield 0"
 
 [node name="ArenaSpacer" type="Control" parent="UI/MainLayout" unique_id=811893977]
 layout_mode = 2
@@ -202,9 +216,18 @@ text = "Player HP 40/40  Shield 0"
 layout_mode = 2
 text = "Practice Dummy HP 60/60  Shield 0"
 
+[node name="PreparedLabel" type="Label" parent="UI/MainLayout/RightPanel"]
+layout_mode = 2
+text = "Prepared: None"
+autowrap_mode = 3
+
 [node name="StateLabel" type="Label" parent="UI/MainLayout/RightPanel" unique_id=480935085]
 layout_mode = 2
 text = "State: IDLE"
 
 [node name="SpellLogUI" parent="UI/MainLayout/RightPanel" unique_id=1345861411 instance=ExtResource("19_log_scene")]
 layout_mode = 2
+
+[node name="FloatingRuneWheel" parent="UI" instance=ExtResource("17_wheel_scene")]
+visible = false
+z_index = 20

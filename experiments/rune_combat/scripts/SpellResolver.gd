@@ -79,16 +79,23 @@ func _assign_effect_values(result: SpellResultData) -> void:
 
 	if has_damage and has_shield:
 		result.effect_type = "projectile_plus_shield"
+		result.effect_kind = "mixed"
 	elif has_shield:
 		result.effect_type = "shield"
+		result.effect_kind = "shield"
 	elif has_damage:
 		result.effect_type = "projectile"
+		result.effect_kind = "projectile"
 	else:
 		result.effect_type = "fizzle"
+		result.effect_kind = "pulse"
 
 	result.effect_speed = 650.0
 	result.effect_radius = 8.0
 	result.effect_lifetime = 0.9
+	result.projectile_speed = result.effect_speed
+	result.projectile_lifetime = result.effect_lifetime
+	result.projectile_size = result.effect_radius
 
 	if result.has_tag("shock") or result.has_tag("unstable"):
 		result.effect_color = Color(0.45, 0.7, 1.0, 0.95)
@@ -104,3 +111,12 @@ func _assign_effect_values(result: SpellResultData) -> void:
 		result.effect_color = Color(0.55, 0.5, 0.43, 0.95)
 	else:
 		result.effect_color = Color(0.78, 0.62, 1.0, 0.85)
+
+	if result.is_signature:
+		result.effect_radius += 3.0
+	if result.instability_label == "Unstable" or result.instability_label == "Forbidden":
+		result.effect_radius += 4.0
+
+	result.projectile_speed = result.effect_speed
+	result.projectile_lifetime = result.effect_lifetime
+	result.projectile_size = result.effect_radius

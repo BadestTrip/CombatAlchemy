@@ -1,7 +1,7 @@
 extends Node
 class_name SpellExecutor
 
-const SIMPLE_CHANT_EFFECT_SCRIPT := preload("res://experiments/rune_combat/scripts/SimpleChantEffect.gd")
+const CHANT_EFFECT_PROJECTILE_SCRIPT := preload("res://experiments/rune_combat/scripts/ChantEffectProjectile.gd")
 
 
 func execute(result: SpellResultData, context: Dictionary) -> PackedStringArray:
@@ -63,6 +63,6 @@ func _spawn_effect(result: SpellResultData, context: Dictionary, effect_type_ove
 	if effects_parent == null:
 		return
 
-	var effect := SIMPLE_CHANT_EFFECT_SCRIPT.new() as SimpleChantEffect
+	var effect := CHANT_EFFECT_PROJECTILE_SCRIPT.new() as SimpleChantEffect
 	effects_parent.add_child(effect)
 	effect.setup(result, context, effect_type_override)

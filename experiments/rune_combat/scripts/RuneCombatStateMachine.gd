@@ -6,8 +6,8 @@ signal state_changed(new_state: int)
 enum State {
 	IDLE,
 	WHEEL_OPEN,
-	CHANTING,
-	CASTING,
+	CHANT_PREPARED,
+	SHOOTING,
 	RECOVERING,
 	ENDED,
 }
@@ -28,20 +28,21 @@ func open_wheel() -> void:
 	set_state(State.WHEEL_OPEN)
 
 
-func close_wheel() -> void:
+func close_wheel(has_prepared_chant: bool = false) -> void:
 	if current_state == State.WHEEL_OPEN:
-		set_state(State.IDLE)
+		set_state(State.CHANT_PREPARED if has_prepared_chant else State.IDLE)
 
 
-func begin_chant() -> void:
-	if can_accept_chant_input():
-		set_state(State.CHANTING)
+func prepare_chant() -> void:
+	if current_state == State.WHEEL_OPEN:
+		set_state(State.CHANT_PREPARED)
 
 
-func begin_cast() -> void:
-	if current_state == State.ENDED:
-		return
-	set_state(State.CASTING)
+func begin_shoot(has_prepared_chant: bool) -> bool:
+	if current_state == State.ENDED or not has_prepared_chant:
+		return false
+	set_state(State.SHOOTING)
+	return true
 
 
 func finish_recovery() -> void:
@@ -55,7 +56,7 @@ func end_combat() -> void:
 
 
 func can_accept_chant_input() -> bool:
-	return current_state == State.IDLE or current_state == State.WHEEL_OPEN or current_state == State.CHANTING
+	return current_state == State.WHEEL_OPEN
 
 
 func get_state_name(state: int) -> String:
@@ -64,10 +65,10 @@ func get_state_name(state: int) -> String:
 			return "IDLE"
 		State.WHEEL_OPEN:
 			return "WHEEL_OPEN"
-		State.CHANTING:
-			return "CHANTING"
-		State.CASTING:
-			return "CASTING"
+		State.CHANT_PREPARED:
+			return "CHANT_PREPARED"
+		State.SHOOTING:
+			return "SHOOTING"
 		State.RECOVERING:
 			return "RECOVERING"
 		State.ENDED:
