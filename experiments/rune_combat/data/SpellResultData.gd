@@ -15,6 +15,11 @@ class_name SpellResultData
 @export var shield: int = 0
 @export var affects_enemy: bool = false
 @export var affects_self: bool = false
+@export var effect_type: String = "projectile"
+@export var effect_color: Color = Color.WHITE
+@export var effect_speed: float = 650.0
+@export var effect_radius: float = 8.0
+@export var effect_lifetime: float = 0.9
 
 
 func set_sequence(sequence: Array) -> void:

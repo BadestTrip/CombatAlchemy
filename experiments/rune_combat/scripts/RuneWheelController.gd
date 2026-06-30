@@ -1,5 +1,5 @@
 extends PanelContainer
-class_name RuneWheelController
+class_name ExperimentalRuneWheelController
 
 signal rune_selected(rune_id: String)
 

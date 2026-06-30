@@ -16,7 +16,7 @@ func update_preview(result: SpellResultData) -> void:
 	else:
 		description_label.text = result.description
 	stability_label.text = "Stability: %s (%d)" % [result.instability_label, result.instability_score]
-	effect_label.text = "Damage %d  Shield %d" % [result.damage, result.shield]
+	effect_label.text = "Effect %s  Damage %d  Shield %d" % [result.effect_type, result.damage, result.shield]
 
 
 func _sequence_to_text(sequence: Array[String]) -> String:

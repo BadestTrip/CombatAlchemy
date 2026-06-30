@@ -16,10 +16,11 @@ class_name RuneCombatController
 @export var player_status_label_path: NodePath
 @export var enemy_status_label_path: NodePath
 @export var state_label_path: NodePath
+@export var effects_parent_path: NodePath
 
 @onready var state_machine := get_node(state_machine_path) as RuneCombatStateMachine
 @onready var combat_input := get_node(combat_input_path) as RuneCombatInput
-@onready var rune_wheel := get_node(rune_wheel_path) as RuneWheelController
+@onready var rune_wheel := get_node(rune_wheel_path) as ExperimentalRuneWheelController
 @onready var chant_builder := get_node(chant_builder_path) as ChantBuilder
 @onready var spell_resolver := get_node(spell_resolver_path) as SpellResolver
 @onready var spell_executor := get_node(spell_executor_path) as SpellExecutor
@@ -32,6 +33,7 @@ class_name RuneCombatController
 @onready var player_status_label := get_node(player_status_label_path) as Label
 @onready var enemy_status_label := get_node(enemy_status_label_path) as Label
 @onready var state_label := get_node(state_label_path) as Label
+@onready var effects_parent := get_node(effects_parent_path) as Node
 
 
 func _ready() -> void:
@@ -52,7 +54,7 @@ func _ready() -> void:
 	_update_preview(chant_builder.get_sequence())
 	_update_unit_status()
 	_on_state_changed(state_machine.current_state)
-	_log_line("Rune combat prototype ready. Click runes or press 1-5, Space to cast, C to clear.")
+	_log_line("Rune combat prototype ready. Move, point with mouse, build a chant, then press Space.")
 
 
 func _on_rune_selected(rune_id: String) -> void:
@@ -74,9 +76,18 @@ func _on_cast_requested() -> void:
 		return
 
 	state_machine.begin_cast()
+	var player_node := player_unit.get_parent() as PlayerCombatController
+	var enemy_node := enemy_unit.get_parent() as Node2D
 	var context := {
 		"player_unit": player_unit,
 		"enemy_unit": enemy_unit,
+		"player_node": player_node,
+		"enemy_node": enemy_node,
+		"cast_origin": player_node.get_cast_origin() if player_node != null else Vector2.ZERO,
+		"aim_position": player_node.get_aim_position() if player_node != null else Vector2.ZERO,
+		"aim_direction": player_node.get_aim_direction() if player_node != null else Vector2.RIGHT,
+		"effects_parent": effects_parent,
+		"log_callback": Callable(self, "_log_line")
 	}
 	var result := spell_resolver.resolve(sequence, context)
 	var lines := spell_executor.execute(result, context)

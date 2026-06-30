@@ -1,26 +1,27 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene format=3 uid="uid://brvm8ljkogslq"]
 
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/RuneCombatController.gd" id="1_controller"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/PlayerCombatController.gd" id="2_player"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/EnemyCombatController.gd" id="3_enemy"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/CombatUnit.gd" id="4_unit"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/RuneCombatStateMachine.gd" id="5_state"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/RuneCombatInput.gd" id="6_input"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/ChantBuilder.gd" id="7_chant"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/RuneGrammarInterpreter.gd" id="8_grammar"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/SignatureSpellResolver.gd" id="9_signatures"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/InstabilityCalculator.gd" id="10_instability"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/CombatRuleController.gd" id="11_rules"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/CooldownManager.gd" id="12_cooldowns"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/SpellbookRecorder.gd" id="13_recorder"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/SpellResolver.gd" id="14_resolver"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/SpellExecutor.gd" id="15_executor"]
-[ext_resource type="Script" path="res://experiments/rune_combat/scripts/ChantPreviewController.gd" id="16_preview"]
+[ext_resource type="Script" uid="uid://b6h4m6cwcydyx" path="res://experiments/rune_combat/scripts/RuneCombatController.gd" id="1_controller"]
+[ext_resource type="Script" uid="uid://bbxorc2yce4tu" path="res://experiments/rune_combat/scripts/PlayerCombatController.gd" id="2_player"]
+[ext_resource type="Script" uid="uid://b5v4ufq16p8d3" path="res://experiments/rune_combat/scripts/EnemyCombatController.gd" id="3_enemy"]
+[ext_resource type="Script" uid="uid://duiawdft4mscb" path="res://experiments/rune_combat/scripts/CombatUnit.gd" id="4_unit"]
+[ext_resource type="Script" uid="uid://orj4g7v4k8vg" path="res://experiments/rune_combat/scripts/RuneCombatStateMachine.gd" id="5_state"]
+[ext_resource type="Script" uid="uid://dg6b042wqnjhu" path="res://experiments/rune_combat/scripts/RuneCombatInput.gd" id="6_input"]
+[ext_resource type="Script" uid="uid://ct75qc5dpypn5" path="res://experiments/rune_combat/scripts/ChantBuilder.gd" id="7_chant"]
+[ext_resource type="Script" uid="uid://dlcwb5rwduk54" path="res://experiments/rune_combat/scripts/RuneGrammarInterpreter.gd" id="8_grammar"]
+[ext_resource type="Script" uid="uid://c0aqjgfvrjlqc" path="res://experiments/rune_combat/scripts/SignatureSpellResolver.gd" id="9_signatures"]
+[ext_resource type="Script" uid="uid://qgr4b6caq4ab" path="res://experiments/rune_combat/scripts/InstabilityCalculator.gd" id="10_instability"]
+[ext_resource type="Script" uid="uid://bixo3u358t2rc" path="res://experiments/rune_combat/scripts/CombatRuleController.gd" id="11_rules"]
+[ext_resource type="Script" uid="uid://mdeac6wtp4f3" path="res://experiments/rune_combat/scripts/CooldownManager.gd" id="12_cooldowns"]
+[ext_resource type="Script" uid="uid://cpstrvkwa77ny" path="res://experiments/rune_combat/scripts/SpellbookRecorder.gd" id="13_recorder"]
+[ext_resource type="Script" uid="uid://ch58umqyrjh0e" path="res://experiments/rune_combat/scripts/SpellResolver.gd" id="14_resolver"]
+[ext_resource type="Script" uid="uid://cvlni8tkjk0jy" path="res://experiments/rune_combat/scripts/SpellExecutor.gd" id="15_executor"]
+[ext_resource type="Script" uid="uid://c6cvdn7pgvmre" path="res://experiments/rune_combat/scripts/ChantPreviewController.gd" id="16_preview"]
 [ext_resource type="PackedScene" path="res://experiments/rune_combat/scenes/RuneWheelUI.tscn" id="17_wheel_scene"]
 [ext_resource type="PackedScene" path="res://experiments/rune_combat/scenes/ChantBarUI.tscn" id="18_chant_scene"]
 [ext_resource type="PackedScene" path="res://experiments/rune_combat/scenes/SpellLogUI.tscn" id="19_log_scene"]
+[ext_resource type="Script" uid="uid://bunnin0rwuqrv" path="res://experiments/rune_combat/scripts/AimIndicator.gd" id="20_aim"]
 
-[node name="RuneCombatPrototype" type="Node2D"]
+[node name="RuneCombatPrototype" type="Node2D" unique_id=1751493139]
 script = ExtResource("1_controller")
 state_machine_path = NodePath("Systems/RuneCombatStateMachine")
 combat_input_path = NodePath("Systems/RuneCombatInput")
@@ -37,86 +38,91 @@ log_text_path = NodePath("UI/MainLayout/RightPanel/SpellLogUI/LogText")
 player_status_label_path = NodePath("UI/MainLayout/RightPanel/UnitStatus/PlayerStatus")
 enemy_status_label_path = NodePath("UI/MainLayout/RightPanel/UnitStatus/EnemyStatus")
 state_label_path = NodePath("UI/MainLayout/RightPanel/StateLabel")
+effects_parent_path = NodePath("Arena")
 
-[node name="Arena" type="Node2D" parent="."]
+[node name="Arena" type="Node2D" parent="." unique_id=2103649087]
 
-[node name="ArenaFloor" type="ColorRect" parent="Arena"]
+[node name="ArenaFloor" type="ColorRect" parent="Arena" unique_id=1869182865]
 offset_left = 470.0
 offset_top = 24.0
 offset_right = 790.0
 offset_bottom = 500.0
 color = Color(0.08, 0.09, 0.1, 1)
 
-[node name="Player" type="CharacterBody2D" parent="Arena"]
+[node name="Player" type="CharacterBody2D" parent="Arena" unique_id=1752949235]
 position = Vector2(555, 300)
 script = ExtResource("2_player")
 
-[node name="PlayerVisual" type="Polygon2D" parent="Arena/Player"]
+[node name="PlayerVisual" type="Polygon2D" parent="Arena/Player" unique_id=1371381023]
 color = Color(0.25, 0.78, 0.96, 1)
 polygon = PackedVector2Array(-14, -16, 14, -16, 14, 16, -14, 16)
 
-[node name="CombatUnit" type="Node" parent="Arena/Player"]
+[node name="CombatUnit" type="Node" parent="Arena/Player" unique_id=1059680907]
 script = ExtResource("4_unit")
 display_name = "Player"
-max_hp = 40
-hp = 40
 
-[node name="DummyEnemy" type="Node2D" parent="Arena"]
+[node name="DummyEnemy" type="Node2D" parent="Arena" unique_id=237873852]
 position = Vector2(710, 300)
 script = ExtResource("3_enemy")
 
-[node name="DummyVisual" type="Polygon2D" parent="Arena/DummyEnemy"]
+[node name="DummyVisual" type="Polygon2D" parent="Arena/DummyEnemy" unique_id=2018808448]
 color = Color(0.9, 0.38, 0.24, 1)
 polygon = PackedVector2Array(-18, -22, 18, -22, 18, 22, -18, 22)
 
-[node name="CombatUnit" type="Node" parent="Arena/DummyEnemy"]
+[node name="CombatUnit" type="Node" parent="Arena/DummyEnemy" unique_id=829590295]
 script = ExtResource("4_unit")
 display_name = "Practice Dummy"
 max_hp = 60
 hp = 60
 
-[node name="Systems" type="Node" parent="."]
+[node name="AimIndicator" type="Node2D" parent="Arena" unique_id=861767104]
+script = ExtResource("20_aim")
+player_path = NodePath("../Player")
+use_mouse_position = true
 
-[node name="RuneCombatStateMachine" type="Node" parent="Systems"]
+[node name="Systems" type="Node" parent="." unique_id=90751109]
+
+[node name="RuneCombatStateMachine" type="Node" parent="Systems" unique_id=996911805]
 script = ExtResource("5_state")
 
-[node name="RuneCombatInput" type="Node" parent="Systems"]
+[node name="RuneCombatInput" type="Node" parent="Systems" unique_id=223148194]
 script = ExtResource("6_input")
 
-[node name="ChantBuilder" type="Node" parent="Systems"]
+[node name="ChantBuilder" type="Node" parent="Systems" unique_id=2023269087]
 script = ExtResource("7_chant")
 
-[node name="RuneGrammarInterpreter" type="Node" parent="Systems"]
+[node name="RuneGrammarInterpreter" type="Node" parent="Systems" unique_id=1907113589]
 script = ExtResource("8_grammar")
 
-[node name="SignatureSpellResolver" type="Node" parent="Systems"]
+[node name="SignatureSpellResolver" type="Node" parent="Systems" unique_id=1465275282]
 script = ExtResource("9_signatures")
 
-[node name="InstabilityCalculator" type="Node" parent="Systems"]
+[node name="InstabilityCalculator" type="Node" parent="Systems" unique_id=289141722]
 script = ExtResource("10_instability")
 
-[node name="CombatRuleController" type="Node" parent="Systems"]
+[node name="CombatRuleController" type="Node" parent="Systems" unique_id=1322714319]
 script = ExtResource("11_rules")
 
-[node name="CooldownManager" type="Node" parent="Systems"]
+[node name="CooldownManager" type="Node" parent="Systems" unique_id=1545706686]
 script = ExtResource("12_cooldowns")
 
-[node name="SpellbookRecorder" type="Node" parent="Systems"]
+[node name="SpellbookRecorder" type="Node" parent="Systems" unique_id=435787639]
 script = ExtResource("13_recorder")
 
-[node name="SpellExecutor" type="Node" parent="Systems"]
+[node name="SpellExecutor" type="Node" parent="Systems" unique_id=1629675514]
 script = ExtResource("15_executor")
 
-[node name="SpellResolver" type="Node" parent="Systems"]
+[node name="SpellResolver" type="Node" parent="Systems" unique_id=567875637]
 script = ExtResource("14_resolver")
 grammar_interpreter_path = NodePath("../RuneGrammarInterpreter")
 signature_resolver_path = NodePath("../SignatureSpellResolver")
 instability_calculator_path = NodePath("../InstabilityCalculator")
 combat_rule_controller_path = NodePath("../CombatRuleController")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=1210929074]
 
-[node name="MainLayout" type="HBoxContainer" parent="UI"]
+[node name="MainLayout" type="HBoxContainer" parent="UI" unique_id=1544929574]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 24.0
@@ -125,80 +131,80 @@ offset_right = -24.0
 offset_bottom = -24.0
 theme_override_constants/separation = 14
 
-[node name="LeftPanel" type="VBoxContainer" parent="UI/MainLayout"]
-layout_mode = 2
+[node name="LeftPanel" type="VBoxContainer" parent="UI/MainLayout" unique_id=1944034871]
 custom_minimum_size = Vector2(430, 0)
+layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Title" type="Label" parent="UI/MainLayout/LeftPanel"]
+[node name="Title" type="Label" parent="UI/MainLayout/LeftPanel" unique_id=1080609950]
 layout_mode = 2
 text = "Rune Combat Prototype"
 
-[node name="Instructions" type="Label" parent="UI/MainLayout/LeftPanel"]
+[node name="Instructions" type="Label" parent="UI/MainLayout/LeftPanel" unique_id=1998802526]
 layout_mode = 2
-text = "1-5 add runes. Space casts. C clears. Backspace removes last."
+text = "Move with WASD/arrows. Point with mouse. 1-5 add runes. Space casts toward mouse. C clears. Backspace removes last. Right click/Tab toggles wheel state."
 autowrap_mode = 3
 
-[node name="RuneWheelUI" parent="UI/MainLayout/LeftPanel" instance=ExtResource("17_wheel_scene")]
+[node name="RuneWheelUI" parent="UI/MainLayout/LeftPanel" unique_id=1671091273 instance=ExtResource("17_wheel_scene")]
 layout_mode = 2
 
-[node name="ChantBarUI" parent="UI/MainLayout/LeftPanel" instance=ExtResource("18_chant_scene")]
+[node name="ChantBarUI" parent="UI/MainLayout/LeftPanel" unique_id=1772812373 instance=ExtResource("18_chant_scene")]
 layout_mode = 2
 
-[node name="SpellPreviewPanel" type="PanelContainer" parent="UI/MainLayout/LeftPanel"]
-layout_mode = 2
+[node name="SpellPreviewPanel" type="PanelContainer" parent="UI/MainLayout/LeftPanel" unique_id=501065548]
 custom_minimum_size = Vector2(420, 180)
+layout_mode = 2
 script = ExtResource("16_preview")
 
-[node name="VBox" type="VBoxContainer" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel"]
+[node name="VBox" type="VBoxContainer" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel" unique_id=1767209730]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Title" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox"]
+[node name="Title" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox" unique_id=681084287]
 layout_mode = 2
 text = "No Chant"
 
-[node name="Sequence" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox"]
+[node name="Sequence" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox" unique_id=1756726717]
 layout_mode = 2
 text = "Sequence: (empty)"
 autowrap_mode = 3
 
-[node name="Description" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox"]
+[node name="Description" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox" unique_id=683730789]
 layout_mode = 2
 text = "Add runes before casting."
 autowrap_mode = 3
 
-[node name="Stability" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox"]
+[node name="Stability" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox" unique_id=436061012]
 layout_mode = 2
 text = "Stability: Stable (0)"
 
-[node name="Effect" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox"]
+[node name="Effect" type="Label" parent="UI/MainLayout/LeftPanel/SpellPreviewPanel/VBox" unique_id=1117185619]
 layout_mode = 2
 text = "Damage 0  Shield 0"
 
-[node name="ArenaSpacer" type="Control" parent="UI/MainLayout"]
+[node name="ArenaSpacer" type="Control" parent="UI/MainLayout" unique_id=811893977]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="RightPanel" type="VBoxContainer" parent="UI/MainLayout"]
-layout_mode = 2
+[node name="RightPanel" type="VBoxContainer" parent="UI/MainLayout" unique_id=1652774044]
 custom_minimum_size = Vector2(460, 0)
+layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="UnitStatus" type="VBoxContainer" parent="UI/MainLayout/RightPanel"]
+[node name="UnitStatus" type="VBoxContainer" parent="UI/MainLayout/RightPanel" unique_id=230411762]
 layout_mode = 2
 
-[node name="PlayerStatus" type="Label" parent="UI/MainLayout/RightPanel/UnitStatus"]
+[node name="PlayerStatus" type="Label" parent="UI/MainLayout/RightPanel/UnitStatus" unique_id=26761542]
 layout_mode = 2
 text = "Player HP 40/40  Shield 0"
 
-[node name="EnemyStatus" type="Label" parent="UI/MainLayout/RightPanel/UnitStatus"]
+[node name="EnemyStatus" type="Label" parent="UI/MainLayout/RightPanel/UnitStatus" unique_id=1537710142]
 layout_mode = 2
 text = "Practice Dummy HP 60/60  Shield 0"
 
-[node name="StateLabel" type="Label" parent="UI/MainLayout/RightPanel"]
+[node name="StateLabel" type="Label" parent="UI/MainLayout/RightPanel" unique_id=480935085]
 layout_mode = 2
 text = "State: IDLE"
 
-[node name="SpellLogUI" parent="UI/MainLayout/RightPanel" instance=ExtResource("19_log_scene")]
+[node name="SpellLogUI" parent="UI/MainLayout/RightPanel" unique_id=1345861411 instance=ExtResource("19_log_scene")]
 layout_mode = 2

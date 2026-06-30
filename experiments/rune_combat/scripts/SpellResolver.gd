@@ -35,6 +35,7 @@ func resolve(sequence: Array, context: Dictionary = {}) -> SpellResultData:
 
 	if combat_rule_controller != null:
 		result = combat_rule_controller.apply_rules(result, context)
+	_assign_effect_values(result)
 	return result
 
 
@@ -68,3 +69,38 @@ func _assign_combat_values(result: SpellResultData) -> void:
 	result.shield = shield
 	result.affects_enemy = damage > 0
 	result.affects_self = result.instability_label == "Unstable" or result.instability_label == "Forbidden"
+
+
+func _assign_effect_values(result: SpellResultData) -> void:
+	var has_damage_tags := result.has_tag("damage") or result.has_tag("fire") or result.has_tag("shock") or result.has_tag("cut") or result.has_tag("edge") or result.has_tag("projectile")
+	var has_shield_tags := result.has_tag("shield") or result.has_tag("protection") or result.has_tag("ward") or result.has_tag("light")
+	var has_damage := result.damage > 0 or has_damage_tags
+	var has_shield := result.shield > 0 or has_shield_tags
+
+	if has_damage and has_shield:
+		result.effect_type = "projectile_plus_shield"
+	elif has_shield:
+		result.effect_type = "shield"
+	elif has_damage:
+		result.effect_type = "projectile"
+	else:
+		result.effect_type = "fizzle"
+
+	result.effect_speed = 650.0
+	result.effect_radius = 8.0
+	result.effect_lifetime = 0.9
+
+	if result.has_tag("shock") or result.has_tag("unstable"):
+		result.effect_color = Color(0.45, 0.7, 1.0, 0.95)
+		result.effect_speed = 760.0
+		result.effect_radius = 9.0
+	elif result.has_tag("fire"):
+		result.effect_color = Color(1.0, 0.42, 0.12, 0.95)
+	elif result.has_tag("cut") or result.has_tag("edge"):
+		result.effect_color = Color(0.95, 0.72, 0.68, 0.95)
+	elif result.has_tag("shield") or result.has_tag("protection") or result.has_tag("ward") or result.has_tag("light"):
+		result.effect_color = Color(1.0, 0.88, 0.52, 0.9)
+	elif result.has_tag("stone"):
+		result.effect_color = Color(0.55, 0.5, 0.43, 0.95)
+	else:
+		result.effect_color = Color(0.78, 0.62, 1.0, 0.85)
