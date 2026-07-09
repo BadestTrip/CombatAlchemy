@@ -9,11 +9,11 @@ class_name LevelMusic
 
 func get_music() -> AudioStream:
 	return music
-func get_crossfade() -> float: 
+func get_crossfade() -> float:
 	return crossfade
-func get_loop() -> bool: 
+func get_loop() -> bool:
 	return loop
-func get_volume_db(): 
+func get_volume_db():
 	return volume_db
-func get_bus() -> StringName: 
+func get_bus() -> StringName:
 	return bus

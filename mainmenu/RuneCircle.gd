@@ -16,11 +16,8 @@ extends Control
 class_name RuneCircle
 
 
-# SymbolLibraryData is the main source of rune names. rune_words is only a
-# fallback so this decorative scene can still render if no library is assigned.
-@export var symbol_library: SymbolLibraryData
-
-# Fallback rune text shown around the circle if symbol_library is missing.
+# Rune text shown around the circle. Main-menu decoration is intentionally
+# independent from combat data so combat prototypes can be replaced freely.
 @export var rune_words: Array[String] = [
 	"ASHA",
 	"VORO",
@@ -145,17 +142,7 @@ func _rebuild_rune_labels() -> void:
 
 func _refresh_active_rune_words() -> void:
 	_active_rune_words.clear()
-	if symbol_library != null:
-		for rune: SymbolCardData in symbol_library.symbols:
-			if rune == null:
-				continue
-			if not rune.spoken_word.is_empty():
-				_active_rune_words.append(rune.spoken_word)
-			elif not rune.symbol_id.is_empty():
-				_active_rune_words.append(rune.symbol_id.to_upper())
-
-	if _active_rune_words.is_empty():
-		_active_rune_words = rune_words.duplicate()
+	_active_rune_words = rune_words.duplicate()
 
 
 # Place each generated label around the circle.
