@@ -1,0 +1,96 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://test/TestPlayer.gd" id="1_test_player"]
+[ext_resource type="Texture2D" path="res://sprites/characters/overworld_character_TRUE_TRANSPARENT.png" id="2_character"]
+[ext_resource type="PackedScene" path="res://test/runes/RuneMenu.tscn" id="3_rune_menu"]
+[ext_resource type="PackedScene" path="res://test/targets/TestDummy.tscn" id="4_test_dummy"]
+[ext_resource type="Script" path="res://test/combat/TestCombatController.gd" id="5_test_combat"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_player"]
+radius = 14.0
+height = 62.0
+
+[node name="TestPlayground" type="Node2D"]
+
+[node name="Field" type="ColorRect" parent="."]
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+color = Color(0.12, 0.15, 0.12, 1)
+
+[node name="Bounds" type="Node2D" parent="."]
+
+[node name="Top" type="ColorRect" parent="Bounds"]
+offset_right = 1920.0
+offset_bottom = 24.0
+mouse_filter = 2
+color = Color(0.65, 0.55, 0.32, 1)
+
+[node name="Bottom" type="ColorRect" parent="Bounds"]
+offset_top = 1056.0
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+color = Color(0.65, 0.55, 0.32, 1)
+
+[node name="Left" type="ColorRect" parent="Bounds"]
+offset_top = 24.0
+offset_right = 24.0
+offset_bottom = 1056.0
+mouse_filter = 2
+color = Color(0.65, 0.55, 0.32, 1)
+
+[node name="Right" type="ColorRect" parent="Bounds"]
+offset_left = 1896.0
+offset_top = 24.0
+offset_right = 1920.0
+offset_bottom = 1056.0
+mouse_filter = 2
+color = Color(0.65, 0.55, 0.32, 1)
+
+[node name="Prototypes" type="Node2D" parent="."]
+
+[node name="RuneMenu" parent="Prototypes" instance=ExtResource("3_rune_menu")]
+offset_left = 1300.0
+offset_top = 48.0
+offset_right = 1880.0
+offset_bottom = 548.0
+
+[node name="TestDummy" parent="Prototypes" instance=ExtResource("4_test_dummy")]
+position = Vector2(620, 570)
+
+[node name="TestCombatController" type="Node" parent="Prototypes"]
+script = ExtResource("5_test_combat")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(960, 540)
+scale = Vector2(3, 3)
+script = ExtResource("1_test_player")
+
+[node name="CharacterSprite" type="TextureRect" parent="Player"]
+offset_left = -32.666664
+offset_top = -32.00003
+offset_right = 32.755554
+offset_bottom = 31.99997
+texture = ExtResource("2_character")
+expand_mode = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("CapsuleShape2D_player")
+
+[node name="DustTrail" type="CPUParticles2D" parent="Player"]
+emitting = false
+amount = 1800
+lifetime = 10.0
+emission_shape = 1
+emission_sphere_radius = 15.0
+direction = Vector2(0, 1)
+spread = 55.0
+gravity = Vector2(-15, 1)
+initial_velocity_min = 6.0
+initial_velocity_max = 18.0
+damping_min = 12.0
+damping_max = 26.0
+scale_amount_min = 0.45
+scale_amount_max = 1.15
+color = Color(1, 0.76, 0.24, 0.42)

@@ -1,0 +1,47 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://test/combat/spells/TestFireProjectile.gd" id="1_fire_projectile"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_fire_projectile"]
+radius = 18.0
+
+[node name="TestFireProjectile" type="Area2D"]
+monitoring = true
+monitorable = false
+script = ExtResource("1_fire_projectile")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_fire_projectile")
+
+[node name="Glow" type="ColorRect" parent="."]
+offset_left = -24.0
+offset_top = -16.0
+offset_right = 24.0
+offset_bottom = 16.0
+mouse_filter = 2
+color = Color(1, 0.32, 0.08, 0.58)
+
+[node name="Core" type="ColorRect" parent="."]
+offset_left = -14.0
+offset_top = -9.0
+offset_right = 14.0
+offset_bottom = 9.0
+mouse_filter = 2
+color = Color(1, 0.82, 0.20, 1)
+
+[node name="Trail" type="CPUParticles2D" parent="."]
+emitting = true
+amount = 80
+lifetime = 0.32
+emission_shape = 1
+emission_sphere_radius = 10.0
+direction = Vector2(-1, 0)
+spread = 28.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 30.0
+initial_velocity_max = 90.0
+damping_min = 20.0
+damping_max = 44.0
+scale_amount_min = 0.35
+scale_amount_max = 0.85
+color = Color(1, 0.28, 0.06, 0.62)

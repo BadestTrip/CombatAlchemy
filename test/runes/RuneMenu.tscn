@@ -1,0 +1,174 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://test/runes/RuneMenu.gd" id="1_rune_menu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_main"]
+bg_color = Color(0.08, 0.09, 0.12, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.34, 0.35, 0.42, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_result"]
+bg_color = Color(0.12, 0.13, 0.17, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.30, 0.32, 0.39, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+
+[node name="RuneMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rune_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.035, 0.04, 0.055, 0.82)
+
+[node name="MainContainer" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(520, 430)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -215.0
+offset_right = 260.0
+offset_bottom = 215.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_main")
+
+[node name="ContentContainer" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="MainContainer/ContentContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Создание заклинания"
+horizontal_alignment = 1
+
+[node name="SlotsContainer" type="HBoxContainer" parent="MainContainer/ContentContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BaseSlotButton" type="Button" parent="MainContainer/ContentContainer/SlotsContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 58)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Основа
+Пусто"
+
+[node name="MovementSlotButton" type="Button" parent="MainContainer/ContentContainer/SlotsContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 58)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Движение
+Пусто"
+
+[node name="ImpactSlotButton" type="Button" parent="MainContainer/ContentContainer/SlotsContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 58)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Попадание
+Пусто"
+
+[node name="RunesLabel" type="Label" parent="MainContainer/ContentContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Руны: заполняют слоты по очереди"
+
+[node name="RunesContainer" type="HBoxContainer" parent="MainContainer/ContentContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ForwardRuneButton" type="Button" parent="MainContainer/ContentContainer/RunesContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Порыв"
+
+[node name="FlameRuneButton" type="Button" parent="MainContainer/ContentContainer/RunesContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Пламя"
+
+[node name="ResultPanel" type="PanelContainer" parent="MainContainer/ContentContainer"]
+custom_minimum_size = Vector2(0, 112)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_result")
+
+[node name="ResultContent" type="VBoxContainer" parent="MainContainer/ContentContainer/ResultPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SpellNameLabel" type="Label" parent="MainContainer/ContentContainer/ResultPanel/ResultContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Заклинание не завершено"
+horizontal_alignment = 1
+
+[node name="SpellDescriptionLabel" type="Label" parent="MainContainer/ContentContainer/ResultPanel/ResultContent"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+text = "Основа: не выбрано.
+Движение: не выбрано.
+Попадание: не выбрано."
+
+[node name="ActionButtonsContainer" type="HBoxContainer" parent="MainContainer/ContentContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CastButton" type="Button" parent="MainContainer/ContentContainer/ActionButtonsContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+disabled = true
+text = "Создать / Space"
+
+[node name="ClearButton" type="Button" parent="MainContainer/ContentContainer/ActionButtonsContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Очистить"

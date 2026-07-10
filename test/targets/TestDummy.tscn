@@ -1,0 +1,91 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://test/targets/TestDummy.gd" id="1_test_dummy"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_dummy"]
+radius = 26.0
+height = 118.0
+
+[node name="TestDummy" type="Area2D" groups=["test_dummy"]]
+input_pickable = true
+script = ExtResource("1_test_dummy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -20)
+shape = SubResource("CapsuleShape2D_dummy")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Shadow" type="ColorRect" parent="Visual"]
+offset_left = -42.0
+offset_top = 20.0
+offset_right = 42.0
+offset_bottom = 30.0
+mouse_filter = 2
+color = Color(0.02, 0.025, 0.02, 0.42)
+
+[node name="Body" type="ColorRect" parent="Visual"]
+offset_left = -30.0
+offset_top = -72.0
+offset_right = 30.0
+offset_bottom = 18.0
+mouse_filter = 2
+color = Color(0.58, 0.42, 0.26, 1)
+
+[node name="BodyStripe" type="ColorRect" parent="Visual"]
+offset_left = -34.0
+offset_top = -18.0
+offset_right = 34.0
+offset_bottom = -8.0
+mouse_filter = 2
+color = Color(0.86, 0.64, 0.34, 1)
+
+[node name="Head" type="ColorRect" parent="Visual"]
+offset_left = -24.0
+offset_top = -112.0
+offset_right = 24.0
+offset_bottom = -72.0
+mouse_filter = 2
+color = Color(0.70, 0.52, 0.34, 1)
+
+[node name="Base" type="ColorRect" parent="Visual"]
+offset_left = -48.0
+offset_top = 18.0
+offset_right = 48.0
+offset_bottom = 34.0
+mouse_filter = 2
+color = Color(0.36, 0.26, 0.18, 1)
+
+[node name="NameLabel" type="Label" parent="."]
+offset_left = -70.0
+offset_top = -154.0
+offset_right = 70.0
+offset_bottom = -130.0
+text = "Манекен"
+horizontal_alignment = 1
+
+[node name="HealthBar" type="ProgressBar" parent="."]
+offset_left = -58.0
+offset_top = -130.0
+offset_right = 58.0
+offset_bottom = -112.0
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="HealthLabel" type="Label" parent="."]
+offset_left = -58.0
+offset_top = -132.0
+offset_right = 58.0
+offset_bottom = -112.0
+text = "100/100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HintLabel" type="Label" parent="."]
+offset_left = -90.0
+offset_top = 42.0
+offset_right = 90.0
+offset_bottom = 64.0
+text = "ЛКМ: тестовый удар"
+horizontal_alignment = 1
