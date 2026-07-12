@@ -16,8 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://mk0ffsryt0mu" path="res://sprites/buttons/quit_hover.png" id="20_1n6yq"]
 [ext_resource type="PackedScene" path="res://mainmenu/RuneCircle.tscn" id="21_rune_circle"]
 [ext_resource type="PackedScene" uid="uid://btyxtwij5kbf7" path="res://mainmenu/VersionStone.tscn" id="22_version_stone"]
-[ext_resource type="Resource" uid="uid://f1frsjbdcext" path="res://combat/resources/symbols/SymbolLibrary_Default.tres" id="23_symbol_library"]
-[ext_resource type="Resource" path="res://mainmenu/resources/MainMenuStyle_Default.tres" id="24_menu_style"]
+[ext_resource type="Resource" uid="uid://ut3caq211l7y" path="res://mainmenu/resources/MainMenuStyle_Default.tres" id="24_menu_style"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wd801"]
 shader = ExtResource("2_o168s")
@@ -74,7 +73,6 @@ offset_left = 167.0
 offset_top = 160.0
 offset_right = 847.0
 offset_bottom = 840.0
-symbol_library = ExtResource("23_symbol_library")
 rune_opacity = 0.52
 
 [node name="UI" type="CenterContainer" parent="." unique_id=1095771845]

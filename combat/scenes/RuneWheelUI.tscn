@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://combat/scripts/RuneWheelController.gd" id="1_wheel"]
+[ext_resource type="PackedScene" path="res://combat/scenes/RuneButtonUI.tscn" id="2_button"]
+
+[node name="RuneWheelUI" type="Control"]
+custom_minimum_size = Vector2(760, 230)
+mouse_filter = 1
+script = ExtResource("1_wheel")
+
+[node name="RuneButton1" parent="." instance=ExtResource("2_button")]
+text = "1\nASHA"
+tooltip_text = "Add ASHA to the chant"
+
+[node name="RuneButton2" parent="." instance=ExtResource("2_button")]
+text = "2\nVORO"
+tooltip_text = "Add VORO to the chant"
+
+[node name="RuneButton3" parent="." instance=ExtResource("2_button")]
+text = "3\nKETH"
+tooltip_text = "Add KETH to the chant"
+
+[node name="RuneButton4" parent="." instance=ExtResource("2_button")]
+text = "4\nELUM"
+tooltip_text = "Add ELUM to the chant"
+
+[node name="RuneButton5" parent="." instance=ExtResource("2_button")]
+text = "5\nZUN"
+tooltip_text = "Add ZUN to the chant"

@@ -1,0 +1,73 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://combat/scenes/CombatStatusPanel.tscn" id="1_status"]
+[ext_resource type="PackedScene" path="res://combat/scenes/ChantBarUI.tscn" id="2_chant_bar"]
+[ext_resource type="PackedScene" path="res://combat/scenes/SpellPreviewPanel.tscn" id="3_preview"]
+[ext_resource type="PackedScene" path="res://combat/scenes/SpellLogUI.tscn" id="4_log"]
+
+[node name="BottomHUD" type="Control"]
+z_index = 30
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -230.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="HUDPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HUDMargin" type="MarginContainer" parent="HUDPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="HUDRow" type="HBoxContainer" parent="HUDPanel/HUDMargin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="StatusColumn" parent="HUDPanel/HUDMargin/HUDRow" instance=ExtResource("1_status")]
+layout_mode = 2
+
+[node name="CenterColumn" type="VBoxContainer" parent="HUDPanel/HUDMargin/HUDRow"]
+custom_minimum_size = Vector2(530, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Instructions" type="Label" parent="HUDPanel/HUDMargin/HUDRow/CenterColumn"]
+layout_mode = 2
+text = "Tab: rune arc  |  Space: prepare/shoot  |  LMB: shoot  |  C: clear  |  Backspace: remove rune"
+autowrap_mode = 3
+
+[node name="PreparedLabel" type="Label" parent="HUDPanel/HUDMargin/HUDRow/CenterColumn"]
+layout_mode = 2
+text = "Prepared: None"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ChantBarUI" parent="HUDPanel/HUDMargin/HUDRow/CenterColumn" instance=ExtResource("2_chant_bar")]
+layout_mode = 2
+
+[node name="SpellPreviewPanel" parent="HUDPanel/HUDMargin/HUDRow/CenterColumn" instance=ExtResource("3_preview")]
+custom_minimum_size = Vector2(500, 82)
+layout_mode = 2
+
+[node name="LogColumn" type="VBoxContainer" parent="HUDPanel/HUDMargin/HUDRow"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SpellLogUI" parent="HUDPanel/HUDMargin/HUDRow/LogColumn" instance=ExtResource("4_log")]
+custom_minimum_size = Vector2(420, 156)
+layout_mode = 2

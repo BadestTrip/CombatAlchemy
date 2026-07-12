@@ -1,816 +1,145 @@
-[gd_scene format=3 uid="uid://cniqi2hq3abh3"]
+[gd_scene format=3 uid="uid://brvm8ljkogslq"]
 
-[ext_resource type="Script" uid="uid://ys0jikcfq3kv" path="res://combat/CombatManager.gd" id="1_l1xqy"]
-[ext_resource type="Resource" uid="uid://1ejqhdk0ryvd" path="res://combat/resources/balance/CombatBalance_Default.tres" id="2_66qso"]
-[ext_resource type="Script" uid="uid://c0x3bnmh8ajwc" path="res://combat/CombatUIController.gd" id="3_ftuvk"]
-[ext_resource type="Script" uid="uid://bnsfdagp3vxfk" path="res://combat/CombatLog.gd" id="4_r4hyf"]
-[ext_resource type="Script" uid="uid://d4ae0nx3egclw" path="res://combat/RoundManager.gd" id="5_ssh5j"]
-[ext_resource type="Resource" uid="uid://f1frsjbdcext" path="res://combat/resources/symbols/SymbolLibrary_Default.tres" id="7_0rlu1"]
-[ext_resource type="Script" uid="uid://cwqc6y17g0xgk" path="res://combat/ChantResolver.gd" id="8_atnl1"]
-[ext_resource type="Resource" uid="uid://gabdbu1y87c8" path="res://combat/resources/chants/ChantLibrary_Default.tres" id="9_chant_library"]
-[ext_resource type="AudioStream" uid="uid://wdbjucpuwkl3" path="res://music/TrainingMusic.mp3" id="21_v5awy"]
-[ext_resource type="Script" uid="uid://ou85bt34vocp" path="res://combat/MageUnit.gd" id="40_qrgab"]
-[ext_resource type="Script" uid="uid://c6p1vnisdne8n" path="res://combat/EnemyUnit.gd" id="41_lo2c2"]
-[ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="42_hva8a"]
-[ext_resource type="Script" uid="uid://bf737wkc22lw" path="res://combat/scripts/SpellDiscoveryManager.gd" id="44_discovery"]
-[ext_resource type="Script" uid="uid://b6pevmp70xcyf" path="res://combat/scripts/ui/RuneWheelController.gd" id="48_rune_wheel"]
-[ext_resource type="Script" uid="uid://bvdaat3ddx1qg" path="res://combat/scripts/ui/FloatingUnitHUD.gd" id="49_floating_hud"]
-[ext_resource type="Script" uid="uid://ban1286l0lwac" path="res://combat/scripts/tutorial/CombatTutorialController.gd" id="50_tutorial"]
-[ext_resource type="Script" uid="uid://45dgmxle63pa" path="res://combat/scripts/tutorial/TutorialHighlighter.gd" id="51_tutorial_highlighter"]
-[ext_resource type="Resource" uid="uid://brupfbqc805g1" path="res://combat/resources/tutorial/CombatTutorialPresentation_Default.tres" id="52_tutorial_presentation"]
-[ext_resource type="Texture2D" uid="uid://cjnbtwthds1lf" path="res://sprites/characters/placeholder_mage_spritey.png" id="54_mage_placeholder"]
-[ext_resource type="Texture2D" uid="uid://c7wjn7t52je3b" path="res://sprites/characters/placeholder_enemy_adept_sprite.png" id="55_enemy_placeholder"]
-[ext_resource type="PackedScene" path="res://ui/PauseMenu.tscn" id="56_pause_menu"]
+[ext_resource type="Script" uid="uid://b6h4m6cwcydyx" path="res://combat/scripts/RuneCombatController.gd" id="1_controller"]
+[ext_resource type="Script" uid="uid://bbxorc2yce4tu" path="res://combat/scripts/PlayerCombatController.gd" id="2_player"]
+[ext_resource type="Texture2D" uid="uid://chy636edfovgf" path="res://sprites/Standard.png" id="3_player_texture"]
+[ext_resource type="Script" uid="uid://duiawdft4mscb" path="res://combat/scripts/CombatUnit.gd" id="4_unit"]
+[ext_resource type="Script" uid="uid://orj4g7v4k8vg" path="res://combat/scripts/RuneCombatStateMachine.gd" id="5_state"]
+[ext_resource type="Script" uid="uid://dg6b042wqnjhu" path="res://combat/scripts/RuneCombatInput.gd" id="6_input"]
+[ext_resource type="Script" uid="uid://ct75qc5dpypn5" path="res://combat/scripts/ChantBuilder.gd" id="7_chant"]
+[ext_resource type="Script" uid="uid://dlcwb5rwduk54" path="res://combat/scripts/RuneGrammarInterpreter.gd" id="8_grammar"]
+[ext_resource type="Script" uid="uid://c0aqjgfvrjlqc" path="res://combat/scripts/SignatureSpellResolver.gd" id="9_signatures"]
+[ext_resource type="Script" uid="uid://qgr4b6caq4ab" path="res://combat/scripts/InstabilityCalculator.gd" id="10_instability"]
+[ext_resource type="Texture2D" uid="uid://c3i4myid7ngu2" path="res://sprites/Pushed.png" id="11_enemy_texture"]
+[ext_resource type="Script" uid="uid://ch58umqyrjh0e" path="res://combat/scripts/SpellResolver.gd" id="14_resolver"]
+[ext_resource type="Script" uid="uid://cvlni8tkjk0jy" path="res://combat/scripts/SpellExecutor.gd" id="15_executor"]
+[ext_resource type="PackedScene" path="res://combat/scenes/RuneWheelUI.tscn" id="17_wheel_scene"]
+[ext_resource type="Script" uid="uid://bunnin0rwuqrv" path="res://combat/scripts/AimIndicator.gd" id="20_aim"]
+[ext_resource type="PackedScene" path="res://ui/PauseMenu.tscn" id="21_pause"]
+[ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="22_level_music"]
+[ext_resource type="AudioStream" uid="uid://c4eip32jmo0ui" path="res://music/Combat.mp3" id="23_music"]
+[ext_resource type="PackedScene" path="res://combat/scenes/CombatHUD.tscn" id="24_hud_scene"]
+[ext_resource type="PackedScene" path="res://combat/scenes/BattlefieldDimmerUI.tscn" id="25_dimmer_scene"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rune_circle"]
-bg_color = Color(0.18, 0.16, 0.12, 0.55)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.95, 0.78, 0.38, 0.65)
-corner_radius_top_left = 240
-corner_radius_top_right = 240
-corner_radius_bottom_right = 240
-corner_radius_bottom_left = 240
+[node name="CombatScene" type="Node2D" unique_id=366610949]
+script = ExtResource("1_controller")
+state_machine_path = NodePath("Systems/RuneCombatStateMachine")
+combat_input_path = NodePath("Systems/RuneCombatInput")
+rune_wheel_path = NodePath("UI/FloatingRuneWheel")
+chant_builder_path = NodePath("Systems/ChantBuilder")
+spell_resolver_path = NodePath("Systems/SpellResolver")
+spell_executor_path = NodePath("Systems/SpellExecutor")
+player_unit_path = NodePath("Arena/Player/CombatUnit")
+enemy_unit_path = NodePath("Arena/DummyEnemy/CombatUnit")
+chant_slots_container_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/ChantBarUI/ChantSlots")
+preview_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/SpellPreviewPanel")
+log_text_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/LogColumn/SpellLogUI/LogText")
+player_status_label_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/StatusColumn/PlayerStatus")
+enemy_status_label_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/StatusColumn/EnemyStatus")
+state_label_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/StatusColumn/StateLabel")
+effects_parent_path = NodePath("Arena")
+battlefield_dimmer_path = NodePath("UI/BattlefieldDimmer")
+prepared_label_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/PreparedLabel")
 
-[node name="CombatScene" type="Control" unique_id=1729869381]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_l1xqy")
-balance = ExtResource("2_66qso")
+[node name="Arena" type="Node2D" parent="." unique_id=1239110495]
 
-[node name="Background" type="ColorRect" parent="." unique_id=846150469]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.08, 0.085, 0.09, 1)
+[node name="ArenaFloor" type="ColorRect" parent="Arena" unique_id=1814383340]
+offset_left = -1800.0
+offset_top = -1100.0
+offset_right = 1800.0
+offset_bottom = 1100.0
+color = Color(0.9447802, 0.9471479, 0.95410115, 1)
 
-[node name="CombatSpace" type="Control" parent="." unique_id=249285751]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+[node name="Player" type="CharacterBody2D" parent="Arena" unique_id=426000908]
+script = ExtResource("2_player")
 
-[node name="PlayerUnit" type="Control" parent="CombatSpace" unique_id=1595591338]
-layout_mode = 1
-anchor_left = 0.045
-anchor_top = 0.18
-anchor_right = 0.265
-anchor_bottom = 0.82
-grow_horizontal = 2
-grow_vertical = 2
+[node name="PlayerVisual" type="Sprite2D" parent="Arena/Player" unique_id=560369888]
+scale = Vector2(0.24, 0.24)
+texture = ExtResource("3_player_texture")
 
-[node name="PlayerUnitVisual" type="TextureRect" parent="CombatSpace/PlayerUnit" unique_id=1151901809]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.05
-anchor_top = 0.22
-anchor_right = 0.95
-anchor_bottom = 0.96
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("54_mage_placeholder")
-expand_mode = 3
-stretch_mode = 5
+[node name="Camera2D" type="Camera2D" parent="Arena/Player" unique_id=2094194777]
+zoom = Vector2(1.35, 1.35)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
 
-[node name="PlayerFloatingHUD" type="PanelContainer" parent="CombatSpace/PlayerUnit" unique_id=478240943]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.02
-anchor_right = 1.0
-anchor_bottom = 0.2
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("49_floating_hud")
+[node name="CombatUnit" type="Node" parent="Arena/Player" unique_id=1485616533]
+script = ExtResource("4_unit")
+display_name = "Player"
 
-[node name="PlayerHUDMargin" type="MarginContainer" parent="CombatSpace/PlayerUnit/PlayerFloatingHUD" unique_id=435172065]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 5
+[node name="DummyEnemy" type="Node2D" parent="Arena" unique_id=1357391605]
+position = Vector2(430, 0)
 
-[node name="PlayerHUDColumn" type="VBoxContainer" parent="CombatSpace/PlayerUnit/PlayerFloatingHUD/PlayerHUDMargin" unique_id=973814440]
-layout_mode = 2
-theme_override_constants/separation = 2
+[node name="DummyVisual" type="Sprite2D" parent="Arena/DummyEnemy" unique_id=1271105643]
+scale = Vector2(0.27, 0.27)
+texture = ExtResource("11_enemy_texture")
 
-[node name="NameLabel" type="Label" parent="CombatSpace/PlayerUnit/PlayerFloatingHUD/PlayerHUDMargin/PlayerHUDColumn" unique_id=1634198758]
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "The Rune Mage"
-horizontal_alignment = 1
+[node name="CombatUnit" type="Node" parent="Arena/DummyEnemy" unique_id=540028767]
+script = ExtResource("4_unit")
+display_name = "Practice Dummy"
+max_hp = 60
+hp = 60
 
-[node name="HPBar" type="ProgressBar" parent="CombatSpace/PlayerUnit/PlayerFloatingHUD/PlayerHUDMargin/PlayerHUDColumn" unique_id=2117075796]
-custom_minimum_size = Vector2(0, 18)
-layout_mode = 2
-show_percentage = false
+[node name="AimIndicator" type="Node2D" parent="Arena" unique_id=1813236235]
+script = ExtResource("20_aim")
+player_path = NodePath("../Player")
+use_mouse_position = true
 
-[node name="ShieldLabel" type="Label" parent="CombatSpace/PlayerUnit/PlayerFloatingHUD/PlayerHUDMargin/PlayerHUDColumn" unique_id=1857788431]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "No Shield"
-horizontal_alignment = 1
+[node name="Systems" type="Node" parent="." unique_id=930110746]
 
-[node name="EnemyUnit" type="Control" parent="CombatSpace" unique_id=1653108272]
-layout_mode = 1
-anchor_left = 0.735
-anchor_top = 0.18
-anchor_right = 0.955
-anchor_bottom = 0.82
-grow_horizontal = 2
-grow_vertical = 2
+[node name="RuneCombatStateMachine" type="Node" parent="Systems" unique_id=126521934]
+script = ExtResource("5_state")
 
-[node name="EnemyIntentBubble" type="PanelContainer" parent="CombatSpace/EnemyUnit" unique_id=299960294]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-anchor_bottom = 0.19
-grow_horizontal = 2
-grow_vertical = 2
+[node name="RuneCombatInput" type="Node" parent="Systems" unique_id=455416947]
+script = ExtResource("6_input")
 
-[node name="EnemyIntentMargin" type="MarginContainer" parent="CombatSpace/EnemyUnit/EnemyIntentBubble" unique_id=96830412]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 6
+[node name="ChantBuilder" type="Node" parent="Systems" unique_id=777444601]
+script = ExtResource("7_chant")
 
-[node name="IntentLabel" type="Label" parent="CombatSpace/EnemyUnit/EnemyIntentBubble/EnemyIntentMargin" unique_id=1688789535]
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "No intent"
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
+[node name="RuneGrammarInterpreter" type="Node" parent="Systems" unique_id=903327991]
+script = ExtResource("8_grammar")
 
-[node name="EnemyUnitVisual" type="TextureRect" parent="CombatSpace/EnemyUnit" unique_id=1660979381]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.05
-anchor_top = 0.29
-anchor_right = 0.95
-anchor_bottom = 0.96
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("55_enemy_placeholder")
-expand_mode = 3
-stretch_mode = 5
+[node name="SignatureSpellResolver" type="Node" parent="Systems" unique_id=998812351]
+script = ExtResource("9_signatures")
 
-[node name="EnemyFloatingHUD" type="PanelContainer" parent="CombatSpace/EnemyUnit" unique_id=1702212065]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.19
-anchor_right = 1.0
-anchor_bottom = 0.34
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("49_floating_hud")
+[node name="InstabilityCalculator" type="Node" parent="Systems" unique_id=1163878143]
+script = ExtResource("10_instability")
 
-[node name="EnemyHUDMargin" type="MarginContainer" parent="CombatSpace/EnemyUnit/EnemyFloatingHUD" unique_id=1444071403]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 5
+[node name="SpellExecutor" type="Node" parent="Systems" unique_id=931133454]
+script = ExtResource("15_executor")
 
-[node name="EnemyHUDColumn" type="VBoxContainer" parent="CombatSpace/EnemyUnit/EnemyFloatingHUD/EnemyHUDMargin" unique_id=2061475307]
-layout_mode = 2
-theme_override_constants/separation = 2
+[node name="SpellResolver" type="Node" parent="Systems" unique_id=938070944]
+script = ExtResource("14_resolver")
+grammar_interpreter_path = NodePath("../RuneGrammarInterpreter")
+signature_resolver_path = NodePath("../SignatureSpellResolver")
+instability_calculator_path = NodePath("../InstabilityCalculator")
 
-[node name="NameLabel" type="Label" parent="CombatSpace/EnemyUnit/EnemyFloatingHUD/EnemyHUDMargin/EnemyHUDColumn" unique_id=2030399288]
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "Training Adept"
-horizontal_alignment = 1
+[node name="UI" type="CanvasLayer" parent="." unique_id=1948898400]
 
-[node name="HPBar" type="ProgressBar" parent="CombatSpace/EnemyUnit/EnemyFloatingHUD/EnemyHUDMargin/EnemyHUDColumn" unique_id=2050941323]
-custom_minimum_size = Vector2(0, 18)
-layout_mode = 2
-show_percentage = false
+[node name="BattlefieldDimmer" parent="UI" unique_id=210302799 instance=ExtResource("25_dimmer_scene")]
+color = Color(0, 0, 0, 0.38)
 
-[node name="ShieldLabel" type="Label" parent="CombatSpace/EnemyUnit/EnemyFloatingHUD/EnemyHUDMargin/EnemyHUDColumn" unique_id=1082550001]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "No Shield"
-horizontal_alignment = 1
-
-[node name="RuneCircleRoot" type="Control" parent="CombatSpace" unique_id=1636944135]
-custom_minimum_size = Vector2(640, 640)
-layout_mode = 1
-anchor_left = 0.28
-anchor_top = 0.06
-anchor_right = 0.72
-anchor_bottom = 0.94
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="RuneCircleVisual" type="Panel" parent="CombatSpace/RuneCircleRoot" unique_id=1181045826]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.12
-anchor_top = 0.12
-anchor_right = 0.88
-anchor_bottom = 0.88
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_rune_circle")
-
-[node name="ChantSlots" type="HBoxContainer" parent="CombatSpace/RuneCircleRoot" unique_id=1409543708]
-z_index = 3
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.2
-anchor_top = 0.36
-anchor_right = 0.8
-anchor_bottom = 0.52
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="ChantSlot1" type="Button" parent="CombatSpace/RuneCircleRoot/ChantSlots" unique_id=1842123587]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(118, 72)
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Slot 1
----"
-
-[node name="Arrow1" type="Label" parent="CombatSpace/RuneCircleRoot/ChantSlots" unique_id=1708149289]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = ">"
-vertical_alignment = 1
-
-[node name="ChantSlot2" type="Button" parent="CombatSpace/RuneCircleRoot/ChantSlots" unique_id=1445911917]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(118, 72)
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Slot 2
----"
-
-[node name="Arrow2" type="Label" parent="CombatSpace/RuneCircleRoot/ChantSlots" unique_id=1396531432]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = ">"
-vertical_alignment = 1
-
-[node name="ChantSlot3" type="Button" parent="CombatSpace/RuneCircleRoot/ChantSlots" unique_id=966775669]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(118, 72)
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Slot 3
----"
-
-[node name="ChantPreview" type="Label" parent="CombatSpace/RuneCircleRoot" unique_id=376363575]
-unique_name_in_owner = true
-z_index = 3
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.2
-anchor_top = 0.53
-anchor_right = 0.8
-anchor_bottom = 0.61
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 0.83, 0.48, 1)
-theme_override_font_sizes/font_size = 16
-text = "...  >  ...  >  ..."
-horizontal_alignment = 1
-
-[node name="ChantShoutText" type="Label" parent="CombatSpace/RuneCircleRoot" unique_id=190740290]
+[node name="FloatingRuneWheel" parent="UI" unique_id=996374988 instance=ExtResource("17_wheel_scene")]
 visible = false
-z_index = 5
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.18
-anchor_top = 0.2
-anchor_right = 0.82
-anchor_bottom = 0.34
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
-theme_override_font_sizes/font_size = 38
-text = "ASHA!"
-horizontal_alignment = 1
-
-[node name="RuneWheelRoot" type="Control" parent="CombatSpace/RuneCircleRoot" unique_id=1162235777 node_paths=PackedStringArray("toggle_button")]
-z_index = 2
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 1
-script = ExtResource("48_rune_wheel")
-toggle_button = NodePath("RuneWheelToggleButton")
-metadata/_edit_use_anchors_ = true
-
-[node name="RunePalette" type="Control" parent="CombatSpace/RuneCircleRoot/RuneWheelRoot" unique_id=1516872362]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(584, 584)
-layout_mode = 1
-anchor_right = 0.96
-anchor_bottom = 0.96
-offset_right = 33.391968
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="RuneWheelToggleButton" type="Button" parent="CombatSpace/RuneCircleRoot/RuneWheelRoot" unique_id=1770090933]
-custom_minimum_size = Vector2(96, 34)
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.42
-anchor_top = 0.86
-anchor_right = 0.58
-anchor_bottom = 0.92
-grow_horizontal = 2
-grow_vertical = 2
-text = "Runes"
-
-[node name="CircleActions" type="HBoxContainer" parent="CombatSpace/RuneCircleRoot" unique_id=416539027]
-z_index = 4
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.29
-anchor_top = 0.66
-anchor_right = 0.71
-anchor_bottom = 0.75
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 8
-alignment = 1
-
-[node name="ClearButton" type="Button" parent="CombatSpace/RuneCircleRoot/CircleActions" unique_id=1033226892]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(110, 42)
-layout_mode = 2
-text = "Clear Chant"
-
-[node name="CastButton" type="Button" parent="CombatSpace/RuneCircleRoot/CircleActions" unique_id=885642082]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 42)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Cast"
-
-[node name="SpellResultBanner" type="PanelContainer" parent="CombatSpace/RuneCircleRoot" unique_id=2051196994]
-visible = false
-z_index = 6
-custom_minimum_size = Vector2(320, 74)
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.25
-anchor_top = 0.75
-anchor_right = 0.75
-anchor_bottom = 0.88
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="SpellResultMargin" type="MarginContainer" parent="CombatSpace/RuneCircleRoot/SpellResultBanner" unique_id=1856709847]
-layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 8
-
-[node name="SpellResultColumn" type="VBoxContainer" parent="CombatSpace/RuneCircleRoot/SpellResultBanner/SpellResultMargin" unique_id=542938647]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="TitleLabel" type="Label" parent="CombatSpace/RuneCircleRoot/SpellResultBanner/SpellResultMargin/SpellResultColumn" unique_id=238352482]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
-theme_override_font_sizes/font_size = 24
-text = "Razor Comet"
-horizontal_alignment = 1
-
-[node name="CategoryLabel" type="Label" parent="CombatSpace/RuneCircleRoot/SpellResultBanner/SpellResultMargin/SpellResultColumn" unique_id=772286882]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.68, 0.86, 1, 1)
-theme_override_font_sizes/font_size = 15
-text = "Known Spell"
-horizontal_alignment = 1
-
-[node name="TutorialLayer" type="Control" parent="." unique_id=1135085833]
-unique_name_in_owner = true
 z_index = 40
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+offset_left = -380.0
+offset_top = -430.0
+offset_right = 380.0
+offset_bottom = -200.0
 
-[node name="TutorialOverlay" type="ColorRect" parent="TutorialLayer" unique_id=2008953040]
-unique_name_in_owner = true
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 0.56)
+[node name="BottomHUD" parent="UI" unique_id=1530837196 instance=ExtResource("24_hud_scene")]
+offset_left = 24.0
+offset_top = -198.0
+offset_right = -24.0
+offset_bottom = -18.0
 
-[node name="TutorialFocusLayer" type="Control" parent="TutorialLayer" unique_id=1486852628]
-unique_name_in_owner = true
-z_index = 10
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+[node name="PauseMenu" parent="UI" unique_id=1281434524 instance=ExtResource("21_pause")]
+z_index = 100
 
-[node name="TutorialHighlighter" type="Node" parent="TutorialLayer" unique_id=112955308]
-unique_name_in_owner = true
-script = ExtResource("51_tutorial_highlighter")
-
-[node name="TutorialObjectiveLayer" type="CanvasLayer" parent="." unique_id=1859149498]
-unique_name_in_owner = true
-layer = 60
-
-[node name="ObjectiveLabel" type="Label" parent="TutorialObjectiveLayer" unique_id=1811661347]
-visible = false
-z_index = 20
-anchors_preset = -1
-anchor_left = 0.17792267
-anchor_top = 0.17764768
-anchor_right = 0.81792265
-anchor_bottom = 0.23764768
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.68, 0.86, 1, 1)
-theme_override_font_sizes/font_size = 16
-horizontal_alignment = 1
-metadata/_edit_use_anchors_ = true
-
-[node name="CombatUI" type="VBoxContainer" parent="." unique_id=1559815515]
-unique_name_in_owner = true
-visible = false
-layout_mode = 1
-script = ExtResource("3_ftuvk")
-symbol_library = ExtResource("7_0rlu1")
-
-[node name="SecondaryUI" type="Control" parent="." unique_id=465070321]
-z_index = 10
-layout_mode = 1
-anchor_left = 0.025
-anchor_top = 0.88
-anchor_right = 0.38
-anchor_bottom = 0.97
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ToggleButtons" type="HBoxContainer" parent="SecondaryUI" unique_id=1349093113]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 8
-
-[node name="CombatLogButton" type="Button" parent="SecondaryUI/ToggleButtons" unique_id=13295732]
-custom_minimum_size = Vector2(120, 42)
-layout_mode = 2
-toggle_mode = true
-text = "Log"
-
-[node name="SpellbookButton" type="Button" parent="SecondaryUI/ToggleButtons" unique_id=1905627153]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 42)
-layout_mode = 2
-toggle_mode = true
-text = "Chants"
-
-[node name="CastHistoryButton" type="Button" parent="SecondaryUI/ToggleButtons" unique_id=823475670]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 42)
-layout_mode = 2
-toggle_mode = true
-text = "Cast History"
-
-[node name="DebugChantsButton" type="Button" parent="SecondaryUI/ToggleButtons" unique_id=1684834210]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 42)
-layout_mode = 2
-toggle_mode = true
-text = "Debug Chants"
-
-[node name="ResultPanel" type="PanelContainer" parent="." unique_id=1103795130]
-unique_name_in_owner = true
-visible = false
-z_index = 25
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.28
-anchor_top = 0.42
-anchor_right = 0.72
-anchor_bottom = 0.58
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ResultMargin" type="MarginContainer" parent="ResultPanel" unique_id=1338907584]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 8
-
-[node name="ResultRow" type="HBoxContainer" parent="ResultPanel/ResultMargin" unique_id=1336552608]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="ResultLabel" type="Label" parent="ResultPanel/ResultMargin/ResultRow" unique_id=1204238784]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(260, 44)
-layout_mode = 2
-theme_override_font_sizes/font_size = 28
-text = "Victory"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="RestartButton" type="Button" parent="ResultPanel/ResultMargin/ResultRow" unique_id=742031531]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 44)
-layout_mode = 2
-text = "Restart"
-
-[node name="ReturnButton" type="Button" parent="ResultPanel/ResultMargin/ResultRow" unique_id=1139237245]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 44)
-layout_mode = 2
-text = "Return"
-
-[node name="MainMenuButton" type="Button" parent="ResultPanel/ResultMargin/ResultRow" unique_id=1449910834]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 44)
-layout_mode = 2
-text = "Main Menu"
-
-[node name="LogPanel" type="PanelContainer" parent="." unique_id=1164199618]
-visible = false
-z_index = 20
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.025
-anchor_top = 0.58
-anchor_right = 0.42
-anchor_bottom = 0.86
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="CombatLog" type="RichTextLabel" parent="LogPanel" unique_id=845310758]
-unique_name_in_owner = true
-layout_mode = 2
-bbcode_enabled = true
-scroll_following = true
-script = ExtResource("4_r4hyf")
-
-[node name="SpellbookPanel" type="PanelContainer" parent="." unique_id=707956171]
-unique_name_in_owner = true
-visible = false
-z_index = 20
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.18
-anchor_top = 0.1
-anchor_right = 0.82
-anchor_bottom = 0.9
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="SpellbookMargin" type="MarginContainer" parent="SpellbookPanel" unique_id=701364338]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 16
-
-[node name="SpellbookColumn" type="VBoxContainer" parent="SpellbookPanel/SpellbookMargin" unique_id=178701873]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="SpellbookHeader" type="HBoxContainer" parent="SpellbookPanel/SpellbookMargin/SpellbookColumn" unique_id=2146791671]
-layout_mode = 2
-
-[node name="SpellbookTitle" type="Label" parent="SpellbookPanel/SpellbookMargin/SpellbookColumn/SpellbookHeader" unique_id=127027397]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
-theme_override_font_sizes/font_size = 28
-text = "Discovered Spells"
-
-[node name="SpellbookCloseButton" type="Button" parent="SpellbookPanel/SpellbookMargin/SpellbookColumn/SpellbookHeader" unique_id=62304148]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 42)
-layout_mode = 2
-text = "Close"
-
-[node name="SpellbookList" type="RichTextLabel" parent="SpellbookPanel/SpellbookMargin/SpellbookColumn" unique_id=923885908]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(900, 580)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="CastHistoryPanel" type="PanelContainer" parent="." unique_id=464775183]
-unique_name_in_owner = true
-visible = false
-z_index = 20
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.2
-anchor_top = 0.18
-anchor_right = 0.8
-anchor_bottom = 0.82
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="HistoryMargin" type="MarginContainer" parent="CastHistoryPanel" unique_id=1756170451]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 16
-
-[node name="HistoryColumn" type="VBoxContainer" parent="CastHistoryPanel/HistoryMargin" unique_id=1753523642]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="HistoryHeader" type="HBoxContainer" parent="CastHistoryPanel/HistoryMargin/HistoryColumn" unique_id=793448856]
-layout_mode = 2
-
-[node name="HistoryTitle" type="Label" parent="CastHistoryPanel/HistoryMargin/HistoryColumn/HistoryHeader" unique_id=1839492413]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.68, 0.86, 1, 1)
-theme_override_font_sizes/font_size = 28
-text = "Cast History"
-
-[node name="CastHistoryCloseButton" type="Button" parent="CastHistoryPanel/HistoryMargin/HistoryColumn/HistoryHeader" unique_id=1922837707]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 42)
-layout_mode = 2
-text = "Close"
-
-[node name="CastHistoryList" type="RichTextLabel" parent="CastHistoryPanel/HistoryMargin/HistoryColumn" unique_id=1140167387]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(900, 430)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="DebugChantsPanel" type="PanelContainer" parent="." unique_id=1803447370]
-unique_name_in_owner = true
-visible = false
-z_index = 20
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.18
-anchor_top = 0.1
-anchor_right = 0.82
-anchor_bottom = 0.9
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="DebugChantsMargin" type="MarginContainer" parent="DebugChantsPanel" unique_id=1230105783]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 16
-
-[node name="DebugChantsColumn" type="VBoxContainer" parent="DebugChantsPanel/DebugChantsMargin" unique_id=1540728504]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="DebugChantsHeader" type="HBoxContainer" parent="DebugChantsPanel/DebugChantsMargin/DebugChantsColumn" unique_id=1319449512]
-layout_mode = 2
-
-[node name="DebugChantsTitle" type="Label" parent="DebugChantsPanel/DebugChantsMargin/DebugChantsColumn/DebugChantsHeader" unique_id=1484337732]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
-theme_override_font_sizes/font_size = 28
-text = "All Active Chants"
-
-[node name="DebugChantsCloseButton" type="Button" parent="DebugChantsPanel/DebugChantsMargin/DebugChantsColumn/DebugChantsHeader" unique_id=1203703904]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 42)
-layout_mode = 2
-text = "Close"
-
-[node name="DebugChantsList" type="RichTextLabel" parent="DebugChantsPanel/DebugChantsMargin/DebugChantsColumn" unique_id=152532069]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(900, 580)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="SpellDiscoveryPopup" type="PanelContainer" parent="." unique_id=31228172]
-unique_name_in_owner = true
-visible = false
-z_index = 25
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_top = 0.28
-anchor_right = 0.7
-anchor_bottom = 0.72
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="DiscoveryMargin" type="MarginContainer" parent="SpellDiscoveryPopup" unique_id=838693558]
-layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 20
-
-[node name="DiscoveryColumn" type="VBoxContainer" parent="SpellDiscoveryPopup/DiscoveryMargin" unique_id=1185748091]
-layout_mode = 2
-theme_override_constants/separation = 14
-alignment = 1
-
-[node name="DiscoveryPopupLabel" type="Label" parent="SpellDiscoveryPopup/DiscoveryMargin/DiscoveryColumn" unique_id=89038692]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
-theme_override_font_sizes/font_size = 22
-text = "NEW SPELL DISCOVERED"
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
-
-[node name="DiscoveryCloseButton" type="Button" parent="SpellDiscoveryPopup/DiscoveryMargin/DiscoveryColumn" unique_id=1721119016]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(130, 42)
-layout_mode = 2
-size_flags_horizontal = 4
-text = "Close"
-
-[node name="DiscoveryAutoHideTimer" type="Timer" parent="." unique_id=1256023856]
-unique_name_in_owner = true
-wait_time = 5.0
-one_shot = true
-
-[node name="RoundManager" type="Node" parent="." unique_id=2072296989]
-unique_name_in_owner = true
-script = ExtResource("5_ssh5j")
-
-[node name="ChantResolver" type="Node" parent="." unique_id=1199369047]
-unique_name_in_owner = true
-script = ExtResource("8_atnl1")
-chant_library = ExtResource("9_chant_library")
-
-[node name="SpellDiscoveryManager" type="Node" parent="." unique_id=871974269]
-unique_name_in_owner = true
-script = ExtResource("44_discovery")
-
-[node name="CombatTutorialController" type="Node" parent="." unique_id=708644915]
-unique_name_in_owner = true
-script = ExtResource("50_tutorial")
-presentation = ExtResource("52_tutorial_presentation")
-
-[node name="Mages" type="Node" parent="." unique_id=2136153042]
-unique_name_in_owner = true
-
-[node name="Mage1" type="Node" parent="Mages" unique_id=1283010499]
-script = ExtResource("40_qrgab")
-mage_name = "The Rune Mage"
-
-[node name="Enemies" type="Node" parent="." unique_id=1257879806]
-unique_name_in_owner = true
-
-[node name="Enemy1" type="Node" parent="Enemies" unique_id=1321252]
-script = ExtResource("41_lo2c2")
-enemy_name = "Training Adept"
-
-[node name="PauseMenu" parent="." unique_id=869663113 instance=ExtResource("56_pause_menu")]
-z_index = 30
-layout_mode = 1
-combat_ui_path = NodePath("../CombatUI")
-
-[node name="LevelMusic" parent="." unique_id=238704293 instance=ExtResource("42_hva8a")]
-music = ExtResource("21_v5awy")
+[node name="LevelMusic" parent="." unique_id=2041182046 instance=ExtResource("22_level_music")]
+music = ExtResource("23_music")

@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[node name="StatusColumn" type="VBoxContainer"]
+custom_minimum_size = Vector2(270, 0)
+size_flags_horizontal = 3
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PlayerStatus" type="Label" parent="."]
+layout_mode = 2
+text = "Player HP"
+
+[node name="EnemyStatus" type="Label" parent="."]
+layout_mode = 2
+text = "Enemy HP"
+
+[node name="StateLabel" type="Label" parent="."]
+layout_mode = 2
+text = "State"
+autowrap_mode = 2

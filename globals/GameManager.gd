@@ -2,20 +2,8 @@ extends Node
 
 enum GameState {
 	MAIN_MENU,
-	OVERWORLD,
 	COMBAT
 }
-
-var current_state: GameState = GameState.MAIN_MENU
-var learned_chant_keys: Dictionary = {}
-var session_cast_history: Array[Dictionary] = []
-var first_combat_tutorial_completed: bool = false
-var training_duel_won: bool = false
-var miniboss_lair_defeated: bool = false
-var pending_encounter: EncounterData
-var defeated_encounter_ids: Dictionary = {}
-var has_overworld_player_return_position: bool = false
-var overworld_player_return_position: Vector2 = Vector2.ZERO
 
 const SCENE_TRANSITION_NODE_PATH: String = "/root/SceneTransition"
 const DEFAULT_SCENE_REGISTRY_PATH: String = "res://globals/resources/SceneRegistry_Default.tres"
@@ -23,111 +11,25 @@ const DEFAULT_SCENE_REGISTRY_PATH: String = "res://globals/resources/SceneRegist
 @export var use_ink_transition: bool = true
 @export var scene_registry: SceneRegistryData
 
+var current_state: GameState = GameState.MAIN_MENU
+
 var _loaded_scene_registry: SceneRegistryData
 
 
 func go_to_main_menu() -> void:
-	clear_pending_encounter()
 	_change_state_and_scene(GameState.MAIN_MENU, _get_main_menu_scene())
 
 
 func start_new_game() -> void:
-	reset_session_progress()
-	_change_state_and_scene(GameState.OVERWORLD, _get_overworld_scene())
-
-
-func go_to_overworld() -> void:
-	clear_pending_encounter()
-	_change_state_and_scene(GameState.OVERWORLD, _get_overworld_scene())
-
-
-func start_duel_from_overworld(
-	encounter_data: EncounterData = null,
-	combat_scene: PackedScene = null
-) -> void:
-	pending_encounter = encounter_data
-	if combat_scene != null:
-		_change_state_and_scene(GameState.COMBAT, combat_scene)
-		return
 	_change_state_and_scene(GameState.COMBAT, _get_combat_scene())
 
 
-func restart_combat() -> void:
-	_change_state_and_scene(GameState.COMBAT, _get_combat_scene())
+func complete_combat(_victory: bool) -> void:
+	current_state = GameState.COMBAT
 
 
 func quit_game() -> void:
 	get_tree().quit()
-
-
-func reset_session_progress() -> void:
-	learned_chant_keys.clear()
-	session_cast_history.clear()
-	first_combat_tutorial_completed = false
-	training_duel_won = false
-	miniboss_lair_defeated = false
-	defeated_encounter_ids.clear()
-	clear_pending_encounter()
-	clear_overworld_player_return_position()
-
-
-func mark_encounter_defeated(encounter_id: String) -> void:
-	if encounter_id.is_empty():
-		return
-	defeated_encounter_ids[encounter_id] = true
-
-
-func has_defeated_encounter(encounter_id: String) -> bool:
-	return defeated_encounter_ids.has(encounter_id)
-
-
-func clear_pending_encounter() -> void:
-	pending_encounter = null
-
-
-func remember_overworld_player_position(return_position: Vector2) -> void:
-	overworld_player_return_position = return_position
-	has_overworld_player_return_position = true
-
-
-func get_overworld_player_return_position() -> Vector2:
-	return overworld_player_return_position
-
-
-func clear_overworld_player_return_position() -> void:
-	has_overworld_player_return_position = false
-	overworld_player_return_position = Vector2.ZERO
-
-
-func remember_learned_chant(chant_key: String) -> void:
-	if chant_key.is_empty():
-		return
-	learned_chant_keys[chant_key] = true
-
-
-func has_learned_chant(chant_key: String) -> bool:
-	return learned_chant_keys.has(chant_key)
-
-
-func get_learned_chant_keys_snapshot() -> Dictionary:
-	return learned_chant_keys.duplicate(true)
-
-
-func remember_cast_history_entry(entry: Dictionary) -> void:
-	session_cast_history.append(entry.duplicate(true))
-
-
-func replace_session_cast_history(entries: Array[Dictionary]) -> void:
-	session_cast_history.clear()
-	for entry: Dictionary in entries:
-		session_cast_history.append(entry.duplicate(true))
-
-
-func get_session_cast_history_snapshot() -> Array[Dictionary]:
-	var snapshot: Array[Dictionary] = []
-	for entry: Dictionary in session_cast_history:
-		snapshot.append(entry.duplicate(true))
-	return snapshot
 
 
 func _change_state_and_scene(next_state: GameState, scene: PackedScene) -> void:
@@ -138,11 +40,9 @@ func _change_state_and_scene(next_state: GameState, scene: PackedScene) -> void:
 	var scene_path := scene.resource_path
 	var transition_node := get_node_or_null(SCENE_TRANSITION_NODE_PATH)
 
-	if use_ink_transition and transition_node != null:
-		if transition_node.has_method("is_busy"):
-			var is_busy := bool(transition_node.call("is_busy"))
-			if is_busy:
-				return
+	if use_ink_transition and transition_node != null and transition_node.has_method("is_busy"):
+		if bool(transition_node.call("is_busy")):
+			return
 
 	current_state = next_state
 
@@ -168,11 +68,6 @@ func _change_state_and_scene(next_state: GameState, scene: PackedScene) -> void:
 func _get_main_menu_scene() -> PackedScene:
 	var registry := _get_scene_registry()
 	return registry.main_menu_scene if registry != null else null
-
-
-func _get_overworld_scene() -> PackedScene:
-	var registry := _get_scene_registry()
-	return registry.overworld_scene if registry != null else null
 
 
 func _get_combat_scene() -> PackedScene:
