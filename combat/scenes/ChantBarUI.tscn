@@ -1,43 +1,43 @@
-[gd_scene load_steps=1 format=3]
+[gd_scene format=3 uid="uid://o53jcegbjjyn"]
 
-[node name="ChantBarUI" type="PanelContainer"]
+[node name="ChantBarUI" type="PanelContainer" unique_id=906366949]
 custom_minimum_size = Vector2(420, 64)
 
-[node name="ChantSlots" type="HBoxContainer" parent="."]
+[node name="ChantSlots" type="HBoxContainer" parent="." unique_id=466371535]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Slot1" type="Label" parent="ChantSlots"]
+[node name="Slot1" type="Label" parent="ChantSlots" unique_id=1218181580]
 custom_minimum_size = Vector2(72, 40)
 layout_mode = 2
+text = "_"
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "_"
 
-[node name="Slot2" type="Label" parent="ChantSlots"]
+[node name="Slot2" type="Label" parent="ChantSlots" unique_id=1716209153]
 custom_minimum_size = Vector2(72, 40)
 layout_mode = 2
+text = "_"
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "_"
 
-[node name="Slot3" type="Label" parent="ChantSlots"]
+[node name="Slot3" type="Label" parent="ChantSlots" unique_id=772875421]
 custom_minimum_size = Vector2(72, 40)
 layout_mode = 2
+text = "_"
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "_"
 
-[node name="Slot4" type="Label" parent="ChantSlots"]
+[node name="Slot4" type="Label" parent="ChantSlots" unique_id=428338759]
 custom_minimum_size = Vector2(72, 40)
 layout_mode = 2
+text = "_"
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "_"
 
-[node name="Slot5" type="Label" parent="ChantSlots"]
+[node name="Slot5" type="Label" parent="ChantSlots" unique_id=646522642]
 custom_minimum_size = Vector2(72, 40)
 layout_mode = 2
+text = "_"
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "_"

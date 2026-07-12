@@ -1,6 +1,8 @@
 extends Node
 class_name SpellResolver
 
+const DEFAULT_EFFECT_TEMPLATE := preload("res://combat/resources/effects/ChantEffectTemplate_Default.tres")
+
 @export var grammar_interpreter_path: NodePath
 @export var signature_resolver_path: NodePath
 @export var instability_calculator_path: NodePath
@@ -32,6 +34,7 @@ func resolve(sequence: Array, context: Dictionary = {}) -> SpellResultData:
 	_assign_combat_values(result)
 
 	_assign_effect_values(result)
+	result.effect_template = DEFAULT_EFFECT_TEMPLATE
 	return result
 
 

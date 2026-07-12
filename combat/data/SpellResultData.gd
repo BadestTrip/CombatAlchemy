@@ -21,6 +21,7 @@ class_name SpellResultData
 @export var effect_radius: float = 8.0
 @export var effect_lifetime: float = 0.9
 @export var effect_kind: String = "none"
+@export var effect_template: ChantEffectTemplateData
 @export var projectile_speed: float = 420.0
 @export var projectile_lifetime: float = 1.0
 @export var projectile_size: float = 10.0

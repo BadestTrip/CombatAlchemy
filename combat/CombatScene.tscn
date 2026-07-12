@@ -13,14 +13,13 @@
 [ext_resource type="Texture2D" uid="uid://c3i4myid7ngu2" path="res://sprites/Pushed.png" id="11_enemy_texture"]
 [ext_resource type="Script" uid="uid://ch58umqyrjh0e" path="res://combat/scripts/SpellResolver.gd" id="14_resolver"]
 [ext_resource type="Script" uid="uid://cvlni8tkjk0jy" path="res://combat/scripts/SpellExecutor.gd" id="15_executor"]
-[ext_resource type="Script" uid="uid://c6cvdn7pgvmre" path="res://combat/scripts/ChantPreviewController.gd" id="16_preview"]
 [ext_resource type="PackedScene" path="res://combat/scenes/RuneWheelUI.tscn" id="17_wheel_scene"]
-[ext_resource type="PackedScene" path="res://combat/scenes/ChantBarUI.tscn" id="18_chant_scene"]
-[ext_resource type="PackedScene" path="res://combat/scenes/SpellLogUI.tscn" id="19_log_scene"]
 [ext_resource type="Script" uid="uid://bunnin0rwuqrv" path="res://combat/scripts/AimIndicator.gd" id="20_aim"]
 [ext_resource type="PackedScene" path="res://ui/PauseMenu.tscn" id="21_pause"]
 [ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="22_level_music"]
 [ext_resource type="AudioStream" uid="uid://c4eip32jmo0ui" path="res://music/Combat.mp3" id="23_music"]
+[ext_resource type="PackedScene" path="res://combat/scenes/CombatHUD.tscn" id="24_hud_scene"]
+[ext_resource type="PackedScene" path="res://combat/scenes/BattlefieldDimmerUI.tscn" id="25_dimmer_scene"]
 
 [node name="CombatScene" type="Node2D" unique_id=366610949]
 script = ExtResource("1_controller")
@@ -116,21 +115,14 @@ instability_calculator_path = NodePath("../InstabilityCalculator")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1948898400]
 
-[node name="BattlefieldDimmer" type="ColorRect" parent="UI" unique_id=210302799]
-visible = false
-z_index = 10
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+[node name="BattlefieldDimmer" parent="UI" unique_id=210302799 instance=ExtResource("25_dimmer_scene")]
 color = Color(0, 0, 0, 0.38)
 
 [node name="FloatingRuneWheel" parent="UI" unique_id=996374988 instance=ExtResource("17_wheel_scene")]
 visible = false
 z_index = 40
 layout_mode = 3
+anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -140,111 +132,11 @@ offset_top = -430.0
 offset_right = 380.0
 offset_bottom = -200.0
 
-[node name="BottomHUD" type="Control" parent="UI" unique_id=1530837196]
-z_index = 30
-layout_mode = 3
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="BottomHUD" parent="UI" unique_id=1530837196 instance=ExtResource("24_hud_scene")]
 offset_left = 24.0
 offset_top = -198.0
 offset_right = -24.0
 offset_bottom = -18.0
-mouse_filter = 1
-
-[node name="HUDPanel" type="PanelContainer" parent="UI/BottomHUD" unique_id=1022887817]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="HUDMargin" type="MarginContainer" parent="UI/BottomHUD/HUDPanel" unique_id=731320223]
-layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 10
-
-[node name="HUDRow" type="HBoxContainer" parent="UI/BottomHUD/HUDPanel/HUDMargin" unique_id=1117071964]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="StatusColumn" type="VBoxContainer" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow" unique_id=2037887457]
-custom_minimum_size = Vector2(270, 0)
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="PlayerStatus" type="Label" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/StatusColumn" unique_id=1985072109]
-layout_mode = 2
-text = "Player HP 40/40  Shield 0"
-
-[node name="EnemyStatus" type="Label" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/StatusColumn" unique_id=577300707]
-layout_mode = 2
-text = "Practice Dummy HP 60/60  Shield 0"
-
-[node name="StateLabel" type="Label" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/StatusColumn" unique_id=1904896592]
-layout_mode = 2
-text = "State: IDLE"
-
-[node name="CenterColumn" type="VBoxContainer" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow" unique_id=1874923017]
-custom_minimum_size = Vector2(530, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 6
-
-[node name="Instructions" type="Label" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn" unique_id=1440091279]
-layout_mode = 2
-text = "Tab: rune arc  |  Space: prepare/shoot  |  LMB: shoot  |  C: clear  |  Backspace: remove rune"
-autowrap_mode = 3
-
-[node name="ChantBarUI" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn" unique_id=1541375222 instance=ExtResource("18_chant_scene")]
-layout_mode = 2
-
-[node name="PreparedLabel" type="Label" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn" unique_id=36699572]
-layout_mode = 2
-text = "Prepared: None"
-autowrap_mode = 3
-
-[node name="SpellPreviewPanel" type="PanelContainer" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn" unique_id=1433842184]
-custom_minimum_size = Vector2(500, 82)
-layout_mode = 2
-script = ExtResource("16_preview")
-
-[node name="VBox" type="VBoxContainer" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/SpellPreviewPanel" unique_id=2120453089]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="Title" type="Label" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/SpellPreviewPanel/VBox" unique_id=500819792]
-layout_mode = 2
-text = "No Chant"
-
-[node name="Sequence" type="Label" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/SpellPreviewPanel/VBox" unique_id=354804769]
-layout_mode = 2
-text = "Sequence: (empty)"
-autowrap_mode = 3
-
-[node name="Description" type="Label" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/SpellPreviewPanel/VBox" unique_id=1694142415]
-layout_mode = 2
-text = "Add runes before casting."
-autowrap_mode = 3
-
-[node name="Stability" type="Label" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/SpellPreviewPanel/VBox" unique_id=1010005695]
-layout_mode = 2
-text = "Stability: Stable (0)"
-
-[node name="Effect" type="Label" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/SpellPreviewPanel/VBox" unique_id=468254985]
-layout_mode = 2
-text = "Effect none  Damage 0  Shield 0"
-
-[node name="LogColumn" type="VBoxContainer" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow" unique_id=113966026]
-custom_minimum_size = Vector2(420, 0)
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="SpellLogUI" parent="UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/LogColumn" unique_id=2000800160 instance=ExtResource("19_log_scene")]
-custom_minimum_size = Vector2(420, 156)
-layout_mode = 2
 
 [node name="PauseMenu" parent="UI" unique_id=1281434524 instance=ExtResource("21_pause")]
 z_index = 100

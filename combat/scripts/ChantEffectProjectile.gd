@@ -1,2 +1,0 @@
-extends SimpleChantEffect
-class_name ChantEffectProjectile
