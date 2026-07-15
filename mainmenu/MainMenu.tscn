@@ -3,10 +3,8 @@
 [ext_resource type="Script" uid="uid://bnujbb67xn4ab" path="res://mainmenu/MainMenu.gd" id="1_o168s"]
 [ext_resource type="Shader" uid="uid://d1ib7a1k4stpk" path="res://extra/main_menu_shader.gdshader" id="2_o168s"]
 [ext_resource type="Texture2D" uid="uid://bmrxptp10isrx" path="res://sprites/mage_cliff_hell_yeah.png" id="2_t26b7"]
-[ext_resource type="Texture2D" uid="uid://sc2qo0coeisr" path="res://sprites/buttons/continue_normal.png" id="9_5faoh"]
 [ext_resource type="Texture2D" uid="uid://calbskh4i5vua" path="res://sprites/buttons/ink_scroll_new_game_normal.png" id="9_ko2lg"]
-[ext_resource type="Texture2D" uid="uid://c0i68xamre1mg" path="res://sprites/buttons/continue_pressed.png" id="10_ptake"]
-[ext_resource type="Texture2D" uid="uid://bibigfillsbin" path="res://sprites/buttons/continue_hover.png" id="11_hubol"]
+[ext_resource type="Texture2D" uid="uid://mmu6nlb73ogh" path="res://sprites/buttons/ink_scroll_new_game_pressed.png" id="10_new_game_pressed"]
 [ext_resource type="Texture2D" uid="uid://pw18bovqf6jb" path="res://sprites/buttons/ink_scroll_new_game_hover.png" id="11_mj7cn"]
 [ext_resource type="Texture2D" uid="uid://bimd6mxy6153u" path="res://sprites/buttons/options_normal.png" id="15_8vx4p"]
 [ext_resource type="Texture2D" uid="uid://yh0d82d44v4r" path="res://sprites/buttons/options_pressed.png" id="16_tdapf"]
@@ -14,7 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://b7i85w5xy13d1" path="res://sprites/buttons/quit_normal.png" id="18_7shrw"]
 [ext_resource type="Texture2D" uid="uid://duh6h8ux1h0vk" path="res://sprites/buttons/quit_pressed.png" id="19_viowm"]
 [ext_resource type="Texture2D" uid="uid://mk0ffsryt0mu" path="res://sprites/buttons/quit_hover.png" id="20_1n6yq"]
-[ext_resource type="PackedScene" path="res://mainmenu/RuneCircle.tscn" id="21_rune_circle"]
+[ext_resource type="PackedScene" path="res://mainmenu/AlchemySeal.tscn" id="21_alchemy_seal"]
 [ext_resource type="PackedScene" uid="uid://btyxtwij5kbf7" path="res://mainmenu/VersionStone.tscn" id="22_version_stone"]
 [ext_resource type="Resource" uid="uid://ut3caq211l7y" path="res://mainmenu/resources/MainMenuStyle_Default.tres" id="24_menu_style"]
 
@@ -32,9 +30,6 @@ shader_parameter/vignette_inner = 0.35
 shader_parameter/vignette_outer = 1.0
 shader_parameter/warmth = 0.25
 shader_parameter/pulse_speed = 4.5
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_v4f20"]
-load_path = "res://.godot/imported/ink_scroll_new_game_pressed.png-cc46a222f429e970ed5aa57800377db9.ctex"
 
 [node name="MainMenu" type="Control" unique_id=437776380]
 layout_mode = 3
@@ -67,13 +62,13 @@ offset_bottom = 890.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="RuneCircle" parent="." unique_id=408273340 instance=ExtResource("21_rune_circle")]
+[node name="AlchemySeal" parent="." unique_id=408273340 instance=ExtResource("21_alchemy_seal")]
 layout_mode = 1
 offset_left = 167.0
 offset_top = 160.0
 offset_right = 847.0
 offset_bottom = 840.0
-rune_opacity = 0.52
+seal_opacity = 0.52
 
 [node name="UI" type="CenterContainer" parent="." unique_id=1095771845]
 layout_mode = 1
@@ -96,17 +91,10 @@ metadata/_edit_use_anchors_ = true
 [node name="HFlowContainer" type="HFlowContainer" parent="UI/FlowContainer" unique_id=1899401316]
 layout_mode = 2
 
-[node name="Continue" type="TextureButton" parent="UI/FlowContainer/HFlowContainer" unique_id=1796255403]
-visible = false
-layout_mode = 2
-texture_normal = ExtResource("9_5faoh")
-texture_pressed = ExtResource("10_ptake")
-texture_hover = ExtResource("11_hubol")
-
 [node name="NewGame" type="TextureButton" parent="UI/FlowContainer/HFlowContainer" unique_id=2118060077]
 layout_mode = 2
 texture_normal = ExtResource("9_ko2lg")
-texture_pressed = SubResource("CompressedTexture2D_v4f20")
+texture_pressed = ExtResource("10_new_game_pressed")
 texture_hover = ExtResource("11_mj7cn")
 
 [node name="Options" type="TextureButton" parent="UI/FlowContainer/HFlowContainer" unique_id=804499769]

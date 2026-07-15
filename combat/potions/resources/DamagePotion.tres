@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://combat/potions/PotionRecipeData.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+recipe_id = "damage_potion"
+display_name = "Damage Potion"
+green_count = 2
+blue_count = 1
+effect_type = 1
+effect_amount = 30
+mixed_color = Color(0, 0.7, 0.65, 1)

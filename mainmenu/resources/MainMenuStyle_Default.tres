@@ -6,3 +6,5 @@
 [resource]
 script = ExtResource("1_menu_style")
 background_texture = ExtResource("2_background")
+alchemy_seal_opacity = 0.52
+alchemy_seal_rotation_speed = 3.0
