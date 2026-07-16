@@ -1,9 +1,8 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://combat/actors/HealthComponent.gd" id="1_health"]
 [ext_resource type="Script" path="res://combat/actors/PotionTarget.gd" id="2_target"]
 [ext_resource type="PackedScene" path="res://combat/actors/ActorHealthBar.tscn" id="3_health_bar"]
-[ext_resource type="Texture2D" path="res://sprites/Pointed.png" id="4_texture"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_target"]
 radius = 42.0
@@ -12,7 +11,6 @@ radius = 42.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.27, 0.27)
-texture = ExtResource("4_texture")
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("1_health")

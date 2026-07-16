@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwyhnqodj4trq"
-path="res://.godot/imported/back_normal.png-dfa85769bdfb68829c1f27bbeb72e86c.ctex"
+uid="uid://bj8e1f7xfyxgu"
+path="res://.godot/imported/main_menu_alchemy.png-c355b656f8b95011a9b738e9cfb4f114.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/buttons/back_normal.png"
-dest_files=["res://.godot/imported/back_normal.png-dfa85769bdfb68829c1f27bbeb72e86c.ctex"]
+source_file="res://sprites/main_menu_alchemy.png"
+dest_files=["res://.godot/imported/main_menu_alchemy.png-c355b656f8b95011a9b738e9cfb4f114.ctex"]
 
 [params]
 

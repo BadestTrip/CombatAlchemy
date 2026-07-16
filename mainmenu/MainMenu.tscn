@@ -2,17 +2,17 @@
 
 [ext_resource type="Script" uid="uid://bnujbb67xn4ab" path="res://mainmenu/MainMenu.gd" id="1_o168s"]
 [ext_resource type="Shader" uid="uid://d1ib7a1k4stpk" path="res://extra/main_menu_shader.gdshader" id="2_o168s"]
-[ext_resource type="Texture2D" uid="uid://bmrxptp10isrx" path="res://sprites/mage_cliff_hell_yeah.png" id="2_t26b7"]
-[ext_resource type="Texture2D" uid="uid://calbskh4i5vua" path="res://sprites/buttons/ink_scroll_new_game_normal.png" id="9_ko2lg"]
-[ext_resource type="Texture2D" uid="uid://mmu6nlb73ogh" path="res://sprites/buttons/ink_scroll_new_game_pressed.png" id="10_new_game_pressed"]
-[ext_resource type="Texture2D" uid="uid://pw18bovqf6jb" path="res://sprites/buttons/ink_scroll_new_game_hover.png" id="11_mj7cn"]
-[ext_resource type="Texture2D" uid="uid://bimd6mxy6153u" path="res://sprites/buttons/options_normal.png" id="15_8vx4p"]
-[ext_resource type="Texture2D" uid="uid://yh0d82d44v4r" path="res://sprites/buttons/options_pressed.png" id="16_tdapf"]
-[ext_resource type="Texture2D" uid="uid://bnqs4owyniifh" path="res://sprites/buttons/options_hover.png" id="17_v41fp"]
-[ext_resource type="Texture2D" uid="uid://b7i85w5xy13d1" path="res://sprites/buttons/quit_normal.png" id="18_7shrw"]
-[ext_resource type="Texture2D" uid="uid://duh6h8ux1h0vk" path="res://sprites/buttons/quit_pressed.png" id="19_viowm"]
-[ext_resource type="Texture2D" uid="uid://mk0ffsryt0mu" path="res://sprites/buttons/quit_hover.png" id="20_1n6yq"]
-[ext_resource type="PackedScene" path="res://mainmenu/AlchemySeal.tscn" id="21_alchemy_seal"]
+[ext_resource type="Texture2D" uid="uid://bj8e1f7xfyxgu" path="res://sprites/main_menu_alchemy.png" id="3_idt4l"]
+[ext_resource type="Texture2D" uid="uid://brs05w0nym8to" path="res://sprites/buttons/new_game_normal.png" id="6_idt4l"]
+[ext_resource type="Texture2D" uid="uid://bi1ct2huvuigc" path="res://sprites/buttons/new_game_pressed.png" id="7_t26b7"]
+[ext_resource type="Texture2D" uid="uid://dd0bpmt5shvih" path="res://sprites/buttons/new_game_hover.png" id="8_v4f20"]
+[ext_resource type="Texture2D" uid="uid://s7yv5rdpiq7k" path="res://sprites/buttons/settings_normal.png" id="9_ko2lg"]
+[ext_resource type="Texture2D" uid="uid://pa6bymc3121a" path="res://sprites/buttons/settings_pressed.png" id="10_uhb2p"]
+[ext_resource type="Texture2D" uid="uid://7fcoq3se0j1w" path="res://sprites/buttons/settings_hover.png" id="11_mj7cn"]
+[ext_resource type="Texture2D" uid="uid://csgv6nrw4tv7u" path="res://sprites/buttons/quit_normal.png" id="12_thm40"]
+[ext_resource type="Texture2D" uid="uid://fe3yryicggau" path="res://sprites/buttons/quit_pressed.png" id="13_klto0"]
+[ext_resource type="Texture2D" uid="uid://bm7yyqdswqro" path="res://sprites/buttons/quit_hover.png" id="14_4458a"]
+[ext_resource type="PackedScene" uid="uid://u2abi4d4jt4i" path="res://mainmenu/AlchemySeal.tscn" id="21_alchemy_seal"]
 [ext_resource type="PackedScene" uid="uid://btyxtwij5kbf7" path="res://mainmenu/VersionStone.tscn" id="22_version_stone"]
 [ext_resource type="Resource" uid="uid://ut3caq211l7y" path="res://mainmenu/resources/MainMenuStyle_Default.tres" id="24_menu_style"]
 
@@ -46,7 +46,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_t26b7")
+texture = ExtResource("3_idt4l")
 
 [node name="Shader" type="ColorRect" parent="." unique_id=1849148694]
 visible = false
@@ -64,22 +64,23 @@ grow_vertical = 2
 
 [node name="AlchemySeal" parent="." unique_id=408273340 instance=ExtResource("21_alchemy_seal")]
 layout_mode = 1
-offset_left = 167.0
-offset_top = 160.0
-offset_right = 847.0
-offset_bottom = 840.0
-seal_opacity = 0.52
+offset_left = 260.4375
+offset_top = 276.19653
+offset_right = 940.4375
+offset_bottom = 956.19653
 
 [node name="UI" type="CenterContainer" parent="." unique_id=1095771845]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.41650218
-anchor_top = 0.09204879
-anchor_right = 0.6665022
-anchor_bottom = 0.52260435
-offset_top = 3.0517578e-05
+anchor_left = 0.45859852
+anchor_top = 0.3578259
+anchor_right = 0.7085985
+anchor_bottom = 0.71754813
+offset_right = 160.0
+offset_bottom = 129.5
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.75, 0.75)
 metadata/_edit_use_anchors_ = true
 
 [node name="FlowContainer" type="FlowContainer" parent="UI" unique_id=51005736]
@@ -93,21 +94,21 @@ layout_mode = 2
 
 [node name="NewGame" type="TextureButton" parent="UI/FlowContainer/HFlowContainer" unique_id=2118060077]
 layout_mode = 2
-texture_normal = ExtResource("9_ko2lg")
-texture_pressed = ExtResource("10_new_game_pressed")
-texture_hover = ExtResource("11_mj7cn")
+texture_normal = ExtResource("6_idt4l")
+texture_pressed = ExtResource("7_t26b7")
+texture_hover = ExtResource("8_v4f20")
 
 [node name="Options" type="TextureButton" parent="UI/FlowContainer/HFlowContainer" unique_id=804499769]
 layout_mode = 2
-texture_normal = ExtResource("15_8vx4p")
-texture_pressed = ExtResource("16_tdapf")
-texture_hover = ExtResource("17_v41fp")
+texture_normal = ExtResource("9_ko2lg")
+texture_pressed = ExtResource("10_uhb2p")
+texture_hover = ExtResource("11_mj7cn")
 
 [node name="Quit" type="TextureButton" parent="UI/FlowContainer/HFlowContainer" unique_id=1083108788]
 layout_mode = 2
-texture_normal = ExtResource("18_7shrw")
-texture_pressed = ExtResource("19_viowm")
-texture_hover = ExtResource("20_1n6yq")
+texture_normal = ExtResource("12_thm40")
+texture_pressed = ExtResource("13_klto0")
+texture_hover = ExtResource("14_4458a")
 
 [node name="VersionStone" parent="." unique_id=737433577 instance=ExtResource("22_version_stone")]
 layout_mode = 1

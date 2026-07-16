@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://dpxmbukrx5llk" path="res://mainmenu/SettingsMenu.gd" id="1_4hxq3"]
 [ext_resource type="Shader" uid="uid://bm57c64bwyeyx" path="res://extra/settings_menu_shader.gdshader" id="3_ppjuv"]
-[ext_resource type="Texture2D" uid="uid://bltgeboh3kb3e" path="res://sprites/buttons/back_normal.png" id="4_gis3k"]
-[ext_resource type="Texture2D" uid="uid://jnmyoew3lgna" path="res://sprites/buttons/back_pressed.png" id="5_83j8s"]
+[ext_resource type="Texture2D" uid="uid://bwyhnqodj4trq" path="res://sprites/buttons/back_normal.png" id="4_4ctsm"]
+[ext_resource type="Texture2D" uid="uid://d2e0sx6jt524" path="res://sprites/buttons/back_pressed.png" id="5_6vrk6"]
 [ext_resource type="FontFile" uid="uid://bi7jlcgpmn18i" path="res://extra/yoster.ttf" id="5_646k0"]
-[ext_resource type="Texture2D" uid="uid://c4hdehyxkrj84" path="res://sprites/buttons/back_hover.png" id="6_gjs24"]
+[ext_resource type="Texture2D" uid="uid://dxsw4e8ykdetk" path="res://sprites/buttons/back_hover.png" id="6_qjxvx"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ipgag"]
 shader = ExtResource("3_ppjuv")
@@ -115,7 +115,7 @@ custom_minimum_size = Vector2(240, 60)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 8
-texture_normal = ExtResource("4_gis3k")
-texture_pressed = ExtResource("5_83j8s")
-texture_hover = ExtResource("6_gjs24")
+texture_normal = ExtResource("4_4ctsm")
+texture_pressed = ExtResource("5_6vrk6")
+texture_hover = ExtResource("6_qjxvx")
 stretch_mode = 0

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwyhnqodj4trq"
-path="res://.godot/imported/back_normal.png-dfa85769bdfb68829c1f27bbeb72e86c.ctex"
+uid="uid://by5m448c5620j"
+path="res://.godot/imported/combat_alchemy_menu_buttons_v2_preview.png-d48ba2d2b74a1c0ccea7bf7005b25a6c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/buttons/back_normal.png"
-dest_files=["res://.godot/imported/back_normal.png-dfa85769bdfb68829c1f27bbeb72e86c.ctex"]
+source_file="res://sprites/buttons/combat_alchemy_menu_buttons_v2_preview.png"
+dest_files=["res://.godot/imported/combat_alchemy_menu_buttons_v2_preview.png-d48ba2d2b74a1c0ccea7bf7005b25a6c.ctex"]
 
 [params]
 

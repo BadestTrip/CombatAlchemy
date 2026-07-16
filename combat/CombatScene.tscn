@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" path="res://combat/ui/PotionMixerUI.tscn" id="7_mixer_ui"]
 [ext_resource type="PackedScene" uid="uid://mt3v0si0wmk7" path="res://ui/PauseMenu.tscn" id="8_pause_menu"]
 [ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="9_level_music"]
-[ext_resource type="AudioStream" uid="uid://c4eip32jmo0ui" path="res://music/Combat.mp3" id="10_combat_music"]
+[ext_resource type="AudioStream" uid="uid://d3klg2jyuwpp0" path="res://music/CombatNew.mp3" id="12_x7jh1"]
 
 [node name="CombatScene" type="Node2D" unique_id=1979150264]
 script = ExtResource("1_controller")
@@ -88,7 +88,7 @@ recipe_book = ExtResource("6_recipe_book")
 z_index = 100
 
 [node name="LevelMusic" parent="." unique_id=1050860962 instance=ExtResource("9_level_music")]
-music = ExtResource("10_combat_music")
+music = ExtResource("12_x7jh1")
 
 [editable path="Arena/Friend"]
 [editable path="Arena/Foe"]

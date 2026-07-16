@@ -1,24 +1,25 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://doydsebyrlpr6"]
 
-[ext_resource type="Script" path="res://combat/actors/ActorHealthBar.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bohg3ehqikcqs" path="res://combat/actors/ActorHealthBar.gd" id="1_script"]
 
-[node name="ActorHealthBar" type="Control"]
+[node name="ActorHealthBar" type="Control" unique_id=1303711814]
 custom_minimum_size = Vector2(140, 48)
+layout_mode = 3
+anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="NameLabel" type="Label" parent="."]
+[node name="NameLabel" type="Label" parent="." unique_id=1368239713]
 layout_mode = 0
 offset_right = 140.0
 offset_bottom = 18.0
 theme_override_colors/font_color = Color(1, 0.95, 0.72, 1)
 theme_override_colors/font_outline_color = Color(0.08, 0.06, 0.08, 1)
 theme_override_constants/outline_size = 3
-mouse_filter = 2
-horizontal_alignment = 1
 text = "Actor"
+horizontal_alignment = 1
 
-[node name="ProgressBar" type="ProgressBar" parent="."]
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=265216772]
 layout_mode = 0
 offset_top = 22.0
 offset_right = 140.0
@@ -26,7 +27,7 @@ offset_bottom = 34.0
 mouse_filter = 2
 show_percentage = false
 
-[node name="HPLabel" type="Label" parent="."]
+[node name="HPLabel" type="Label" parent="." unique_id=1137233176]
 layout_mode = 0
 offset_top = 32.0
 offset_right = 140.0
@@ -34,6 +35,5 @@ offset_bottom = 48.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.08, 0.06, 0.08, 1)
 theme_override_constants/outline_size = 3
-mouse_filter = 2
-horizontal_alignment = 1
 text = "100/100"
+horizontal_alignment = 1
