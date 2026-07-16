@@ -1,0 +1,236 @@
+[gd_scene format=3 uid="uid://d4nich8w62ust"]
+
+[ext_resource type="Script" uid="uid://dcfaitodbvgp0" path="res://experiments/character_animation/CharacterAnimationLab.gd" id="1_lab_script"]
+[ext_resource type="PackedScene" path="res://experiments/character_animation/HumanoidCutoutRig.tscn" id="2_rig_scene"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_toolbar"]
+bg_color = Color(0.105882, 0.113725, 0.133333, 0.97)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.337255, 0.356863, 0.4, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+bg_color = Color(0.184314, 0.2, 0.231373, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.396078, 0.423529, 0.47451, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="CharacterAnimationLab" type="Control" unique_id=1995988910]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lab_script")
+
+[node name="Background" type="ColorRect" parent="." unique_id=961261179]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.713726, 0.690196, 0.631373, 1)
+
+[node name="StageAnchor" type="Control" parent="." unique_id=886818123]
+anchors_preset = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="GroundShadow" type="Polygon2D" parent="StageAnchor" unique_id=1665232248]
+position = Vector2(0, 122)
+color = Color(0.109804, 0.113725, 0.12549, 0.2)
+polygon = PackedVector2Array(-92, 0, -70, -10, 0, -15, 70, -10, 92, 0, 70, 10, 0, 15, -70, 10)
+
+[node name="GroundLine" type="Line2D" parent="StageAnchor" unique_id=161062719]
+position = Vector2(0, 123)
+points = PackedVector2Array(-330, 0, 330, 0)
+width = 2.0
+default_color = Color(0.223529, 0.231373, 0.25098, 0.32)
+
+[node name="HumanoidCutoutRig" parent="StageAnchor" unique_id=1623266891 instance=ExtResource("2_rig_scene")]
+unique_name_in_owner = true
+position = Vector2(0, -75)
+scale = Vector2(1.5, 1.5)
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=2091479764]
+layer = 10
+
+[node name="HeaderMargin" type="MarginContainer" parent="UI" unique_id=791974262]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 430.0
+offset_bottom = 58.0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="Title" type="Label" parent="UI/HeaderMargin" unique_id=1204940380]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.129412, 0.137255, 0.156863, 1)
+theme_override_font_sizes/font_size = 22
+text = "CUTOUT ANIMATION LAB"
+
+[node name="ToolbarMargin" type="MarginContainer" parent="UI" unique_id=1290849846]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -166.0
+offset_right = -24.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="ToolbarPanel" type="PanelContainer" parent="UI/ToolbarMargin" unique_id=1590388358]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_toolbar")
+
+[node name="ToolbarPadding" type="MarginContainer" parent="UI/ToolbarMargin/ToolbarPanel" unique_id=1316587771]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="ToolbarColumn" type="VBoxContainer" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding" unique_id=1386679750]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ControlsRow" type="HBoxContainer" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn" unique_id=613990180]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="IdleButton" type="Button" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=1107393648]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(78, 40)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "Idle"
+
+[node name="WalkButton" type="Button" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=2074452451]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(78, 40)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "Walk"
+
+[node name="DrinkButton" type="Button" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=977033756]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(78, 40)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "Drink"
+
+[node name="ThrowButton" type="Button" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=969771669]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(78, 40)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "Throw"
+
+[node name="HitButton" type="Button" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=262912385]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(78, 40)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "Hit"
+
+[node name="ControlSpacer" type="VSeparator" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=139067479]
+layout_mode = 2
+
+[node name="SpeedLabel" type="Label" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=1001946845]
+layout_mode = 2
+text = "Speed"
+vertical_alignment = 1
+
+[node name="SpeedSlider" type="HSlider" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=163780661]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 40)
+layout_mode = 2
+min_value = 0.25
+max_value = 2.0
+step = 0.05
+value = 1.0
+
+[node name="SpeedValue" type="Label" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=1545392912]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 0)
+layout_mode = 2
+text = "1.00x"
+vertical_alignment = 1
+
+[node name="MirrorToggle" type="CheckButton" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=572802699]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mirror"
+
+[node name="BonesToggle" type="CheckButton" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=1292498605]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Bones"
+
+[node name="ResetButton" type="Button" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/ControlsRow" unique_id=1723941918]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(78, 40)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "Reset"
+
+[node name="ToolbarSeparator" type="HSeparator" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn" unique_id=1717539363]
+layout_mode = 2
+
+[node name="StatusRow" type="HBoxContainer" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn" unique_id=1256364306]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="CurrentStateLabel" type="Label" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/StatusRow" unique_id=1350631626]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.666667, 0.690196, 0.74902, 1)
+text = "Current state"
+
+[node name="CurrentStateValue" type="Label" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/StatusRow" unique_id=1562573618]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.443137, 0.87451, 0.819608, 1)
+text = "idle"
+
+[node name="StatusSpacer" type="VSeparator" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/StatusRow" unique_id=426760469]
+custom_minimum_size = Vector2(22, 0)
+layout_mode = 2
+
+[node name="LastEventLabel" type="Label" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/StatusRow" unique_id=503734462]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.666667, 0.690196, 0.74902, 1)
+text = "Last event"
+
+[node name="LastEventValue" type="Label" parent="UI/ToolbarMargin/ToolbarPanel/ToolbarPadding/ToolbarColumn/StatusRow" unique_id=1376776627]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92549, 0.733333, 0.419608, 1)
+text = "None"

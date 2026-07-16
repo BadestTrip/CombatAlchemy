@@ -13,6 +13,11 @@ application-shell services: scene routing, settings, music, and transitions.
 Potion recipes, health, input translation, UI rendering, and projectile motion
 remain independent of those autoloads.
 
+The project also contains an isolated skeletal cutout animation experiment
+under `experiments/character_animation/`. It is a developer tool, is not
+registered in `project.godot`, and has no connection to combat, actors,
+autoloads, input actions, or scene routing.
+
 ## Runtime Flow
 
 ```text
@@ -36,6 +41,18 @@ Combat input
 
 Escape opens the reusable `ui/PauseMenu.tscn`. Main Menu routes through
 `GameManager`; Quit routes through `GameManager.quit_game()`.
+
+The character animation lab has a separate developer-only flow:
+
+```text
+Play Current Scene: CharacterAnimationLab.tscn
+  -> CharacterAnimationLab toolbar
+	  -> HumanoidCutoutRig public playback API
+		  -> AnimationTree
+			  -> StateMachine
+				  -> AnimationPlayer
+					  -> HumanoidAnimationLibrary.tres
+```
 
 ## Autoloads
 
@@ -100,7 +117,8 @@ an explicit migration.
 | `globals/resources/` | Scene registry and project information resources. |
 | `mainmenu/` | Main menu, settings overlay, version plaque, and alchemy decoration. |
 | `ui/` | Reusable pause menu. |
-| `tests/` | Dependency-free potion domain test scene. |
+| `experiments/character_animation/` | Isolated reusable cutout rig, animation library, developer lab, and rigging guide. |
+| `tests/` | Dependency-free potion-domain, projectile-collision, and animation-rig test scenes. |
 | `music/`, `sprites/`, `extra/` | Audio, images, fonts, and shaders. |
 
 ## Combat Scene Composition
@@ -109,11 +127,13 @@ an explicit migration.
 uses `PotionCombatController` and contains:
 
 - `Arena/Player`: `PlayerActor.tscn`, starting at 70/100 health, using
-  `sprites/Standard.png`, with movement and a following camera.
+  `sprites/characters/overworld_character_TRUE_TRANSPARENT.png`, with movement
+  and a following camera.
 - `Arena/Friend`: `TargetActor.tscn`, starting at 50/100 health, using
-  `sprites/Pointed.png`.
+  `sprites/characters/overworld_character_TRUE_TRANSPARENT.png` through a scene
+  override.
 - `Arena/Foe`: `TargetActor.tscn`, starting at 100/100 health, using
-  `sprites/Pushed.png`.
+  `sprites/characters/mini_boss_TRUE_TRANSPARENT.png` through a scene override.
 - `Arena/Projectiles`: owner for thrown potion instances.
 - `Systems/PotionInput`: maps Input Map actions to typed signals.
 - `Systems/PotionMixer`: owns layers and the prepared recipe.
@@ -252,6 +272,87 @@ above zero again. No component changes scene or decides victory/defeat.
 - Button callbacks emit reagent intent only; the controller and mixer decide
   whether it is accepted.
 
+## Character Animation Experiment
+
+The files under `experiments/character_animation/` demonstrate reusable
+Godot-native 2D skeletal cutout animation. They are intentionally isolated
+from the active potion sandbox. Run `CharacterAnimationLab.tscn` with **Play
+Current Scene** to use the experiment.
+
+### HumanoidCutoutRig Scene
+
+- File: `experiments/character_animation/HumanoidCutoutRig.tscn`
+- Responsibility: author the reusable humanoid skeleton, rigid placeholder
+  body parts, hand sockets, optional bone overlay, and playback nodes.
+- Root structure: `HumanoidCutoutRig/FacingRoot/Skeleton2D` with standardized
+  `Root`, `Spine`, `Head`, paired arm/hand bones, and paired leg/foot bones.
+- Visual approach: engine-native `Polygon2D` parts parented directly to their
+  controlling `Bone2D`. There is no weighted deformation, IK, root motion, or
+  secondary cloth simulation.
+- Facing: horizontal mirroring changes only `FacingRoot`; gameplay/world
+  transforms are not involved.
+- Attachment points: `HandSocket_L` and `HandSocket_R` are `Marker2D` nodes for
+  future held props.
+- Naming contract: reusable animation tracks depend on the exact bone names and
+  node paths. Visual children may be replaced, but tracked bones must not be
+  renamed or reparented without migrating the animation library.
+
+The exact hierarchy, rest-pose workflow, artwork overlap, and pivot guidance
+are documented in `experiments/character_animation/README.md`.
+
+### HumanoidAnimationLibrary
+
+- File: `experiments/character_animation/HumanoidAnimationLibrary.tres`
+- Type: external `AnimationLibrary` assigned to the rig's `AnimationPlayer`.
+- Reuse rule: another humanoid can share the library only when it preserves the
+  tracked node paths and has broadly compatible proportions.
+- Playback graph: the `AnimationTree` is a BlendTree whose `StateMachine`
+  output passes through `TimeScale` before the final output.
+- Startup: the rig starts in `idle`.
+- Transitions: `idle` and `walk` blend over 0.12 seconds; action states enter
+  over 0.08 seconds and automatically return to `idle` over 0.10 seconds.
+
+| Clip | Duration | Looping | Event |
+| --- | ---: | --- | --- |
+| `RESET` | 0.10 s | No | None |
+| `idle` | 1.60 s | Yes | None |
+| `walk` | 0.80 s | Yes | None |
+| `drink` | 1.00 s | No | `drink_commit` at 0.55 s |
+| `throw` | 0.75 s | No | `throw_release` at 0.45 s |
+| `hit` | 0.45 s | No | `hit_peak` at 0.18 s |
+
+All locomotion is in place. A future gameplay controller must own world-space
+movement.
+
+### HumanoidCutoutRig Script
+
+- File: `experiments/character_animation/HumanoidCutoutRig.gd`
+- Responsibility: provide a small playback facade over authored rig and
+  animation resources; it does not create bones, body parts, clips, or UI.
+- Dependencies: unique nodes `FacingRoot`, `DebugBones`, `AnimationPlayer`, and
+  `AnimationTree`, plus a state-machine parameter named `StateMachine` and a
+  time-scale parameter named `TimeScale`.
+- Signals: `state_changed(state)` and `animation_event(event_name)`.
+- Public functions: `play_state()`, `reset_to_idle()`, `set_mirrored()`,
+  `set_playback_speed()`, `set_debug_bones_visible()`, `get_current_state()`,
+  and `get_available_states()`.
+- Validation: invalid state requests return `false`; playback speed clamps to
+  0.25-2.0.
+- Internal event relay: animation method tracks call `_emit_animation_event()`,
+  which emits the public `animation_event` signal.
+
+### CharacterAnimationLab
+
+- Scene: `experiments/character_animation/CharacterAnimationLab.tscn`
+- Script: `experiments/character_animation/CharacterAnimationLab.gd`
+- Responsibility: provide a neutral responsive stage and scene-authored
+  controls for exercising the rig's public API.
+- Controls: Idle, Walk, Drink, Throw, Hit, playback speed, Mirror, Bones, and
+  Reset.
+- Feedback: labels show the current state and most recent animation event.
+- Scope rule: the controller forwards UI input only. It does not construct rig
+  nodes, alter animation data, or connect the experiment to gameplay.
+
 ## Shell Script Reference
 
 ### LevelMusic
@@ -333,6 +434,29 @@ above zero again. No component changes scene or decides victory/defeat.
   preservation/signals, prepared ownership, health bounds/signals/recovery, and
   target acceptance.
 
+### PotionProjectileCollisionTests
+
+- Files: `tests/PotionProjectileCollisionTests.gd`,
+  `tests/PotionProjectileCollisionTests.tscn`
+- Responsibility: verify a real `Area2D` overlap applies one thrown potion and
+  consumes the projectile without mutating physics monitoring during the
+  overlap callback.
+- Coverage: target/projectile instantiation, health-component wiring, valid
+  launch, exactly-once damage, and projectile cleanup after the first accepted
+  hit.
+
+### CharacterAnimationRigTests
+
+- Files: `tests/CharacterAnimationRigTests.gd`,
+  `tests/CharacterAnimationRigTests.tscn`
+- Responsibility: verify the isolated cutout rig and lab without gameplay
+  integration.
+- Coverage: required bones and hand sockets, clip names/durations/loop modes,
+  exact method-track event times, AnimationTree nodes and transitions, public
+  state requests, invalid-state rejection, mirroring scope, playback-speed
+  clamps, debug-line visibility, automatic action returns, and 1280x720 lab
+  containment.
+
 ## Potion Data Flow
 
 1. Tab toggles an unfinished mixer. A prepared potion cannot be hidden.
@@ -412,6 +536,26 @@ godot --headless --path . res://tests/PotionDomainTests.tscn
 Expected output contains `PotionDomainTests: PASS (18 tests)` and exits with
 code 0.
 
+### Automated Projectile Collision Scene
+
+```powershell
+godot --headless --path . res://tests/PotionProjectileCollisionTests.tscn
+```
+
+Expected output contains `PotionProjectileCollisionTests: PASS (6 checks)` and
+exits with code 0. Run this test with normal physics timing rather than forcing
+a fixed FPS.
+
+### Automated Character Animation Scene
+
+```powershell
+godot --headless --fixed-fps 60 --path . res://tests/CharacterAnimationRigTests.tscn
+```
+
+Expected output contains `CharacterAnimationRigTests: PASS (89 checks)` and
+exits with code 0. Fixed FPS provides deterministic timing for one-shot event
+and automatic-return checks.
+
 ### Manual Godot Checklist
 
 1. Open the project and confirm no missing script, class, or resource errors.
@@ -445,6 +589,28 @@ code 0.
 18. Resize through smaller 16:9 windows. Confirm the mixer stays fully visible at
 	bottom center and health/UI text does not overlap.
 
+### Manual Character Animation Checklist
+
+1. Open `experiments/character_animation/CharacterAnimationLab.tscn` and use
+   **Play Current Scene**.
+2. Confirm the rig starts in `idle` with the bone overlay visible.
+3. Select Idle and Walk. Confirm both loop in place and blend without moving the
+   scene root through world space.
+4. Select Drink, Throw, and Hit. Confirm each action plays once, reports its
+   expected event, and automatically returns to `idle`.
+5. Move the speed slider through 0.25x, 1.0x, and 2.0x. Confirm animation speed
+   changes without changing transition ownership or world position.
+6. Toggle Mirror. Confirm only the authored facing container flips and the rig
+   remains centered.
+7. Toggle Bones. Confirm all cyan bone indicators hide and reappear while body
+   parts remain visible.
+8. Select Reset. Confirm the lab returns to `idle` and clears the last-event
+   label.
+9. Resize through smaller 16:9 windows. Confirm the stage remains centered and
+   the toolbar stays inside the viewport without overlapping controls.
+10. Run the main project with F5. Confirm the animation lab does not appear in
+	active scene flow.
+
 ## Change Guidelines
 
 - Keep changes small and reviewable.
@@ -454,4 +620,10 @@ code 0.
 - Keep `PotionCombatController` as a coordinator. Put state/rules in their owning
   components instead of growing a new all-purpose manager.
 - Do not couple recipe matching to insertion order or actor identity.
+- Keep the character animation experiment isolated until explicit gameplay
+  integration is requested. Do not add it to `project.godot`, autoloads,
+  `GameManager`, `CombatScene`, or existing actor scenes implicitly.
+- Preserve the humanoid rig's tracked bone names and paths when reusing
+  `HumanoidAnimationLibrary.tres`; migrate animation tracks deliberately if the
+  hierarchy changes.
 - After each change, list changed files and provide focused manual Godot steps.
