@@ -1,145 +1,94 @@
 [gd_scene format=3 uid="uid://brvm8ljkogslq"]
 
-[ext_resource type="Script" uid="uid://b6h4m6cwcydyx" path="res://combat/scripts/RuneCombatController.gd" id="1_controller"]
-[ext_resource type="Script" uid="uid://bbxorc2yce4tu" path="res://combat/scripts/PlayerCombatController.gd" id="2_player"]
-[ext_resource type="Texture2D" uid="uid://chy636edfovgf" path="res://sprites/Standard.png" id="3_player_texture"]
-[ext_resource type="Script" uid="uid://duiawdft4mscb" path="res://combat/scripts/CombatUnit.gd" id="4_unit"]
-[ext_resource type="Script" uid="uid://orj4g7v4k8vg" path="res://combat/scripts/RuneCombatStateMachine.gd" id="5_state"]
-[ext_resource type="Script" uid="uid://dg6b042wqnjhu" path="res://combat/scripts/RuneCombatInput.gd" id="6_input"]
-[ext_resource type="Script" uid="uid://ct75qc5dpypn5" path="res://combat/scripts/ChantBuilder.gd" id="7_chant"]
-[ext_resource type="Script" uid="uid://dlcwb5rwduk54" path="res://combat/scripts/RuneGrammarInterpreter.gd" id="8_grammar"]
-[ext_resource type="Script" uid="uid://c0aqjgfvrjlqc" path="res://combat/scripts/SignatureSpellResolver.gd" id="9_signatures"]
-[ext_resource type="Script" uid="uid://qgr4b6caq4ab" path="res://combat/scripts/InstabilityCalculator.gd" id="10_instability"]
-[ext_resource type="Texture2D" uid="uid://c3i4myid7ngu2" path="res://sprites/Pushed.png" id="11_enemy_texture"]
-[ext_resource type="Script" uid="uid://ch58umqyrjh0e" path="res://combat/scripts/SpellResolver.gd" id="14_resolver"]
-[ext_resource type="Script" uid="uid://cvlni8tkjk0jy" path="res://combat/scripts/SpellExecutor.gd" id="15_executor"]
-[ext_resource type="PackedScene" path="res://combat/scenes/RuneWheelUI.tscn" id="17_wheel_scene"]
-[ext_resource type="Script" uid="uid://bunnin0rwuqrv" path="res://combat/scripts/AimIndicator.gd" id="20_aim"]
-[ext_resource type="PackedScene" path="res://ui/PauseMenu.tscn" id="21_pause"]
-[ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="22_level_music"]
-[ext_resource type="AudioStream" uid="uid://c4eip32jmo0ui" path="res://music/Combat.mp3" id="23_music"]
-[ext_resource type="PackedScene" path="res://combat/scenes/CombatHUD.tscn" id="24_hud_scene"]
-[ext_resource type="PackedScene" path="res://combat/scenes/BattlefieldDimmerUI.tscn" id="25_dimmer_scene"]
+[ext_resource type="Script" uid="uid://ccpfq7ot55g5d" path="res://combat/PotionCombatController.gd" id="1_controller"]
+[ext_resource type="PackedScene" uid="uid://clqe5778u4ymb" path="res://combat/actors/PlayerActor.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://combat/actors/TargetActor.tscn" id="3_target"]
+[ext_resource type="Script" uid="uid://jrow3f7wpqk7" path="res://combat/PotionInput.gd" id="4_input"]
+[ext_resource type="Texture2D" uid="uid://7ca0l6tnv8mj" path="res://sprites/characters/overworld_character_TRUE_TRANSPARENT.png" id="4_x7jh1"]
+[ext_resource type="Script" uid="uid://dx7nefyynlygw" path="res://combat/potions/PotionMixer.gd" id="5_mixer"]
+[ext_resource type="Texture2D" uid="uid://dweoepaulchsb" path="res://sprites/characters/mini_boss_TRUE_TRANSPARENT.png" id="5_x7jh1"]
+[ext_resource type="Resource" path="res://combat/potions/resources/PotionRecipeBook_Default.tres" id="6_recipe_book"]
+[ext_resource type="PackedScene" path="res://combat/ui/PotionMixerUI.tscn" id="7_mixer_ui"]
+[ext_resource type="PackedScene" uid="uid://mt3v0si0wmk7" path="res://ui/PauseMenu.tscn" id="8_pause_menu"]
+[ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="9_level_music"]
+[ext_resource type="AudioStream" uid="uid://d3klg2jyuwpp0" path="res://music/CombatNew.mp3" id="12_x7jh1"]
 
-[node name="CombatScene" type="Node2D" unique_id=366610949]
+[node name="CombatScene" type="Node2D" unique_id=1979150264]
 script = ExtResource("1_controller")
-state_machine_path = NodePath("Systems/RuneCombatStateMachine")
-combat_input_path = NodePath("Systems/RuneCombatInput")
-rune_wheel_path = NodePath("UI/FloatingRuneWheel")
-chant_builder_path = NodePath("Systems/ChantBuilder")
-spell_resolver_path = NodePath("Systems/SpellResolver")
-spell_executor_path = NodePath("Systems/SpellExecutor")
-player_unit_path = NodePath("Arena/Player/CombatUnit")
-enemy_unit_path = NodePath("Arena/DummyEnemy/CombatUnit")
-chant_slots_container_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/ChantBarUI/ChantSlots")
-preview_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/SpellPreviewPanel")
-log_text_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/LogColumn/SpellLogUI/LogText")
-player_status_label_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/StatusColumn/PlayerStatus")
-enemy_status_label_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/StatusColumn/EnemyStatus")
-state_label_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/StatusColumn/StateLabel")
-effects_parent_path = NodePath("Arena")
-battlefield_dimmer_path = NodePath("UI/BattlefieldDimmer")
-prepared_label_path = NodePath("UI/BottomHUD/HUDPanel/HUDMargin/HUDRow/CenterColumn/PreparedLabel")
+potion_input_path = NodePath("Systems/PotionInput")
+potion_mixer_path = NodePath("Systems/PotionMixer")
+potion_mixer_ui_path = NodePath("UI/PotionMixerUI")
+player_combat_controller_path = NodePath("Arena/Player")
+player_potion_target_path = NodePath("Arena/Player/PotionTarget")
+projectiles_parent_path = NodePath("Arena/Projectiles")
 
-[node name="Arena" type="Node2D" parent="." unique_id=1239110495]
+[node name="Arena" type="Node2D" parent="." unique_id=874053048]
 
-[node name="ArenaFloor" type="ColorRect" parent="Arena" unique_id=1814383340]
+[node name="ArenaFloor" type="ColorRect" parent="Arena" unique_id=1914808651]
 offset_left = -1800.0
 offset_top = -1100.0
 offset_right = 1800.0
 offset_bottom = 1100.0
+mouse_filter = 2
 color = Color(0.9447802, 0.9471479, 0.95410115, 1)
 
-[node name="Player" type="CharacterBody2D" parent="Arena" unique_id=426000908]
-script = ExtResource("2_player")
+[node name="Player" parent="Arena" unique_id=847552728 instance=ExtResource("2_player")]
 
-[node name="PlayerVisual" type="Sprite2D" parent="Arena/Player" unique_id=560369888]
-scale = Vector2(0.24, 0.24)
-texture = ExtResource("3_player_texture")
+[node name="Friend" parent="Arena" unique_id=939673385 instance=ExtResource("3_target")]
+position = Vector2(480, -140)
 
-[node name="Camera2D" type="Camera2D" parent="Arena/Player" unique_id=2094194777]
-zoom = Vector2(1.35, 1.35)
-position_smoothing_enabled = true
-position_smoothing_speed = 8.0
+[node name="Sprite2D" parent="Arena/Friend" index="0"]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("4_x7jh1")
 
-[node name="CombatUnit" type="Node" parent="Arena/Player" unique_id=1485616533]
-script = ExtResource("4_unit")
-display_name = "Player"
+[node name="HealthComponent" parent="Arena/Friend" index="1"]
+current_health = 50
 
-[node name="DummyEnemy" type="Node2D" parent="Arena" unique_id=1357391605]
-position = Vector2(430, 0)
-
-[node name="DummyVisual" type="Sprite2D" parent="Arena/DummyEnemy" unique_id=1271105643]
-scale = Vector2(0.27, 0.27)
-texture = ExtResource("11_enemy_texture")
-
-[node name="CombatUnit" type="Node" parent="Arena/DummyEnemy" unique_id=540028767]
-script = ExtResource("4_unit")
-display_name = "Practice Dummy"
-max_hp = 60
-hp = 60
-
-[node name="AimIndicator" type="Node2D" parent="Arena" unique_id=1813236235]
-script = ExtResource("20_aim")
-player_path = NodePath("../Player")
-use_mouse_position = true
-
-[node name="Systems" type="Node" parent="." unique_id=930110746]
-
-[node name="RuneCombatStateMachine" type="Node" parent="Systems" unique_id=126521934]
-script = ExtResource("5_state")
-
-[node name="RuneCombatInput" type="Node" parent="Systems" unique_id=455416947]
-script = ExtResource("6_input")
-
-[node name="ChantBuilder" type="Node" parent="Systems" unique_id=777444601]
-script = ExtResource("7_chant")
-
-[node name="RuneGrammarInterpreter" type="Node" parent="Systems" unique_id=903327991]
-script = ExtResource("8_grammar")
-
-[node name="SignatureSpellResolver" type="Node" parent="Systems" unique_id=998812351]
-script = ExtResource("9_signatures")
-
-[node name="InstabilityCalculator" type="Node" parent="Systems" unique_id=1163878143]
-script = ExtResource("10_instability")
-
-[node name="SpellExecutor" type="Node" parent="Systems" unique_id=931133454]
-script = ExtResource("15_executor")
-
-[node name="SpellResolver" type="Node" parent="Systems" unique_id=938070944]
-script = ExtResource("14_resolver")
-grammar_interpreter_path = NodePath("../RuneGrammarInterpreter")
-signature_resolver_path = NodePath("../SignatureSpellResolver")
-instability_calculator_path = NodePath("../InstabilityCalculator")
-
-[node name="UI" type="CanvasLayer" parent="." unique_id=1948898400]
-
-[node name="BattlefieldDimmer" parent="UI" unique_id=210302799 instance=ExtResource("25_dimmer_scene")]
-color = Color(0, 0, 0, 0.38)
-
-[node name="FloatingRuneWheel" parent="UI" unique_id=996374988 instance=ExtResource("17_wheel_scene")]
-visible = false
-z_index = 40
+[node name="ActorHealthBar" parent="Arena/Friend" index="3"]
 layout_mode = 3
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -380.0
-offset_top = -430.0
-offset_right = 380.0
-offset_bottom = -200.0
+anchors_preset = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 140.0
+offset_bottom = 48.0
+display_name = "Friend"
 
-[node name="BottomHUD" parent="UI" unique_id=1530837196 instance=ExtResource("24_hud_scene")]
-offset_left = 24.0
-offset_top = -198.0
-offset_right = -24.0
-offset_bottom = -18.0
+[node name="Foe" parent="Arena" unique_id=1002567749 instance=ExtResource("3_target")]
+position = Vector2(480, 140)
 
-[node name="PauseMenu" parent="UI" unique_id=1281434524 instance=ExtResource("21_pause")]
+[node name="Sprite2D" parent="Arena/Foe" index="0"]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("5_x7jh1")
+
+[node name="ActorHealthBar" parent="Arena/Foe" index="3"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 140.0
+offset_bottom = 48.0
+display_name = "Foe"
+
+[node name="Projectiles" type="Node2D" parent="Arena" unique_id=223784400]
+
+[node name="Systems" type="Node" parent="." unique_id=1554141428]
+
+[node name="PotionInput" type="Node" parent="Systems" unique_id=1512476088]
+script = ExtResource("4_input")
+
+[node name="PotionMixer" type="Node" parent="Systems" unique_id=1353335448]
+script = ExtResource("5_mixer")
+recipe_book = ExtResource("6_recipe_book")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=63518013]
+
+[node name="PotionMixerUI" parent="UI" unique_id=1218744205 instance=ExtResource("7_mixer_ui")]
+
+[node name="PauseMenu" parent="UI" unique_id=1041878019 instance=ExtResource("8_pause_menu")]
 z_index = 100
 
-[node name="LevelMusic" parent="." unique_id=2041182046 instance=ExtResource("22_level_music")]
-music = ExtResource("23_music")
+[node name="LevelMusic" parent="." unique_id=1050860962 instance=ExtResource("9_level_music")]
+music = ExtResource("12_x7jh1")
+
+[editable path="Arena/Friend"]
+[editable path="Arena/Foe"]

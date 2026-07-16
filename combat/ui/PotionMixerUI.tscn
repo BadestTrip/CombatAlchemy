@@ -1,0 +1,101 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://combat/ui/PotionMixerUI.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://combat/ui/FlaskView.tscn" id="2_flask"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_red"]
+bg_color = Color(0.9, 0.16, 0.2, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.74, 0.74, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_green"]
+bg_color = Color(0.2, 0.78, 0.35, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.75, 1, 0.8, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_blue"]
+bg_color = Color(0.15, 0.45, 0.95, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.72, 0.84, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="PotionMixerUI" type="Control"]
+visible = false
+custom_minimum_size = Vector2(360, 210)
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -180.0
+offset_top = -230.0
+offset_right = 180.0
+offset_bottom = -20.0
+grow_horizontal = 1
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="FlaskView" parent="." instance=ExtResource("2_flask")]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = 164.0
+offset_bottom = 200.0
+
+[node name="ReagentButtons" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 216.0
+offset_top = 7.0
+offset_right = 276.0
+offset_bottom = 203.0
+theme_override_constants/separation = 8
+
+[node name="RedButton" type="Button" parent="ReagentButtons"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_red")
+text = "R"
+
+[node name="GreenButton" type="Button" parent="ReagentButtons"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_green")
+text = "G"
+
+[node name="BlueButton" type="Button" parent="ReagentButtons"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_blue")
+text = "B"
+
+[connection signal="pressed" from="ReagentButtons/RedButton" to="." method="_on_red_button_pressed"]
+[connection signal="pressed" from="ReagentButtons/GreenButton" to="." method="_on_green_button_pressed"]
+[connection signal="pressed" from="ReagentButtons/BlueButton" to="." method="_on_blue_button_pressed"]

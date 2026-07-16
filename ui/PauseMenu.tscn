@@ -1,9 +1,9 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://mt3v0si0wmk7"]
 
-[ext_resource type="Script" path="res://ui/PauseMenu.gd" id="1_pause_script"]
+[ext_resource type="Script" uid="uid://c8hl87j0asc5y" path="res://ui/PauseMenu.gd" id="1_pause_script"]
 [ext_resource type="PackedScene" uid="uid://bsnod8l07k2md" path="res://mainmenu/Settings.tscn" id="2_settings"]
 
-[node name="PauseMenu" type="Control"]
+[node name="PauseMenu" type="Control" unique_id=278061592]
 process_mode = 3
 visible = false
 layout_mode = 3
@@ -14,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_pause_script")
 
-[node name="PauseShade" type="ColorRect" parent="."]
+[node name="PauseShade" type="ColorRect" parent="." unique_id=1591990470]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,7 +23,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.72)
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=204101626]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,44 +31,39 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=2014346610]
 custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="PauseTitle" type="Label" parent="CenterContainer/VBoxContainer"]
+[node name="PauseTitle" type="Label" parent="CenterContainer/VBoxContainer" unique_id=2135778876]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
 theme_override_font_sizes/font_size = 34
 text = "Paused"
 horizontal_alignment = 1
 
-[node name="Resume" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="Resume" type="Button" parent="CenterContainer/VBoxContainer" unique_id=1831855345]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 text = "Resume"
 
-[node name="Restart" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-text = "Restart Combat"
-
-[node name="Settings" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="Settings" type="Button" parent="CenterContainer/VBoxContainer" unique_id=2052024395]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 text = "Settings"
 
-[node name="MainMenu" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="MainMenu" type="Button" parent="CenterContainer/VBoxContainer" unique_id=81294497]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 text = "Main Menu"
 
-[node name="Quit" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="Quit" type="Button" parent="CenterContainer/VBoxContainer" unique_id=401420406]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 text = "Quit Game"
 
-[node name="SettingsMenu" parent="." instance=ExtResource("2_settings")]
+[node name="SettingsMenu" parent="." unique_id=823619812 instance=ExtResource("2_settings")]
 process_mode = 3
 visible = false
 layout_mode = 1

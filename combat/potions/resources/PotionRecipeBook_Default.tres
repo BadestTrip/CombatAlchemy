@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://combat/potions/PotionRecipeBookData.gd" id="1_book"]
+[ext_resource type="Resource" path="res://combat/potions/resources/HealthPotion.tres" id="2_health"]
+[ext_resource type="Resource" path="res://combat/potions/resources/DamagePotion.tres" id="3_damage"]
+[ext_resource type="Script" path="res://combat/potions/PotionRecipeData.gd" id="4_recipe_data"]
+
+[resource]
+script = ExtResource("1_book")
+recipes = Array[ExtResource("4_recipe_data")]([ExtResource("2_health"), ExtResource("3_damage")])

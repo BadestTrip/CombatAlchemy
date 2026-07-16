@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://u2abi4d4jt4i"]
+
+[ext_resource type="Script" uid="uid://dblcwdahh0coo" path="res://mainmenu/AlchemySeal.gd" id="1_alchemy_seal"]
+
+[node name="AlchemySeal" type="Control" unique_id=593471411]
+custom_minimum_size = Vector2(640, 640)
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("1_alchemy_seal")

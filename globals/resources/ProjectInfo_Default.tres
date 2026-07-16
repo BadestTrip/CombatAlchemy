@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_project_info")
-project_version = "Version 0.1.6"
-current_focus = "Core systems enchantment"
+project_version = "Version 0.1.7"
+current_focus = "Potion combat prototype"
 build_label = "Prototype"
