@@ -5,6 +5,7 @@
 > Vision version: 0.1
 > Last updated: 2026-07-16
 > Technical companion: [Project Architecture](./PROJECT_ARCHITECTURE.md)
+> Visual companion: [Art Reference Index](./ART_REFERENCE_INDEX.md)
 
 ## Purpose
 
@@ -983,7 +984,7 @@ Use each reference only for the qualities named below.
 
 | File | Use as reference for | Do not inherit |
 | --- | --- | --- |
-| `sprites/mage_cliff_hell_yeah.png` | Mood-only reference for ink wash, paper texture, negative space, isolation, and distant mystery | The staff-bearing wizard pose, giant celestial ring, exact costume, or architecture as world canon |
+| `sprites/main_menu_alchemy.png` | Mood-only reference for ink wash, paper texture, negative space, isolation, and distant mystery | The exact researcher pose, laboratory silhouette, costume, or architecture as world canon |
 | `mainmenu/AlchemySeal.tscn` | Slow decorative motion, restrained RGB marks, and abstract measurement geometry in the current menu | A magical alphabet, combat symbol system, or seal motif repeated across unrelated assets |
 | `combat/ui/FlaskView.tscn` and `combat/ui/PotionMixerUI.tscn` | The flask-first interaction, visible liquid layers, and bottom-center composition | Placeholder geometry, button styling, or current dimensions as mandatory final art |
 | `extra/ink_wash_shader_done.gdshader` | The current ink reveal transition language | A full-screen effect to apply continuously to gameplay or every asset |

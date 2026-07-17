@@ -22,23 +22,23 @@ The animation tracks depend on these exact names and paths:
 HumanoidCutoutRig
 `- FacingRoot
    `- Skeleton2D
-      `- Root
-         |- Spine
-         |  |- Head
-         |  |- UpperArm_L
-         |  |  `- Forearm_L
-         |  |     `- Hand_L
-         |  |        `- HandSocket_L
-         |  `- UpperArm_R
-         |     `- Forearm_R
-         |        `- Hand_R
-         |           `- HandSocket_R
-         |- Thigh_L
-         |  `- Shin_L
-         |     `- Foot_L
-         `- Thigh_R
-            `- Shin_R
-               `- Foot_R
+	  `- Root
+		 |- Spine
+		 |  |- Head
+		 |  |- UpperArm_L
+		 |  |  `- Forearm_L
+		 |  |     `- Hand_L
+		 |  |        `- HandSocket_L
+		 |  `- UpperArm_R
+		 |     `- Forearm_R
+		 |        `- Hand_R
+		 |           `- HandSocket_R
+		 |- Thigh_L
+		 |  `- Shin_L
+		 |     `- Foot_L
+		 `- Thigh_R
+			`- Shin_R
+			   `- Foot_R
 ```
 
 Do not rename or reparent these nodes when reusing `HumanoidAnimationLibrary.tres`. Visual
