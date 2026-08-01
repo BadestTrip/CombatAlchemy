@@ -34,14 +34,18 @@ func show_mixed(color: Color) -> void:
 	_stop_animation()
 	var serial := _animation_serial
 	_mixed_liquid.visible = false
-	var tween := create_tween()
-	_active_tween = tween
+	var visible_layers: Array[Polygon2D] = []
 	for layer in _layers:
 		if layer.visible:
+			visible_layers.append(layer)
+	if not visible_layers.is_empty():
+		var tween := create_tween()
+		_active_tween = tween
+		for layer in visible_layers:
 			tween.parallel().tween_property(layer, "color", color, 0.18)
-	await tween.finished
-	if serial != _animation_serial:
-		return
+		await tween.finished
+		if serial != _animation_serial:
+			return
 	for layer in _layers:
 		layer.visible = false
 	_mixed_liquid.color = color

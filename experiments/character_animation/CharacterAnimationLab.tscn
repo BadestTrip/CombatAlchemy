@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d4nich8w62ust"]
 
 [ext_resource type="Script" uid="uid://dcfaitodbvgp0" path="res://experiments/character_animation/CharacterAnimationLab.gd" id="1_lab_script"]
-[ext_resource type="PackedScene" path="res://experiments/character_animation/HumanoidCutoutRig.tscn" id="2_rig_scene"]
+[ext_resource type="PackedScene" path="res://characters/animation/ResearcherCutoutRig.tscn" id="2_rig_scene"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_toolbar"]
 bg_color = Color(0.105882, 0.113725, 0.133333, 0.97)
@@ -37,6 +37,7 @@ grow_vertical = 2
 script = ExtResource("1_lab_script")
 
 [node name="Background" type="ColorRect" parent="." unique_id=961261179]
+z_index = -20
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0

@@ -19,12 +19,14 @@ potion_input_path = NodePath("Systems/PotionInput")
 potion_mixer_path = NodePath("Systems/PotionMixer")
 potion_mixer_ui_path = NodePath("UI/PotionMixerUI")
 player_combat_controller_path = NodePath("Arena/Player")
+player_animation_controller_path = NodePath("Arena/Player/PlayerAnimationController")
 player_potion_target_path = NodePath("Arena/Player/PotionTarget")
 projectiles_parent_path = NodePath("Arena/Projectiles")
 
 [node name="Arena" type="Node2D" parent="." unique_id=874053048]
 
 [node name="ArenaFloor" type="ColorRect" parent="Arena" unique_id=1914808651]
+z_index = -20
 offset_left = -1800.0
 offset_top = -1100.0
 offset_right = 1800.0
@@ -45,8 +47,6 @@ texture = ExtResource("4_x7jh1")
 current_health = 50
 
 [node name="ActorHealthBar" parent="Arena/Friend" index="3"]
-layout_mode = 3
-anchors_preset = 0
 offset_left = 0.0
 offset_top = 0.0
 offset_right = 140.0
@@ -61,8 +61,6 @@ scale = Vector2(0.1, 0.1)
 texture = ExtResource("5_x7jh1")
 
 [node name="ActorHealthBar" parent="Arena/Foe" index="3"]
-layout_mode = 3
-anchors_preset = 0
 offset_left = 0.0
 offset_top = 0.0
 offset_right = 140.0

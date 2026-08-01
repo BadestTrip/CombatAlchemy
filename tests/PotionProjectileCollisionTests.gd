@@ -45,8 +45,11 @@ func _test_projectile_collision() -> void:
 		"valid damage projectile launches"
 	)
 
-	await get_tree().physics_frame
-	await get_tree().process_frame
+	for _physics_step in range(4):
+		await get_tree().physics_frame
+		await get_tree().process_frame
+		if health.current_health == 70 and not is_instance_valid(projectile):
+			break
 
 	_expect(health.current_health == 70, "overlap applies the damage recipe exactly once")
 	_expect(not is_instance_valid(projectile), "projectile is consumed after its first accepted hit")

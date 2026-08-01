@@ -1,0 +1,388 @@
+<style>
+  .perspective-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 24px;
+  }
+
+  .perspective-card {
+    border: 1px solid #464b50;
+    background: #171a1d;
+    cursor: pointer;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .perspective-card:hover,
+  .perspective-card.selected {
+    border-color: #c7a85b;
+  }
+
+  .perspective-card.selected {
+    box-shadow: inset 0 0 0 2px #c7a85b;
+  }
+
+  .scene {
+    position: relative;
+    height: 238px;
+    overflow: hidden;
+    background-color: #22262a;
+  }
+
+  .scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 12px solid rgba(12, 14, 16, 0.28);
+    pointer-events: none;
+  }
+
+  .scene-label {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    z-index: 8;
+    padding: 5px 8px;
+    background: #111416;
+    color: #d8c994;
+    font-size: 12px;
+  }
+
+  .grid-top {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(#3c4247 1px, transparent 1px),
+      linear-gradient(90deg, #3c4247 1px, transparent 1px);
+    background-size: 42px 42px;
+  }
+
+  .grid-oblique {
+    position: absolute;
+    left: -12%;
+    right: -12%;
+    bottom: -28%;
+    height: 116%;
+    background-image:
+      linear-gradient(#3d4347 1px, transparent 1px),
+      linear-gradient(90deg, #3d4347 1px, transparent 1px);
+    background-size: 48px 48px;
+    transform: perspective(420px) rotateX(58deg);
+    transform-origin: center bottom;
+  }
+
+  .grid-isometric {
+    position: absolute;
+    width: 340px;
+    height: 340px;
+    left: 50%;
+    top: 54%;
+    background-image:
+      linear-gradient(#3d4347 1px, transparent 1px),
+      linear-gradient(90deg, #3d4347 1px, transparent 1px);
+    background-size: 48px 48px;
+    transform: translate(-50%, -50%) rotate(45deg) scaleY(0.56);
+  }
+
+  .lane-floor {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 43%;
+    bottom: 0;
+    background-color: #2b3034;
+    border-top: 2px solid #535b61;
+  }
+
+  .lane-floor::before,
+  .lane-floor::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px solid #454b50;
+  }
+
+  .lane-floor::before { top: 33%; }
+  .lane-floor::after { top: 70%; }
+
+  .mannequin {
+    position: absolute;
+    left: 50%;
+    top: 54%;
+    width: 66px;
+    height: 104px;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+  }
+
+  .mannequin .head {
+    position: absolute;
+    left: 22px;
+    top: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #d6c69d;
+    border: 2px solid #111416;
+  }
+
+  .mannequin .torso {
+    position: absolute;
+    left: 18px;
+    top: 22px;
+    width: 30px;
+    height: 42px;
+    background: #8b3030;
+    border: 2px solid #111416;
+  }
+
+  .mannequin .limb {
+    position: absolute;
+    width: 10px;
+    height: 46px;
+    background: #657b68;
+    border: 2px solid #111416;
+    transform-origin: 50% 4px;
+  }
+
+  .mannequin .arm-l { left: 11px; top: 25px; transform: rotate(22deg); }
+  .mannequin .arm-r { right: 9px; top: 25px; transform: rotate(-22deg); }
+  .mannequin .leg-l { left: 20px; top: 61px; transform: rotate(8deg); }
+  .mannequin .leg-r { right: 18px; top: 61px; transform: rotate(-8deg); }
+
+  .top-man {
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-35deg) scaleY(0.56);
+  }
+
+  .top-man .torso {
+    border-radius: 45%;
+    height: 34px;
+  }
+
+  .top-man .head { top: 15px; left: 19px; width: 28px; height: 28px; }
+  .top-man .arm-l,
+  .top-man .arm-r { top: 29px; }
+  .top-man .leg-l,
+  .top-man .leg-r { top: 50px; }
+
+  .side-man {
+    left: 44%;
+    top: 53%;
+    transform: translate(-50%, -50%) scaleX(0.76);
+  }
+
+  .side-man .head { left: 28px; }
+  .side-man .torso { left: 23px; width: 25px; }
+
+  .direction-ring {
+    position: absolute;
+    left: 50%;
+    top: 54%;
+    width: 146px;
+    height: 146px;
+    transform: translate(-50%, -50%);
+    border: 1px solid #c7a85b;
+    border-radius: 50%;
+    z-index: 3;
+  }
+
+  .direction-ring span {
+    position: absolute;
+    color: #e8d890;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .direction-ring .n { top: -15px; left: 65px; }
+  .direction-ring .ne { top: 6px; right: 5px; }
+  .direction-ring .e { top: 60px; right: -12px; }
+  .direction-ring .se { bottom: 5px; right: 4px; }
+  .direction-ring .s { bottom: -16px; left: 66px; }
+  .direction-ring .sw { bottom: 5px; left: 4px; }
+  .direction-ring .w { top: 60px; left: -13px; }
+  .direction-ring .nw { top: 6px; left: 4px; }
+
+  .facing-strip {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 7px;
+    z-index: 7;
+  }
+
+  .facing-strip span {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    background: #111416;
+    color: #d8c994;
+    border: 1px solid #4d5459;
+    font-size: 11px;
+  }
+
+  .card-copy {
+    padding: 16px 18px 18px;
+  }
+
+  .card-copy h3 {
+    margin: 0 0 8px;
+  }
+
+  .card-copy p {
+    margin: 0 0 12px;
+    color: #b7bdc1;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .fact {
+    padding: 4px 7px;
+    background: #272c30;
+    border: 1px solid #41474c;
+    color: #d4d7d9;
+    font-size: 12px;
+  }
+
+  .recommended {
+    color: #171a1d;
+    background: #c7a85b;
+    border-color: #c7a85b;
+    font-weight: 700;
+  }
+
+  .recommendation {
+    margin-top: 22px;
+    padding: 16px 18px;
+    border-left: 4px solid #c7a85b;
+    background: #202428;
+  }
+
+  @media (max-width: 850px) {
+    .perspective-cards { grid-template-columns: 1fr; }
+  }
+</style>
+
+<h2>Four ways to keep CombatAlchemy fully 2D</h2>
+<p class="subtitle">
+  Select the perspective that best balances readable combat, smooth movement,
+  and the amount of directional artwork we are willing to author.
+</p>
+
+<div class="perspective-cards">
+  <div class="perspective-card" data-choice="pure-top-down" onclick="toggleSelect(this)">
+    <div class="scene">
+      <div class="scene-label">A. Pure overhead</div>
+      <div class="grid-top"></div>
+      <div class="direction-ring">
+        <span class="n">&uarr;</span><span class="ne">&nearr;</span>
+        <span class="e">&rarr;</span><span class="se">&searr;</span>
+        <span class="s">&darr;</span><span class="sw">&swarr;</span>
+        <span class="w">&larr;</span><span class="nw">&nwarr;</span>
+      </div>
+      <div class="mannequin top-man">
+        <div class="head"></div><div class="torso"></div>
+        <div class="limb arm-l"></div><div class="limb arm-r"></div>
+        <div class="limb leg-l"></div><div class="limb leg-r"></div>
+      </div>
+    </div>
+    <div class="card-copy">
+      <h3>Pure Top-Down</h3>
+      <p>The whole 2D rig rotates continuously toward movement or aim.</p>
+      <div class="facts">
+        <span class="fact">1 visual set</span>
+        <span class="fact">Smooth 360 degrees</span>
+        <span class="fact">Weak facial/costume readability</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="perspective-card" data-choice="three-quarter" onclick="toggleSelect(this)">
+    <div class="scene">
+      <div class="scene-label">B. Elevated three-quarter</div>
+      <div class="grid-oblique"></div>
+      <div class="mannequin">
+        <div class="head"></div><div class="torso"></div>
+        <div class="limb arm-l"></div><div class="limb arm-r"></div>
+        <div class="limb leg-l"></div><div class="limb leg-r"></div>
+      </div>
+      <div class="facing-strip">
+        <span>N</span><span>NE</span><span>E</span><span>SE</span><span>S</span>
+      </div>
+    </div>
+    <div class="card-copy">
+      <h3>Elevated Three-Quarter</h3>
+      <p>Five authored facings plus horizontal mirroring produce all eight directions.</p>
+      <div class="facts">
+        <span class="fact recommended">Recommended</span>
+        <span class="fact">5 visual sets</span>
+        <span class="fact">Strong character readability</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="perspective-card" data-choice="isometric" onclick="toggleSelect(this)">
+    <div class="scene">
+      <div class="scene-label">C. Isometric diamond</div>
+      <div class="grid-isometric"></div>
+      <div class="mannequin" style="top:49%; transform:translate(-50%, -50%) scale(0.92);">
+        <div class="head"></div><div class="torso"></div>
+        <div class="limb arm-l"></div><div class="limb arm-r"></div>
+        <div class="limb leg-l"></div><div class="limb leg-r"></div>
+      </div>
+      <div class="facing-strip">
+        <span>NE</span><span>SE</span><span>SW</span><span>NW</span>
+      </div>
+    </div>
+    <div class="card-copy">
+      <h3>Isometric</h3>
+      <p>A strict diagonal world with strong depth and architectural composition.</p>
+      <div class="facts">
+        <span class="fact">4 or 8 visual sets</span>
+        <span class="fact">Distinct environments</span>
+        <span class="fact">Harder aiming geometry</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="perspective-card" data-choice="side-lane" onclick="toggleSelect(this)">
+    <div class="scene">
+      <div class="scene-label">D. Side view with depth lanes</div>
+      <div class="lane-floor"></div>
+      <div class="mannequin side-man">
+        <div class="head"></div><div class="torso"></div>
+        <div class="limb arm-l"></div><div class="limb arm-r"></div>
+        <div class="limb leg-l"></div><div class="limb leg-r"></div>
+      </div>
+      <div class="facing-strip">
+        <span>&larr;</span><span>depth</span><span>&rarr;</span>
+      </div>
+    </div>
+    <div class="card-copy">
+      <h3>Side View With Depth</h3>
+      <p>Characters need mostly left/right animation while moving through shallow foreground lanes.</p>
+      <div class="facts">
+        <span class="fact">2 visual sets</span>
+        <span class="fact">Best limb animation</span>
+        <span class="fact">Changes combat structure</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="recommendation">
+  <strong>Current recommendation:</strong> elevated three-quarter. It preserves
+  CombatAlchemy's readable researcher silhouette and arena movement. The
+  geometric experiment would use five directional rest poses, mirrored to
+  eight directions, with a pelvis, chest, clavicles, upper/lower limbs, feet,
+  and direction-dependent layer ordering.
+</div>

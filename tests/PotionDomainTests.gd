@@ -23,15 +23,17 @@ func _ready() -> void:
 	_test_successful_mix_signals()
 	_test_prepared_recipe_consumption()
 	_test_health_damage_and_healing_clamp_to_bounds()
+	_test_health_damaged_signal_reports_actual_damage_only()
 	_test_health_depleted_emits_only_when_crossing_to_zero()
 	_test_health_reset_and_ratio()
 	_test_health_healing_from_zero_revives()
 	_test_potion_target_applies_recipes_and_rejects_null()
 	_test_potion_target_emits_only_for_accepted_recipes()
 	_test_potion_target_rejects_invalid_recipe_and_health_paths()
+	_test_player_movement_lock_contract()
 	_free_owned_nodes()
 	if _failures.is_empty():
-		print("PotionDomainTests: PASS (18 tests)")
+		print("PotionDomainTests: PASS (20 tests)")
 		get_tree().quit(0)
 	else:
 		for failure in _failures:
@@ -251,6 +253,26 @@ func _test_health_damage_and_healing_clamp_to_bounds() -> void:
 	_expect(health.heal(1) == 0, "healing at maximum restores nothing")
 
 
+func _test_health_damaged_signal_reports_actual_damage_only() -> void:
+	var health := _new_health_component()
+	health.max_health = 100
+	health.current_health = 70
+	_expect(health.has_signal(&"damaged"), "health exposes the damaged signal")
+	if not health.has_signal(&"damaged"):
+		return
+	var damage_events: Array[int] = []
+	health.connect(&"damaged", func(amount: int) -> void:
+		damage_events.append(amount)
+	)
+	health.current_health = 60
+	health.take_damage(0)
+	health.take_damage(-5)
+	health.take_damage(25)
+	health.take_damage(100)
+	health.take_damage(1)
+	_expect(damage_events == [25, 35], "damaged reports only positive health actually removed by take_damage")
+
+
 func _test_health_depleted_emits_only_when_crossing_to_zero() -> void:
 	var health := _new_health_component()
 	health.max_health = 10
@@ -340,6 +362,33 @@ func _test_potion_target_rejects_invalid_recipe_and_health_paths() -> void:
 	)
 	_expect(not invalid_path_target.receive_potion(DAMAGE_POTION), "target rejects a non-health component path")
 	_expect(invalid_path_events.is_empty(), "invalid health path does not emit potion_received")
+
+
+func _test_player_movement_lock_contract() -> void:
+	var player := PlayerCombatController.new()
+	add_child(player)
+	_owned_nodes.append(player)
+	_expect(player.has_signal(&"movement_changed"), "player controller exposes movement_changed")
+	_expect(player.has_method(&"set_movement_locked"), "player controller can lock movement")
+	_expect(player.has_method(&"is_movement_locked"), "player controller reports its movement lock")
+	if (
+		not player.has_signal(&"movement_changed")
+		or not player.has_method(&"set_movement_locked")
+		or not player.has_method(&"is_movement_locked")
+	):
+		return
+	var velocity_events: Array[Vector2] = []
+	player.connect(&"movement_changed", func(reported_velocity: Vector2) -> void:
+		velocity_events.append(reported_velocity)
+	)
+	player.velocity = Vector2(80.0, 30.0)
+	player.call(&"set_movement_locked", true)
+	player._physics_process(1.0 / 60.0)
+	_expect(player.call(&"is_movement_locked") as bool, "movement lock reports enabled")
+	_expect(player.velocity == Vector2.ZERO, "movement lock clears player velocity")
+	_expect(not velocity_events.is_empty() and velocity_events[-1] == Vector2.ZERO, "locked movement reports zero velocity")
+	player.call(&"set_movement_locked", false)
+	_expect(not (player.call(&"is_movement_locked") as bool), "movement lock can be disabled")
 
 
 func _new_mixer() -> PotionMixer:

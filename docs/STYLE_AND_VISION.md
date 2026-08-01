@@ -2,8 +2,8 @@
 
 > Status: Living creative reference
 > Working title: CombatAlchemy
-> Vision version: 0.1
-> Last updated: 2026-07-16
+> Vision version: 0.2
+> Last updated: 2026-07-23
 > Technical companion: [Project Architecture](./PROJECT_ARCHITECTURE.md)
 > Visual companion: [Art Reference Index](./ART_REFERENCE_INDEX.md)
 
@@ -150,10 +150,11 @@ The distinction in this table is mandatory in planning and communication.
 | Area | Current prototype | Intended direction |
 | --- | --- | --- |
 | Entry flow | Main Menu opens a potion combat sandbox | Main Menu leads to a refuge and expedition cycle |
-| Player | Movable 2D actor with a following camera | A readable occult researcher with field equipment |
+| Player | Movable atlas-backed researcher cutout with a following camera, articulated coat, readable action poses, and an animated hand flask | A production-refined occult researcher with simplified gameplay-scale detail, directional sets where needed, and practical field equipment |
 | Encounters | Stationary Friend and Foe test targets | Enemies, allies, terrain, and pressure create potion decisions |
 | Mixing | Three RGB layers and two count-based recipes | A readable rule set expanded through discoveries and ingredient properties |
 | Application | Drink self or throw at a target | Drink, throw, and later interact with selected world conditions |
+| Animation | Rigid `Bone2D` cutout with painterly raster parts, idle/walk/drink/throw/hit clips, and authored coat motion | Refined cutout parts, stronger action silhouettes, restrained secondary motion, and the same legible commit timing |
 | Progression | None | Knowledge and recorded discoveries lead; statistics remain secondary |
 | Expedition | Not implemented | Authored locations support observation, collection, risk, and return |
 | Consequences | Not implemented | Research and use leave specific marks on people, places, or the researcher |
@@ -520,9 +521,25 @@ Friend or Foe.
 
 ### Animation
 
+The current Player uses a rigid Godot `Bone2D` cutout rig assembled from 21
+transparent painterly atlas regions. It is a working character model and
+production architecture proof, but its generated detail, proportions, and
+single mirrored view are not final locked art. Future repainting should preserve
+the authored joints, hidden overlap, coat bones, hand sockets, and readable
+poses unless the technical contract is deliberately migrated.
+
+Drink and throw have explicit physical commit moments. The flask reaches the
+mouth before a drink takes effect, and a thrown potion leaves the hand at the
+release pose. Final artwork and revised clips may improve those poses, but
+visual timing must continue to agree with gameplay timing.
+
 - Favor clear poses, held silhouettes, and a few deliberate painterly transitions.
+- Simplify small straps and material noise when they collapse at gameplay zoom.
 - Use brush smears and ink displacement for fast motion rather than uniform blur.
 - Keep idle movement subtle.
+- Keep the flask hand separated from the torso at drink and throw commit frames.
+- Preserve hidden overlap around articulated coat, shoulder, elbow, wrist, hip,
+  and knee seams so motion does not expose empty gaps.
 - Camera shake should be short, low amplitude, and reserved for meaningful impact.
 - Do not use constant floating, pulsing, or particle emission on every object.
 
@@ -987,13 +1004,18 @@ Use each reference only for the qualities named below.
 | `sprites/main_menu_alchemy.png` | Mood-only reference for ink wash, paper texture, negative space, isolation, and distant mystery | The exact researcher pose, laboratory silhouette, costume, or architecture as world canon |
 | `mainmenu/AlchemySeal.tscn` | Slow decorative motion, restrained RGB marks, and abstract measurement geometry in the current menu | A magical alphabet, combat symbol system, or seal motif repeated across unrelated assets |
 | `combat/ui/FlaskView.tscn` and `combat/ui/PotionMixerUI.tscn` | The flask-first interaction, visible liquid layers, and bottom-center composition | Placeholder geometry, button styling, or current dimensions as mandatory final art |
+| `docs/ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png` | Approved elevated three-quarter pose, broad hat, obscured face, weathered coat, and practical research equipment | A promise that every generated strap, texture, or proportion is final production art |
+| `characters/animation/HumanoidCutoutRig.tscn` and `experiments/character_animation/README.md` | Stable joint hierarchy, coat bones, action timing, hand sockets, overlap requirements, and reusable playback API | Generic placeholder polygons as final anatomy or costume |
+| `characters/animation/ResearcherCutoutRig.tscn` and `sprites/characters/researcher/README.md` | Current atlas assembly, nonnegative layer order, exact pivots, readable silhouette, and a working replacement workflow | Generated high-frequency detail, one-view mirroring, or current part proportions as immutable final art |
 | `extra/ink_wash_shader_done.gdshader` | The current ink reveal transition language | A full-screen effect to apply continuously to gameplay or every asset |
 | `docs/PROJECT_ARCHITECTURE.md` | Current technical ownership and implemented behavior | Creative or visual direction beyond its factual description |
 
-The current actor sprites, placeholder arena, UI geometry, logo files, and unused
-legacy assets are not automatic style targets merely because they remain in the
-repository. When an existing asset conflicts with this document, retain only the
-explicitly approved quality until a replacement is produced.
+The current target sprites, generic polygon placeholders, arena, UI geometry,
+logo files, and unused legacy assets are not automatic style targets merely
+because they remain in the repository. The researcher skin is an approved
+working model, but still requires production simplification and art direction.
+When an existing asset conflicts with this document, retain only the explicitly
+approved quality until a replacement is produced.
 
 ## Maintaining This Document
 

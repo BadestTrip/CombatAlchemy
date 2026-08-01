@@ -1,18 +1,32 @@
 # Character Animation Lab
 
-This folder is an isolated Godot-native cutout animation experiment. Run
-`CharacterAnimationLab.tscn` with **Play Current Scene**. Nothing here is registered in
-`project.godot` or connected to combat.
+This folder contains the isolated developer lab for the Godot-native cutout
+animation system. Run `CharacterAnimationLab.tscn` with **Play Current Scene**.
+The lab is not registered in `project.godot`; it exercises the same production
+rig used by the combat Player without invoking gameplay.
 
 ## Files
 
-- `HumanoidCutoutRig.tscn`: reusable `Skeleton2D`, rigid placeholder body parts, hand sockets,
-  debug lines, `AnimationPlayer`, and `AnimationTree`.
-- `HumanoidAnimationLibrary.tres`: reusable animation clips. It can be assigned to another
-  humanoid rig when that rig preserves the same bone names and node paths.
-- `HumanoidCutoutRig.gd`: small public playback API and animation-event relay.
+- `../../characters/animation/HumanoidCutoutRig.tscn`: reusable `Skeleton2D`, rigid placeholder
+  body parts, hand sockets, debug lines, `AnimationPlayer`, and `AnimationTree`.
+- `../../characters/animation/ResearcherCutoutRig.tscn`: inherited production
+  skin that hides the placeholders and assembles the researcher from
+  atlas-backed `Sprite2D` parts.
+- `../../characters/animation/HumanoidAnimationLibrary.tres`: reusable animation clips. It can
+  be assigned to another humanoid rig when that rig preserves the same bone names and node paths.
+- `../../characters/animation/HumanoidCutoutRig.gd`: public playback, socket lookup, and
+  animation-event relay.
+- `../../sprites/characters/researcher/README.md`: researcher prompts, atlas
+  regions, scales, pivots, visual layers, and replacement checks.
 - `CharacterAnimationLab.tscn`: developer stage and scene-authored playback controls.
 - `CharacterAnimationLab.gd`: forwards toolbar input to the rig API.
+
+Related gameplay consumers:
+
+- `../../combat/actors/PlayerAnimationController.gd`: maps actual Player
+  movement, potion actions, and damage to the rig API.
+- `../../combat/actors/HeldPotionFlask.tscn`: scene-backed prop instanced under
+  `HandSocket_R` by the Player adapter.
 
 ## Required Hierarchy
 
@@ -23,6 +37,9 @@ HumanoidCutoutRig
 `- FacingRoot
    `- Skeleton2D
 	  `- Root
+		 |- CoatTail_L
+		 |- CoatTail_C
+		 |- CoatTail_R
 		 |- Spine
 		 |  |- Head
 		 |  |- UpperArm_L
@@ -41,8 +58,11 @@ HumanoidCutoutRig
 			   `- Foot_R
 ```
 
-Do not rename or reparent these nodes when reusing `HumanoidAnimationLibrary.tres`. Visual
-children beneath a bone may be replaced or renamed without breaking animation tracks.
+Do not rename or reparent these nodes when reusing
+`HumanoidAnimationLibrary.tres`. `CoatTail_L`, `CoatTail_C`, and
+`CoatTail_R` are tracked bones, not researcher-only decoration. Visual
+children beneath a bone may be replaced or renamed without breaking animation
+tracks.
 
 ## Rest Pose
 
@@ -62,8 +82,10 @@ when switching clips or replacing visual parts.
 
 ## Replacing Placeholder Parts
 
-The `Polygon2D` nodes are rigid cutout placeholders. Replace a placeholder with a transparent
-`Sprite2D` under the same `Bone2D`; do not move the bone just to compensate for artwork alignment.
+The generic rig's `Polygon2D` nodes are rigid cutout placeholders.
+`ResearcherCutoutRig.tscn` demonstrates the preferred replacement pattern: an
+inherited skin hides each placeholder and adds a transparent `Sprite2D` under
+the same `Bone2D`.
 
 - Put the sprite origin at the joint controlled by its parent bone.
 - Place upper-arm pivots at shoulders, forearm pivots at elbows, hand pivots at wrists, thigh
@@ -78,6 +100,26 @@ The `Polygon2D` nodes are rigid cutout placeholders. Replace a placeholder with 
 A flattened character image cannot reveal hidden joints. Production cutout characters need one
 transparent image per articulated part.
 
+Use nonnegative layers so opaque arena or lab backgrounds cannot hide rear
+limbs:
+
+| Layer | Content |
+| ---: | --- |
+| 0 | Rear coat panels |
+| 1 | Rear limbs |
+| 2 | Pelvis and torso |
+| 3 | Front limbs |
+| 4 | Head and hat |
+| 5 | Equipment and satchel |
+| 12 | Held flask |
+| 20 | Debug bones |
+
+The researcher skin keeps its sprite nodes at each bone origin and uses
+`Sprite2D.offset` plus documented source-pixel pivots. Check the pivot before
+moving a bone. A skin may make a small, documented proportion adjustment, such
+as the researcher's shoulder spacing, but the generic skeleton and tracked
+paths should remain stable.
+
 ## Orientation Limits
 
 `FacingRoot` provides horizontal mirroring for one front/three-quarter visual set. It does not
@@ -90,7 +132,10 @@ force incompatible proportions, extra limbs, wings, or tails into this humanoid 
 ## Playback Contract
 
 Available states are `RESET`, `idle`, `walk`, `drink`, `throw`, and `hit`. Locomotion clips remain
-in place; a future gameplay controller should move the character root in world space.
+in place. In the active combat scene, `PlayerCombatController` moves the
+character root in world space and emits its applied velocity;
+`PlayerAnimationController` uses that signal to choose `idle` or `walk` without
+restarting the current clip every physics frame.
 
 One-shot method-track events are:
 
@@ -98,12 +143,47 @@ One-shot method-track events are:
 - `throw_release` at 0.45 seconds.
 - `hit_peak` at 0.18 seconds.
 
-The lab displays the most recent event. Future gameplay may connect to the rig's
-`animation_event(event_name)` signal, but this experiment intentionally has no gameplay wiring.
+The lab displays the most recent event. In combat, `PlayerAnimationController`
+connects to these events and keeps gameplay rules outside the rig. The lab itself
+has no gameplay wiring.
+
+These method events are public timing boundaries, not decorative callbacks.
+`PotionCombatController` reserves a prepared recipe when an action starts, then
+applies or spawns it only at the matching event. Do not rename, remove, or move
+an event without updating the adapter, combat controller, architecture guide,
+and timing tests together.
+
+Damage can transition directly from `drink` or `throw` to `hit`. Damage before
+the matching event destroys the reserved potion; damage after it cannot undo
+the committed effect. Every one-shot reports completion so movement and input
+can recover. Missing events deliberately warn, discard the recipe, and hide the
+held flask rather than leaving combat locked.
+
+Every clip also contains deterministic coat-tail rotation tracks:
+
+- `idle`: at most 1.5 degrees of opposing motion;
+- `walk`: up to 5 degrees on the side panels and 2 degrees at center;
+- `drink`: at most 2 degrees of restrained lag;
+- `throw`: 5-7 degrees of windup and 8-10 degrees of release lag;
+- `hit`: up to 10 degrees of recoil, returning to rest by the clip end.
+
+These tracks are authored motion, not cloth physics.
 
 ## Adding Or Editing Clips
 
-Edit `HumanoidAnimationLibrary.tres` through the `AnimationPlayer` panel on an instance of the rig.
+Edit `res://characters/animation/HumanoidAnimationLibrary.tres` through the
+`AnimationPlayer` panel on an instance of the rig.
 Keep movement in place and preserve the `RESET` values for every property animated by other clips.
 Use the `AnimationTree` graph for transition timing; do not encode gameplay movement or damage in
 animation tracks.
+
+After changing bones, sockets, clips, transitions, or method-event timing, run:
+
+- `tests/CharacterAnimationRigTests.tscn`
+- `tests/PlayerAnimationControllerTests.tscn`
+- `tests/PotionActionTimingTests.tscn`
+
+The first protects the generic rig, coat contract, researcher atlas skin, and
+lab. The second protects Player-facing
+movement, mirroring, prop, and interruption behavior. The third protects the
+actual recipe commit and projectile-release boundaries in `CombatScene`.

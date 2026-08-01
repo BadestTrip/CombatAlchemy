@@ -1,33 +1,35 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://bw6vyc7jl8yjt"]
 
-[ext_resource type="Script" path="res://combat/ui/FlaskView.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://borpbwwfa2mut" path="res://combat/ui/FlaskView.gd" id="1_script"]
 
-[node name="FlaskView" type="Control"]
+[node name="FlaskView" type="Control" unique_id=189406457]
 custom_minimum_size = Vector2(144, 190)
+layout_mode = 3
+anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="GlassBody" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(55, 24, 89, 24, 89, 65, 121, 151, 121, 168, 112, 180, 32, 180, 23, 168, 23, 151, 55, 65)
+[node name="GlassBody" type="Polygon2D" parent="." unique_id=1293048938]
 color = Color(0.72, 0.86, 0.95, 0.13)
+polygon = PackedVector2Array(55, 24, 89, 24, 89, 65, 121, 151, 121, 168, 112, 180, 32, 180, 23, 168, 23, 151, 55, 65)
 
-[node name="Layer3" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(43, 82, 101, 82, 110, 106, 34, 106)
-color = Color(1, 1, 1, 1)
+[node name="Layer3" type="Polygon2D" parent="." unique_id=2111410924]
+position = Vector2(11.368421, 0)
+scale = Vector2(0.8421053, 1)
+polygon = PackedVector2Array(44.687492, 82, 99.31249, 82, 110, 106, 34, 106)
 
-[node name="Layer2" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(34, 106, 110, 106, 120, 132, 24, 132)
-color = Color(1, 1, 1, 1)
+[node name="Layer2" type="Polygon2D" parent="." unique_id=1699245760]
+position = Vector2(9, 1.5258789e-05)
+scale = Vector2(0.875, 1)
+polygon = PackedVector2Array(35.428574, 105.999985, 108.571434, 105.999985, 120, 132, 24, 132)
 
-[node name="Layer1" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(24, 132, 120, 132, 121, 168, 112, 176, 32, 176, 23, 168)
-color = Color(1, 1, 1, 1)
+[node name="Layer1" type="Polygon2D" parent="." unique_id=721607369]
+polygon = PackedVector2Array(23, 152, 30.167767, 132.00002, 114, 132, 121, 152, 121, 168, 112, 180, 32, 180, 23, 168)
 
-[node name="MixedLiquid" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(43, 82, 101, 82, 121, 151, 121, 168, 112, 176, 32, 176, 23, 168, 23, 151)
-color = Color(1, 1, 1, 1)
+[node name="MixedLiquid" type="Polygon2D" parent="." unique_id=1188289192]
+polygon = PackedVector2Array(49, 82, 95, 82, 121, 151, 121, 168, 112, 180, 32, 180, 23, 168, 23, 151)
 
-[node name="GlassOutline" type="Line2D" parent="."]
+[node name="GlassOutline" type="Line2D" parent="." unique_id=1616145902]
 points = PackedVector2Array(55, 24, 89, 24, 89, 65, 121, 151, 121, 168, 112, 180, 32, 180, 23, 168, 23, 151, 55, 65, 55, 24)
 width = 4.0
 default_color = Color(0.82, 0.94, 1, 1)
