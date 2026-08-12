@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dtu5q3kcb6wd7"]
 
 [ext_resource type="Script" uid="uid://ctpjnntyr5u5c" path="res://experiments/directional_character_animation/DirectionalHumanoidRig.gd" id="1_2emj1"]
-[ext_resource type="AnimationLibrary" path="res://experiments/directional_character_animation/DirectionalHumanoidAnimationLibrary.tres" id="2_evfe8"]
+[ext_resource type="AnimationLibrary" uid="uid://j07sob4avthm" path="res://experiments/directional_character_animation/DirectionalHumanoidAnimationLibrary.tres" id="2_evfe8"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_qnt02"]
 animation = &"idle_back"
@@ -231,7 +231,7 @@ metadata/directional_visual_layer = &"left"
 [node name="UpperArm_L" type="Bone2D" parent="FacingRoot/Skeleton2D/Root/Pelvis/SpineLower/Chest/Clavicle_L" unique_id=1848776138]
 position = Vector2(-13, 2)
 rotation = 0.13962634
-scale = Vector2(0.99999994, 0.99999994)
+scale = Vector2(0.9999999, 0.9999999)
 rest = Transform2D(0.99026805, 0.1391731, -0.1391731, 0.99026805, -13, 2)
 auto_calculate_length_and_angle = false
 length = 27.0
@@ -338,7 +338,7 @@ metadata/directional_visual_layer = &"right"
 [node name="UpperArm_R" type="Bone2D" parent="FacingRoot/Skeleton2D/Root/Pelvis/SpineLower/Chest/Clavicle_R" unique_id=1494865874]
 position = Vector2(13, 2)
 rotation = -0.13962634
-scale = Vector2(0.99999994, 0.99999994)
+scale = Vector2(0.9999999, 0.9999999)
 rest = Transform2D(0.99026805, -0.1391731, 0.1391731, 0.99026805, 13, 2)
 auto_calculate_length_and_angle = false
 length = 27.0

@@ -8,6 +8,9 @@ Scene**.
 The experiment is not referenced by `project.godot`, combat, the active Player,
 or the existing researcher animation lab.
 
+For a native-scale side-by-side comparison with the compact 15-bone V2, run
+`../compact_directional_character_animation/DirectionalRigComparisonLab.tscn`.
+
 ## Files
 
 - `DirectionalHumanoidRig.tscn`: editable geometric body, `Skeleton2D`,
@@ -46,10 +49,10 @@ Root
    │        └─ Foot_L
    │           └─ Toe_L
    └─ Thigh_R
-      └─ Shin_R
-         └─ Ankle_R
-            └─ Foot_R
-               └─ Toe_R
+	  └─ Shin_R
+		 └─ Ankle_R
+			└─ Foot_R
+			   └─ Toe_R
 ```
 
 Do not rename or reparent these bones without migrating every animation track.

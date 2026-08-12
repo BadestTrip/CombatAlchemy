@@ -1,0 +1,171 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://experiments/compact_directional_character_animation/DirectionalRigComparisonLab.gd" id="1_lab"]
+[ext_resource type="Script" path="res://experiments/compact_directional_character_animation/CompactDirectionalComparisonMover.gd" id="2_mover"]
+[ext_resource type="PackedScene" path="res://experiments/directional_character_animation/DirectionalHumanoidRig.tscn" id="3_original"]
+[ext_resource type="PackedScene" path="res://experiments/compact_directional_character_animation/CompactDirectionalHumanoidRig.tscn" id="4_compact"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_horizontal"]
+size = Vector2(3200, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vertical"]
+size = Vector2(48, 1800)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_original_actor"]
+size = Vector2(118, 176)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_compact_actor"]
+size = Vector2(108, 124)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_status"]
+bg_color = Color(0.055, 0.064, 0.067, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.39, 0.49, 0.47, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="LabelSettings" id="LabelSettings_world"]
+font_size = 14
+font_color = Color(0.9, 0.84, 0.68, 1)
+outline_size = 4
+outline_color = Color(0.04, 0.05, 0.05, 0.9)
+
+[sub_resource type="LabelSettings" id="LabelSettings_hud"]
+font_size = 14
+font_color = Color(0.82, 0.85, 0.81, 1)
+
+[node name="DirectionalRigComparisonLab" type="Node2D"]
+script = ExtResource("1_lab")
+
+[node name="RoomFloor" type="Polygon2D" parent="."]
+z_index = -10
+color = Color(0.17, 0.205, 0.2, 1)
+polygon = PackedVector2Array(0, 0, 3200, 0, 3200, 1800, 0, 1800)
+
+[node name="RoomBorder" type="Line2D" parent="."]
+z_index = -8
+points = PackedVector2Array(24, 24, 3176, 24, 3176, 1776, 24, 1776, 24, 24)
+width = 4.0
+default_color = Color(0.47, 0.42, 0.31, 0.8)
+
+[node name="CenterGuide" type="Line2D" parent="."]
+z_index = -9
+points = PackedVector2Array(1600, 120, 1600, 1680)
+width = 2.0
+default_color = Color(0.34, 0.39, 0.36, 0.55)
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="NorthWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(1600, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/NorthWall"]
+shape = SubResource("RectangleShape2D_horizontal")
+
+[node name="SouthWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(1600, 1800)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/SouthWall"]
+shape = SubResource("RectangleShape2D_horizontal")
+
+[node name="WestWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 900)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WestWall"]
+shape = SubResource("RectangleShape2D_vertical")
+
+[node name="EastWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(3200, 900)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/EastWall"]
+shape = SubResource("RectangleShape2D_vertical")
+
+[node name="ComparisonMover" type="CharacterBody2D" parent="."]
+position = Vector2(1600, 900)
+script = ExtResource("2_mover")
+
+[node name="OriginalCollision" type="CollisionShape2D" parent="ComparisonMover"]
+position = Vector2(-140, -50)
+shape = SubResource("RectangleShape2D_original_actor")
+
+[node name="CompactCollision" type="CollisionShape2D" parent="ComparisonMover"]
+position = Vector2(140, -20)
+shape = SubResource("RectangleShape2D_compact_actor")
+
+[node name="OriginalRigMount" type="Node2D" parent="ComparisonMover"]
+position = Vector2(-140, 0)
+
+[node name="DirectionalHumanoidRig" parent="ComparisonMover/OriginalRigMount" instance=ExtResource("3_original")]
+
+[node name="OriginalLabel" type="Label" parent="ComparisonMover/OriginalRigMount"]
+offset_left = -74.0
+offset_top = -176.0
+offset_right = 74.0
+offset_bottom = -152.0
+text = "Original 26-bone"
+label_settings = SubResource("LabelSettings_world")
+horizontal_alignment = 1
+
+[node name="CompactRigMount" type="Node2D" parent="ComparisonMover"]
+position = Vector2(140, 0)
+
+[node name="CompactDirectionalHumanoidRig" parent="ComparisonMover/CompactRigMount" instance=ExtResource("4_compact")]
+
+[node name="CompactLabel" type="Label" parent="ComparisonMover/CompactRigMount"]
+offset_left = -74.0
+offset_top = -130.0
+offset_right = 74.0
+offset_bottom = -106.0
+text = "Compact 15-bone"
+label_settings = SubResource("LabelSettings_world")
+horizontal_alignment = 1
+
+[node name="Camera2D" type="Camera2D" parent="ComparisonMover"]
+position = Vector2(0, -70)
+limit_left = 0
+limit_top = 0
+limit_right = 3200
+limit_bottom = 1800
+position_smoothing_enabled = false
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="StatusPanel" type="PanelContainer" parent="HUD"]
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 430.0
+offset_bottom = 56.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_status")
+
+[node name="StatusRow" type="HBoxContainer" parent="HUD/StatusPanel"]
+theme_override_constants/separation = 10
+
+[node name="LocomotionCaption" type="Label" parent="HUD/StatusPanel/StatusRow"]
+layout_mode = 2
+text = "SHARED STATE"
+label_settings = SubResource("LabelSettings_hud")
+
+[node name="LocomotionValue" type="Label" parent="HUD/StatusPanel/StatusRow"]
+custom_minimum_size = Vector2(54, 0)
+layout_mode = 2
+text = "IDLE"
+label_settings = SubResource("LabelSettings_hud")
+
+[node name="Separator" type="VSeparator" parent="HUD/StatusPanel/StatusRow"]
+layout_mode = 2
+
+[node name="FacingCaption" type="Label" parent="HUD/StatusPanel/StatusRow"]
+layout_mode = 2
+text = "FACING"
+label_settings = SubResource("LabelSettings_hud")
+
+[node name="FacingValue" type="Label" parent="HUD/StatusPanel/StatusRow"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+text = "FRONT"
+label_settings = SubResource("LabelSettings_hud")

@@ -1,0 +1,190 @@
+<div id="compact-rig-comparison">
+  <style>
+    #compact-rig-comparison .rig-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+    #compact-rig-comparison .rig-card {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      cursor: pointer;
+    }
+    #compact-rig-comparison .rig-stage {
+      display: grid;
+      place-items: center;
+      min-height: 310px;
+      color: var(--foreground);
+    }
+    #compact-rig-comparison svg {
+      width: 100%;
+      max-width: 230px;
+      height: 300px;
+      overflow: visible;
+    }
+    #compact-rig-comparison .silhouette {
+      fill: color-mix(in srgb, var(--muted) 72%, transparent);
+      stroke: var(--border);
+      stroke-width: 1.5;
+    }
+    #compact-rig-comparison .bone {
+      fill: none;
+      stroke: var(--viz-series-1);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    #compact-rig-comparison .joint {
+      fill: var(--card);
+      stroke: var(--viz-series-1);
+      stroke-width: 3;
+    }
+    #compact-rig-comparison .measure {
+      fill: none;
+      stroke: var(--muted-foreground);
+      stroke-width: 1;
+    }
+    #compact-rig-comparison .measure-text {
+      fill: var(--muted-foreground);
+      font-size: 11px;
+      font-family: inherit;
+    }
+    #compact-rig-comparison .ground {
+      stroke: var(--border);
+      stroke-width: 1;
+    }
+    #compact-rig-comparison .card-body {
+      flex: 1;
+    }
+    #compact-rig-comparison .spec-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    #compact-rig-comparison .spec-line span:last-child {
+      font-weight: 500;
+      color: var(--foreground);
+    }
+    #compact-rig-comparison .recommendation {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    @media (max-width: 680px) {
+      #compact-rig-comparison .rig-grid {
+        grid-template-columns: 1fr;
+      }
+      #compact-rig-comparison .rig-stage {
+        min-height: 270px;
+      }
+      #compact-rig-comparison svg {
+        height: 260px;
+      }
+    }
+  </style>
+
+  <h2>Choose the compact player proportion</h2>
+  <p class="subtitle">All three use one skeleton and support front, back, and side animation families. Click the proportion that should become the new baseline.</p>
+
+  <div class="rig-grid cards">
+    <div class="card rig-card" data-choice="arcade-square" onclick="toggleSelect(this)">
+      <div class="rig-stage card-image">
+        <svg viewBox="0 0 220 300" role="img" aria-label="Arcade-square skeleton, width 100 and height 108">
+          <line class="ground" x1="42" y1="260" x2="178" y2="260" />
+          <rect class="silhouette" x="60" y="120" width="100" height="98" rx="5" />
+          <circle class="silhouette" cx="110" cy="83" r="46" />
+          <rect class="silhouette" x="55" y="205" width="45" height="55" rx="5" />
+          <rect class="silhouette" x="120" y="205" width="45" height="55" rx="5" />
+          <path class="bone" d="M110 88 L110 142 L110 190 M70 144 L110 142 L150 144 M70 144 L62 190 L76 216 M150 144 L158 190 L144 216 M110 190 L84 216 L78 250 M110 190 L136 216 L142 250" />
+          <g>
+            <circle class="joint" cx="110" cy="88" r="5" /><circle class="joint" cx="110" cy="142" r="5" /><circle class="joint" cx="110" cy="190" r="5" />
+            <circle class="joint" cx="70" cy="144" r="5" /><circle class="joint" cx="62" cy="190" r="5" /><circle class="joint" cx="76" cy="216" r="5" />
+            <circle class="joint" cx="150" cy="144" r="5" /><circle class="joint" cx="158" cy="190" r="5" /><circle class="joint" cx="144" cy="216" r="5" />
+            <circle class="joint" cx="84" cy="216" r="5" /><circle class="joint" cx="78" cy="250" r="5" /><circle class="joint" cx="136" cy="216" r="5" /><circle class="joint" cx="142" cy="250" r="5" />
+          </g>
+          <path class="measure" d="M55 278 V286 M165 278 V286 M55 282 H165" />
+          <text class="measure-text" x="110" y="297" text-anchor="middle">100 W</text>
+          <path class="measure" d="M184 37 H192 M184 260 H192 M188 37 V260" />
+          <text class="measure-text" x="201" y="153" text-anchor="middle" transform="rotate(90 201 153)">108 H</text>
+        </svg>
+      </div>
+      <div class="card-body">
+        <h3>A. Arcade Square</h3>
+        <p>Closest to a tiny action sprite. Broad silhouette, very short limbs, and minimal secondary motion.</p>
+        <div class="spec-line text-small"><span class="text-muted">Ratio W:H</span><span>1 : 1.08</span></div>
+        <div class="spec-line text-small"><span class="text-muted">Practical bones</span><span>13–15</span></div>
+        <div class="spec-line text-small"><span class="text-muted">Best quality</span><span>Readability</span></div>
+      </div>
+    </div>
+
+    <div class="card rig-card" data-choice="balanced-compact" onclick="toggleSelect(this)">
+      <div class="rig-stage card-image">
+        <svg viewBox="0 0 220 300" role="img" aria-label="Balanced compact skeleton, width 100 and height 116">
+          <line class="ground" x1="42" y1="260" x2="178" y2="260" />
+          <rect class="silhouette" x="62" y="112" width="96" height="104" rx="5" />
+          <circle class="silhouette" cx="110" cy="72" r="42" />
+          <rect class="silhouette" x="60" y="205" width="39" height="55" rx="5" />
+          <rect class="silhouette" x="121" y="205" width="39" height="55" rx="5" />
+          <path class="bone" d="M110 76 L110 106 L110 142 L110 188 M74 134 L88 126 L110 126 L132 126 L146 134 M74 134 L66 173 L78 208 M146 134 L154 173 L142 208 M110 188 L86 211 L80 245 L72 254 M110 188 L134 211 L140 245 L148 254" />
+          <g>
+            <circle class="joint" cx="110" cy="76" r="5" /><circle class="joint" cx="110" cy="106" r="5" /><circle class="joint" cx="110" cy="142" r="5" /><circle class="joint" cx="110" cy="188" r="5" />
+            <circle class="joint" cx="88" cy="126" r="5" /><circle class="joint" cx="74" cy="134" r="5" /><circle class="joint" cx="66" cy="173" r="5" /><circle class="joint" cx="78" cy="208" r="5" />
+            <circle class="joint" cx="132" cy="126" r="5" /><circle class="joint" cx="146" cy="134" r="5" /><circle class="joint" cx="154" cy="173" r="5" /><circle class="joint" cx="142" cy="208" r="5" />
+            <circle class="joint" cx="86" cy="211" r="5" /><circle class="joint" cx="80" cy="245" r="5" /><circle class="joint" cx="72" cy="254" r="5" />
+            <circle class="joint" cx="134" cy="211" r="5" /><circle class="joint" cx="140" cy="245" r="5" /><circle class="joint" cx="148" cy="254" r="5" />
+          </g>
+          <path class="measure" d="M60 278 V286 M160 278 V286 M60 282 H160" />
+          <text class="measure-text" x="110" y="297" text-anchor="middle">100 W</text>
+          <path class="measure" d="M178 30 H186 M178 260 H186 M182 30 V260" />
+          <text class="measure-text" x="195" y="145" text-anchor="middle" transform="rotate(90 195 145)">116 H</text>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="viz-badge">Recommended</div>
+        <h3>B. Balanced Compact</h3>
+        <p>Square enough for arcade readability, but retains wrists, ankles, and a short spine for smooth potion actions.</p>
+        <div class="spec-line text-small"><span class="text-muted">Ratio W:H</span><span>1 : 1.16</span></div>
+        <div class="spec-line text-small"><span class="text-muted">Practical bones</span><span>17–19</span></div>
+        <div class="spec-line text-small"><span class="text-muted">Best quality</span><span>Balance</span></div>
+      </div>
+    </div>
+
+    <div class="card rig-card" data-choice="large-head-cutout" onclick="toggleSelect(this)">
+      <div class="rig-stage card-image">
+        <svg viewBox="0 0 220 300" role="img" aria-label="Large-head cutout skeleton, width 100 and height 124">
+          <line class="ground" x1="42" y1="260" x2="178" y2="260" />
+          <rect class="silhouette" x="64" y="119" width="92" height="94" rx="7" />
+          <ellipse class="silhouette" cx="110" cy="68" rx="49" ry="52" />
+          <rect class="silhouette" x="58" y="203" width="42" height="57" rx="8" />
+          <rect class="silhouette" x="120" y="203" width="42" height="57" rx="8" />
+          <path class="bone" d="M110 72 L110 104 L110 145 L110 188 M76 132 L90 123 L110 123 L130 123 L144 132 M76 132 L68 169 L79 205 M144 132 L152 169 L141 205 M110 188 L87 211 L80 244 L72 254 M110 188 L133 211 L140 244 L148 254" />
+          <g>
+            <circle class="joint" cx="110" cy="72" r="5" /><circle class="joint" cx="110" cy="104" r="5" /><circle class="joint" cx="110" cy="145" r="5" /><circle class="joint" cx="110" cy="188" r="5" />
+            <circle class="joint" cx="90" cy="123" r="5" /><circle class="joint" cx="76" cy="132" r="5" /><circle class="joint" cx="68" cy="169" r="5" /><circle class="joint" cx="79" cy="205" r="5" />
+            <circle class="joint" cx="130" cy="123" r="5" /><circle class="joint" cx="144" cy="132" r="5" /><circle class="joint" cx="152" cy="169" r="5" /><circle class="joint" cx="141" cy="205" r="5" />
+            <circle class="joint" cx="87" cy="211" r="5" /><circle class="joint" cx="80" cy="244" r="5" /><circle class="joint" cx="72" cy="254" r="5" />
+            <circle class="joint" cx="133" cy="211" r="5" /><circle class="joint" cx="140" cy="244" r="5" /><circle class="joint" cx="148" cy="254" r="5" />
+          </g>
+          <path class="measure" d="M60 278 V286 M160 278 V286 M60 282 H160" />
+          <text class="measure-text" x="110" y="297" text-anchor="middle">100 W</text>
+          <path class="measure" d="M178 16 H186 M178 260 H186 M182 16 V260" />
+          <text class="measure-text" x="195" y="138" text-anchor="middle" transform="rotate(90 195 138)">124 H</text>
+        </svg>
+      </div>
+      <div class="card-body">
+        <h3>C. Large-Head Cutout</h3>
+        <p>More expressive silhouette and face space. The larger head reduces the room available for readable leg motion.</p>
+        <div class="spec-line text-small"><span class="text-muted">Ratio W:H</span><span>1 : 1.24</span></div>
+        <div class="spec-line text-small"><span class="text-muted">Practical bones</span><span>17–20</span></div>
+        <div class="spec-line text-small"><span class="text-muted">Best quality</span><span>Expression</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="recommendation">
+    <p><strong>My recommendation: B.</strong> It is only 16% taller than wide, remains readable at arcade scale, and keeps enough articulation for walking, drinking, throwing, and hit reactions without returning to the long humanoid proportions.</p>
+  </div>
+</div>

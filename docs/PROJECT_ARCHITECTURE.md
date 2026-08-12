@@ -1,12 +1,14 @@
 # Project Architecture
 
 > Status: Technical source of truth
-> Last verified: 2026-07-23
+> Last verified: 2026-08-09
 > Creative companion: [Style and Vision](./STYLE_AND_VISION.md)
 > Animation production guide:
 > [Character Animation Lab](../experiments/character_animation/README.md)
 > Directional locomotion experiment:
 > [Directional Geometric Locomotion Lab](../experiments/directional_character_animation/README.md)
+> Compact directional V2:
+> [Balanced Compact Directional Rig V2](../experiments/compact_directional_character_animation/README.md)
 
 ## Project Scope
 
@@ -77,6 +79,18 @@ Play Current Scene: DirectionalAnimationLab.tscn
 				  -> DirectionalHumanoidAnimationLibrary.tres
 ```
 
+The compact V2 experiment compares both directional contracts without entering
+active scene flow:
+
+```text
+Play Current Scene: DirectionalRigComparisonLab.tscn
+  -> ComparisonMover normalized world movement
+      -> Original 26-bone rig at x = -140
+      -> Compact 15-bone rig at x = 140
+          -> synchronized idle/walk facing state machines
+              -> CompactDirectionalHumanoidAnimationLibrary.tres
+```
+
 ## Autoloads
 
 The names below are public project interfaces and should not be renamed without
@@ -143,6 +157,7 @@ an explicit migration.
 | `ui/` | Reusable pause menu. |
 | `experiments/character_animation/` | Developer animation lab and rigging guide for the production cutout rig. |
 | `experiments/directional_character_animation/` | Isolated front/back/mirrored-side geometric locomotion rig and movement room. |
+| `experiments/compact_directional_character_animation/` | Isolated compact four-facing rig, external clips, comparison lab, and guide. |
 | `tests/` | Potion-domain, collision, rig, player-animation, and action-timing test scenes. |
 | `sprites/characters/researcher/` | Transparent researcher atlases and their asset-production README. |
 | `music/`, `sprites/`, `extra/` | Audio, remaining images, fonts, and shaders. |
@@ -474,6 +489,27 @@ the animation adapter observes its emitted velocity.
 - Isolation: it is not registered in `project.godot` and is not referenced by
   the active Player, combat scene, or production researcher rig.
 
+### Balanced Compact Directional Rig V2
+
+- Guide: `experiments/compact_directional_character_animation/README.md`
+- Rig: 15 authored `Bone2D` nodes and rigid polygons form a 100 by 116 pixel
+  arcade silhouette with stable left/right hand sockets.
+- Playback: four idle and four walk clips use separate front, back, side-left,
+  and side-right states. Every walk shares the same nine-key 0.72-second gait.
+- Direction changes: idle and walk state machines use synchronized,
+  non-resetting 0.10-second crossfades; locomotion blends over 0.12 seconds.
+- Anatomy: side clips are authored independently and never mirror
+  `FacingRoot`; colored placeholder limbs make hand identity inspectable.
+- Comparison lab: one `CharacterBody2D` sends normalized 220-pixel-per-second
+  motion to the original and compact rigs at native scale, with two collision
+  shapes and one unsmoothed bounded camera.
+- Public adapter: preserves the original directional API and signal names so a
+  later production skin can be evaluated without changing movement ownership.
+- Promotion path: replace polygons with four directional sprite sets, preserve
+  bone paths and pivots, then integrate through a focused Player adapter.
+- Isolation: V2 is absent from combat, autoloads, active Player scenes, and
+  `project.godot`.
+
 ## Shell Script Reference
 
 ### LevelMusic
@@ -714,6 +750,16 @@ godot --headless --fixed-fps 60 --path . res://tests/PlayerAnimationControllerTe
 
 Expected output contains `PlayerAnimationControllerTests: PASS (66 checks)` and
 exits with code 0.
+
+### Automated Compact Directional Rig Scene
+
+```powershell
+godot --headless --fixed-fps 60 --path . res://tests/CompactDirectionalAnimationRigTests.tscn
+```
+
+Expected output contains
+`CompactDirectionalAnimationRigTests: PASS (475 checks)`. It validates the
+compact rig, authored clips, direction graph, public API, and comparison lab.
 
 ### Automated Potion Action Timing Scene
 
