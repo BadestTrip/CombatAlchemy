@@ -1012,8 +1012,10 @@ Use each reference only for the qualities named below.
 
 The current target sprites, generic polygon placeholders, arena, UI geometry,
 logo files, and unused legacy assets are not automatic style targets merely
-because they remain in the repository. The researcher skin is an approved
-working model, but still requires production simplification and art direction.
+because they remain in the repository. The approved researcher reference is a
+visual target for costume, silhouette, perspective, and material treatment.
+The active compact PlayerModel still uses geometric placeholders pending new
+directional sprite parts.
 When an existing asset conflicts with this document, retain only the explicitly
 approved quality until a replacement is produced.
 
