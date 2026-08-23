@@ -150,11 +150,11 @@ The distinction in this table is mandatory in planning and communication.
 | Area | Current prototype | Intended direction |
 | --- | --- | --- |
 | Entry flow | Main Menu opens a potion combat sandbox | Main Menu leads to a refuge and expedition cycle |
-| Player | Movable atlas-backed researcher cutout with a following camera, articulated coat, readable action poses, and an animated hand flask | A production-refined occult researcher with simplified gameplay-scale detail, directional sets where needed, and practical field equipment |
+| Player | Movable 15-bone geometric-placeholder `PlayerModel` with a following camera, four separately authored positive-scale facings, idle/walk locomotion, and hand sockets retained for future interactions | A production-refined occult researcher informed by the G06 visual target, with simplified gameplay-scale detail, directional sets where needed, and practical field equipment |
 | Encounters | Stationary Friend and Foe test targets | Enemies, allies, terrain, and pressure create potion decisions |
 | Mixing | Three RGB layers and two count-based recipes | A readable rule set expanded through discoveries and ingredient properties |
 | Application | Drink self or throw at a target | Drink, throw, and later interact with selected world conditions |
-| Animation | Rigid `Bone2D` cutout with painterly raster parts, idle/walk/drink/throw/hit clips, and authored coat motion | Refined cutout parts, stronger action silhouettes, restrained secondary motion, and the same legible commit timing |
+| Animation | The compact `PlayerModel` has four separately authored idle/walk facing families only; it uses no horizontal mirroring, action clips, animated flask, or coattail rig | Refined sprite parts, stronger future action silhouettes, restrained secondary motion, and legible commit timing when action animation is deliberately added |
 | Progression | None | Knowledge and recorded discoveries lead; statistics remain secondary |
 | Expedition | Not implemented | Authored locations support observation, collection, risk, and return |
 | Consequences | Not implemented | Research and use leave specific marks on people, places, or the researcher |
@@ -521,25 +521,26 @@ Friend or Foe.
 
 ### Animation
 
-The current Player uses a rigid Godot `Bone2D` cutout rig assembled from 21
-transparent painterly atlas regions. It is a working character model and
-production architecture proof, but its generated detail, proportions, and
-single mirrored view are not final locked art. Future repainting should preserve
-the authored joints, hidden overlap, coat bones, hand sockets, and readable
-poses unless the technical contract is deliberately migrated.
+The active Player uses the compact 15-bone geometric-placeholder `PlayerModel`.
+It has four separately authored facing families at positive scale and only
+idle/walk locomotion. The model has no atlas assembly, horizontal mirroring,
+coattail rig, animated flask, or drink/throw/hit action clips. Its hand sockets
+remain stable for future interactions and sprite-part replacement.
 
-Drink and throw have explicit physical commit moments. The flask reaches the
-mouth before a drink takes effect, and a thrown potion leaves the hand at the
-release pose. Final artwork and revised clips may improve those poses, but
-visual timing must continue to agree with gameplay timing.
+Drink and throw apply immediately in the current prototype: drinking applies
+the prepared recipe to the player, while throwing launches the projectile from
+the right-hand socket or its defensive fallback. G06 remains the future visual
+target for the researcher's costume, silhouette, perspective, and materials;
+it does not imply an active action-animation rig.
 
 - Favor clear poses, held silhouettes, and a few deliberate painterly transitions.
 - Simplify small straps and material noise when they collapse at gameplay zoom.
 - Use brush smears and ink displacement for fast motion rather than uniform blur.
 - Keep idle movement subtle.
-- Keep the flask hand separated from the torso at drink and throw commit frames.
-- Preserve hidden overlap around articulated coat, shoulder, elbow, wrist, hip,
-  and knee seams so motion does not expose empty gaps.
+- When action animation is added in a future scope, keep the flask hand
+  separated from the torso at drink and throw commit frames.
+- Preserve hidden overlap around future sprite-part shoulder, elbow, wrist,
+  hip, knee, and ankle seams so motion does not expose empty gaps.
 - Camera shake should be short, low amplitude, and reserved for meaningful impact.
 - Do not use constant floating, pulsing, or particle emission on every object.
 

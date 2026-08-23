@@ -100,9 +100,11 @@ func _test_room(workshop: Node, camera: Camera2D) -> void:
 		var wall_bodies := walls.find_children("*", "StaticBody2D", true, false)
 		_expect(wall_bodies.size() == 4, "workshop has four wall bodies")
 	for wall_name in [&"NorthWall", &"SouthWall", &"WestWall", &"EastWall"]:
+		var wall := walls.get_node_or_null(NodePath(String(wall_name))) as StaticBody2D if walls != null else null
+		var wall_collision := wall.get_node_or_null(^"CollisionShape2D") as CollisionShape2D if wall != null else null
 		_expect(
-			walls != null and walls.get_node_or_null(NodePath(String(wall_name))) is StaticBody2D,
-			"workshop has %s" % wall_name
+			wall != null and wall_collision != null and wall_collision.shape != null,
+			"workshop has %s with a configured CollisionShape2D" % wall_name
 		)
 	if camera != null:
 		_expect(

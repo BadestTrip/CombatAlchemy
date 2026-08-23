@@ -38,6 +38,7 @@ func _run_tests() -> void:
 	var body_collision := player.get_node_or_null(^"CollisionShape2D") as CollisionShape2D
 	var health := player.get_node_or_null(^"HealthComponent") as HealthComponent
 	var target := player.get_node_or_null(^"PotionTarget") as PotionTarget
+	var target_collision := target.get_node_or_null(^"CollisionShape2D") as CollisionShape2D if target != null else null
 	var health_bar := player.get_node_or_null(^"ActorHealthBar") as Control
 	_expect(
 		model != null and model.scene_file_path == PLAYER_MODEL_SCENE_PATH,
@@ -47,13 +48,48 @@ func _run_tests() -> void:
 		player.get_node_or_null(^"PlayerAnimationController") == null,
 		"PlayerActor has no retired action adapter"
 	)
-	_expect(camera != null and camera.zoom.is_equal_approx(Vector2(4, 4)), "camera framing is retained")
+	_expect(is_equal_approx(player.speed, 220.0), "player movement speed is retained")
+	_expect(player.player_model_path == ^"PlayerModel", "player model binding path is retained")
+	_expect(
+		camera != null
+		and camera.position.is_equal_approx(Vector2(0.0, -55.0))
+		and camera.zoom.is_equal_approx(Vector2(4.0, 4.0))
+		and camera.position_smoothing_enabled
+		and is_equal_approx(camera.position_smoothing_speed, 8.0),
+		"camera position, zoom, and smoothing are retained"
+	)
 	_expect(
 		body_collision != null and body_collision.shape is CapsuleShape2D,
 		"compact capsule collision is retained"
 	)
+	var body_capsule := body_collision.shape as CapsuleShape2D if body_collision != null else null
+	_expect(
+		body_capsule != null
+		and is_equal_approx(body_capsule.radius, 31.0)
+		and is_equal_approx(body_capsule.height, 120.0)
+		and body_collision.position.is_equal_approx(Vector2(0.0, -22.0)),
+		"capsule size and offset are retained"
+	)
 	_expect(health != null and health.current_health == 70, "player health is retained")
-	_expect(target != null and health_bar != null, "potion target and health bar are retained")
+	var target_circle := target_collision.shape as CircleShape2D if target_collision != null else null
+	_expect(
+		target != null
+		and target.collision_layer == 2
+		and target.collision_mask == 0
+		and target_circle != null
+		and is_equal_approx(target_circle.radius, 42.0),
+		"potion target layer, mask, and radius are retained"
+	)
+	_expect(
+		health_bar != null
+		and is_equal_approx(health_bar.offset_left, -70.0)
+		and is_equal_approx(health_bar.offset_top, -166.0)
+		and is_equal_approx(health_bar.offset_right, 70.0)
+		and is_equal_approx(health_bar.offset_bottom, -118.0)
+		and health_bar.get(&"display_name") == "Player"
+		and health_bar.get(&"health_component_path") == ^"../HealthComponent",
+		"health-bar offsets and bindings are retained"
+	)
 
 	if model == null:
 		player.free()

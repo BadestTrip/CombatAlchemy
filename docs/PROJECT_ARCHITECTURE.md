@@ -172,8 +172,8 @@ exposes no item in that category.
 | `tests/PlayerModelWorkshopTests.gd` | Validate workshop composition, controls, movement, collision, camera, and debug bones. | `PlayerModelWorkshop.tscn`. | None | None | None |
 | `tests/PlayerActorTests.gd` | Validate active player composition, movement/model forwarding, and throw origin/fallback. | `PlayerActor.tscn` and `PlayerModel`. | None | None | None |
 | `tests/PotionDomainTests.gd` | Validate reagents, recipes, mixer signals/state, health, targets, and movement lock. | Potion-domain and actor scripts. | None | None | None |
-| `tests/PotionProjectileCollisionTests.gd` | Validate launched projectile collision and recipe delivery. | `PotionProjectile`, `PotionTarget`, and health data. | None | None | None |
-| `tests/PotionUseTests.gd` | Validate immediate drink/throw input paths, UI closure, origin/direction, self-ignore, hit, and expiry. | `CombatScene.tscn` and potion/player runtime components. | None | None | None |
+| `tests/PotionProjectileCollisionTests.gd` | Validate a launched projectile's real physics collision, first accepted hit, recipe delivery, and consumption. | `PotionProjectile`, `PotionTarget`, and health data. | None | None | None |
+| `tests/PotionUseTests.gd` | Validate immediate drink/throw input paths, prepared-recipe consumption, mixer closure, and projectile origin/direction. | `CombatScene.tscn` and potion/player runtime components. | None | None | None |
 
 ## Potion Data Flow
 
@@ -188,9 +188,10 @@ exposes no item in that category.
    UI to show a uniform prepared color.
 6. Right Mouse takes the prepared recipe, closes the mixer immediately, and
    calls the player's `PotionTarget.receive_potion(recipe)`.
-7. Left Mouse captures `PlayerCombatController.get_throw_origin()` and
-   `get_throw_direction()`, takes the recipe, closes the mixer immediately,
-   instances `PotionProjectile`, and calls `launch(...)`.
+7. Left Mouse instantiates and type-validates `PotionProjectile`, then captures
+   `PlayerCombatController.get_throw_origin()` and `get_throw_direction()`.
+   Only after that validation succeeds does it take the recipe, close the mixer
+   immediately, add the projectile, and call `launch(...)`.
 8. The projectile ignores the player's target, applies its recipe to the first
    accepting `PotionTarget`, or expires after its configured lifetime.
 

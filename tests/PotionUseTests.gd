@@ -65,8 +65,20 @@ func _run_tests() -> void:
 
 	var initial_health := health.current_health
 	var initial_projectile_count := projectiles.get_child_count()
+	var mixer_visible_before_no_recipe_input := mixer_ui.visible
+	var layers_before_no_recipe_input := mixer.get_layers()
 	potion_input.drink_requested.emit()
+	_expect(
+		mixer_ui.visible == mixer_visible_before_no_recipe_input
+		and mixer.get_layers() == layers_before_no_recipe_input,
+		"no-recipe drink leaves mixer visibility and layers unchanged"
+	)
 	potion_input.throw_requested.emit()
+	_expect(
+		mixer_ui.visible == mixer_visible_before_no_recipe_input
+		and mixer.get_layers() == layers_before_no_recipe_input,
+		"no-recipe throw leaves mixer visibility and layers unchanged"
+	)
 	_expect(health.current_health == initial_health, "no-recipe drink leaves health unchanged")
 	_expect(
 		projectiles.get_child_count() == initial_projectile_count,
