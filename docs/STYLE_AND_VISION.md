@@ -1005,8 +1005,8 @@ Use each reference only for the qualities named below.
 | `mainmenu/AlchemySeal.tscn` | Slow decorative motion, restrained RGB marks, and abstract measurement geometry in the current menu | A magical alphabet, combat symbol system, or seal motif repeated across unrelated assets |
 | `combat/ui/FlaskView.tscn` and `combat/ui/PotionMixerUI.tscn` | The flask-first interaction, visible liquid layers, and bottom-center composition | Placeholder geometry, button styling, or current dimensions as mandatory final art |
 | `docs/ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png` | Approved elevated three-quarter pose, broad hat, obscured face, weathered coat, and practical research equipment | A promise that every generated strap, texture, or proportion is final production art |
-| `characters/animation/HumanoidCutoutRig.tscn` and `experiments/character_animation/README.md` | Stable joint hierarchy, coat bones, action timing, hand sockets, overlap requirements, and reusable playback API | Generic placeholder polygons as final anatomy or costume |
-| `characters/animation/ResearcherCutoutRig.tscn` and `sprites/characters/researcher/README.md` | Current atlas assembly, nonnegative layer order, exact pivots, readable silhouette, and a working replacement workflow | Generated high-frequency detail, one-view mirroring, or current part proportions as immutable final art |
+| `characters/player/PlayerModel.tscn` | Stable 15-bone hierarchy, four authored facings, hand sockets, joint pivots, overlap requirements, and geometric replacement surfaces | Geometric placeholder polygons as final anatomy or costume |
+| `characters/player/README.md` | Current sprite-part replacement workflow, positive-scale directional contract, exact socket IDs, and workshop checks | Generated high-frequency detail or current placeholder proportions as immutable final art |
 | `extra/ink_wash_shader_done.gdshader` | The current ink reveal transition language | A full-screen effect to apply continuously to gameplay or every asset |
 | `docs/PROJECT_ARCHITECTURE.md` | Current technical ownership and implemented behavior | Creative or visual direction beyond its factual description |
 

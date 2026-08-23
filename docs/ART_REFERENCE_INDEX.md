@@ -26,7 +26,7 @@ reproduce its complete composition. Extract only the quality identified in its
 | --- | --- |
 | `ART_REF_G01_GAMEPLAY_NORTH_STAR.png` | Camera, arena readability, restrained color, flask placement |
 | `ART_REF_G02_RESEARCHER_SHEET.png` | Researcher silhouette, equipment, drink and throw poses |
-| `ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png` | Approved neutral cutout model, costume, perspective, and part-generation target |
+| `ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png` | Visual costume, silhouette, perspective, and directional-part reference |
 | `ART_REF_G03_ENEMY_PROCESS_SHEET.png` | Material-driven enemy families and gameplay silhouettes |
 | `ART_REF_G04_FLASK_UI_STATES.png` | Flask state consistency and physical mixer feedback |
 | `ART_REF_G05_POTION_VFX.png` | Healing and damage effect timing language |
@@ -42,12 +42,13 @@ The following images were generated specifically as CombatAlchemy concept
 references. They are not production-ready assets. Rebuild final UI, sprites,
 effects, and environments for their actual in-engine requirements.
 
-The active Player currently uses an articulated `Bone2D` cutout assembled from
-transparent atlas regions generated from G06. Character references in this pack
-define the intended silhouette and material treatment for later repainting and
-production simplification. Do not collapse the researcher into one flattened
-sprite while skeletal animation is retained; keep separate transparent body
-parts with hidden overlap at every joint.
+The active Player uses the 15-bone `characters/player/PlayerModel.tscn` with
+geometric placeholders and four authored facings. G02 and G06 remain visual
+references for costume, silhouette, perspective, and future directional sprite
+parts; neither image defines an active atlas pipeline. Preserve the skeletal
+contract when producing replacement art: use separate body parts, pivots at
+local joint zero, and enough hidden overlap to cover the authored motion range.
+The replacement workflow is documented in `characters/player/README.md`.
 
 ### G01: Gameplay North Star
 
@@ -144,8 +145,8 @@ Avoid: photorealism, glossy 3D, anime, cel shading, heroic power pose, wizard st
 
 **Use for**
 
-- The approved elevated top-down three-quarter perspective for the current
-  one-view-plus-mirror rig.
+- The approved elevated top-down three-quarter perspective for future
+  four-facing directional sprite parts.
 - Consistent hat, obscured face, weathered coat, glass apparatus, satchel,
   gloves, and boots across articulated parts.
 - A neutral A-pose that exposes shoulder, elbow, wrist, hip, knee, ankle, and
@@ -158,20 +159,20 @@ Avoid: photorealism, glossy 3D, anime, cel shading, heroic power pose, wizard st
 - Every strap, crack, scale-like fabric mark, or glass fitting as mandatory
   final production detail.
 - The flattened target image as a gameplay sprite.
-- The current single facing set as a substitute for future back-facing art.
+- The single reference view as a substitute for authored directional art.
 - Chroma-background pixels or cleanup artifacts.
 
 **Production observations**
 
-- The active skin uses four transparent atlases under
-  `sprites/characters/researcher/`.
-- `ResearcherCutoutRig.tscn` uses 21 `AtlasTexture` regions and preserves the
-  generic rig API.
+- G06 is a visual costume and silhouette reference, not an active atlas
+  pipeline.
+- The active compact workshop uses geometric placeholders pending new
+  directional sprite parts.
 - Simplify internal texture noise before final production art; silhouette,
   joints, and action readability take priority.
-- Exact regions, pivots, scales, generation prompts, and alpha workflow are
-  documented in
-  [`sprites/characters/researcher/README.md`](../sprites/characters/researcher/README.md).
+- Preserve the 15-bone hierarchy, separate left/right facings, joint pivots,
+  positive scale, and stable sockets documented in
+  [`characters/player/README.md`](../characters/player/README.md).
 
 <details>
 <summary>Approved generation prompt</summary>
