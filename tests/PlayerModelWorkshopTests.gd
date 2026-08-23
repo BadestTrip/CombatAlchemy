@@ -3,6 +3,8 @@ extends Node
 # Responsibility: Verify the isolated PlayerModel workshop composition and controls.
 
 const WORKSHOP_PATH := "res://characters/player/PlayerModelWorkshop.tscn"
+const MODEL_SCENE_PATH := "res://characters/player/PlayerModel.tscn"
+const ACTOR_SCRIPT_PATH := "res://characters/player/PlayerModelWorkshopActor.gd"
 const PROJECT_PATH := "res://project.godot"
 
 var _failures: Array[String] = []
@@ -46,9 +48,22 @@ func _run_tests() -> void:
 	var bones_toggle := workshop.get_node_or_null(^"HUD/StatusPanel/StatusRow/BonesToggle") as CheckButton
 
 	_expect(actor != null, "workshop has one movement owner")
+	var expected_actor_script := load(ACTOR_SCRIPT_PATH) as Script
 	_expect(
-		model != null and model.scene_file_path == "res://characters/player/PlayerModel.tscn",
+		actor != null and actor.get_script() == expected_actor_script,
+		"workshop movement owner uses the workshop actor script"
+	)
+	_expect(
+		actor != null and is_equal_approx(float(actor.get(&"movement_speed")), 220.0),
+		"workshop movement owner defaults to 220 px/s"
+	)
+	_expect(
+		model != null and model.scene_file_path == MODEL_SCENE_PATH,
 		"workshop instances the canonical model"
+	)
+	_expect(
+		_count_scene_instances(workshop, MODEL_SCENE_PATH) == 1,
+		"workshop instances the canonical model exactly once"
 	)
 	_expect(camera != null and not camera.position_smoothing_enabled, "workshop camera follows without smoothing")
 	_expect(collision != null, "workshop actor has one gameplay-sized collision")
@@ -69,6 +84,9 @@ func _run_tests() -> void:
 	add_child(workshop)
 	await get_tree().process_frame
 	_test_state_controls(model, facing_label, locomotion_label, bones_toggle)
+	_release_movement_actions()
+	await _test_actor_movement(actor, model, facing_label, locomotion_label)
+	_release_movement_actions()
 	workshop.queue_free()
 	await get_tree().process_frame
 
@@ -121,16 +139,50 @@ func _test_state_controls(
 	_expect(facing_label.text == "FRONT", "facing label initializes from the model")
 	_expect(locomotion_label.text == "IDLE", "locomotion label initializes from the model")
 
-	model.call(&"set_motion", Vector2.RIGHT * 220.0)
-	_expect(facing_label.text == "SIDE_RIGHT", "facing signal updates the workshop label")
-	_expect(locomotion_label.text == "WALK", "locomotion signal updates the workshop label")
-
 	bones_toggle.set_pressed_no_signal(true)
 	bones_toggle.toggled.emit(true)
 	_expect(_bone_lines_have_visibility(model, true), "the CheckButton shows bone indicators")
 	bones_toggle.set_pressed_no_signal(false)
 	bones_toggle.toggled.emit(false)
 	_expect(_bone_lines_have_visibility(model, false), "the CheckButton hides bone indicators")
+
+
+func _test_actor_movement(
+	actor: CharacterBody2D,
+	model: Node,
+	facing_label: Label,
+	locomotion_label: Label
+) -> void:
+	_release_movement_actions()
+	if actor == null or model == null or facing_label == null or locomotion_label == null:
+		return
+
+	var starting_position := actor.global_position
+	Input.action_press(&"move_right")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_expect(actor.global_position.x > starting_position.x, "workshop actor moves from real input")
+	_expect(
+		actor.velocity.is_equal_approx(Vector2.RIGHT * 220.0),
+		"workshop actor applies its 220 px/s default speed"
+	)
+	_expect(model.call(&"get_facing") as StringName == &"side_right", "actor forwards input-derived facing")
+	_expect(model.call(&"get_locomotion_state") as StringName == &"walk", "actor forwards input-derived motion")
+	_expect(facing_label.text == "SIDE_RIGHT", "forwarded facing signal updates the workshop label")
+	_expect(locomotion_label.text == "WALK", "forwarded locomotion signal updates the workshop label")
+
+	_release_movement_actions()
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_expect(actor.velocity.is_zero_approx(), "workshop actor stops after input release")
+	_expect(model.call(&"get_locomotion_state") as StringName == &"idle", "input release forwards idle motion")
+	_expect(locomotion_label.text == "IDLE", "input release updates the workshop label to idle")
+	_release_movement_actions()
+
+
+func _release_movement_actions() -> void:
+	for action in [&"move_left", &"move_right", &"move_up", &"move_down"]:
+		Input.action_release(action)
 
 
 func _bone_lines_have_visibility(model: Node, expected: bool) -> bool:
@@ -148,6 +200,14 @@ func _contains_potion_node(root: Node) -> bool:
 		if String(candidate.name).to_lower().contains("potion"):
 			return true
 	return false
+
+
+func _count_scene_instances(root: Node, scene_path: String) -> int:
+	var instance_count := 1 if root.scene_file_path == scene_path else 0
+	for candidate in root.find_children("*", "", true, false):
+		if candidate.scene_file_path == scene_path:
+			instance_count += 1
+	return instance_count
 
 
 func _expect(condition: bool, message: String) -> void:
