@@ -75,7 +75,7 @@ func _run_tests() -> void:
 	_expect(not mixer.has_prepared_potion(), "no-recipe input does not create a prepared potion")
 
 	health.current_health = 40
-	_prepare_health_potion(mixer)
+	_prepare_health_potion(potion_input, mixer)
 	_expect(mixer_ui.visible, "prepared potion is visible before drinking")
 	potion_input.drink_requested.emit()
 	_expect(health.current_health == 70, "drink applies the health recipe during the input signal")
@@ -84,7 +84,7 @@ func _run_tests() -> void:
 	potion_input.drink_requested.emit()
 	_expect(health.current_health == 70, "a second drink input cannot reuse the consumed recipe")
 
-	_prepare_damage_potion(mixer)
+	_prepare_damage_potion(potion_input, mixer)
 	var origin := player.get_throw_origin()
 	var direction := player.get_throw_direction()
 	var before := projectiles.get_child_count()
@@ -102,6 +102,15 @@ func _run_tests() -> void:
 	_expect(
 		not mixer.has_prepared_potion() and not mixer_ui.visible,
 		"throw consumes the recipe and closes the mixer"
+	)
+	var mixer_visible_after_throw := mixer_ui.visible
+	var layers_after_throw := mixer.get_layers()
+	potion_input.throw_requested.emit()
+	_expect(projectiles.get_child_count() == before + 1, "a second throw input cannot launch another projectile")
+	_expect(not mixer.has_prepared_potion(), "a second throw input cannot restore the consumed recipe")
+	_expect(
+		mixer_ui.visible == mixer_visible_after_throw and mixer.get_layers() == layers_after_throw,
+		"a second throw input leaves the consumed mixer state unchanged"
 	)
 
 	potion_input.mixer_toggle_requested.emit()
@@ -130,20 +139,37 @@ func _run_tests() -> void:
 	await get_tree().process_frame
 
 
-func _prepare_health_potion(mixer: PotionMixer) -> void:
-	mixer.clear()
-	_expect(mixer.add_reagent(PotionReagent.RED), "health potion accepts first red")
-	_expect(mixer.add_reagent(PotionReagent.RED), "health potion accepts second red")
-	_expect(mixer.add_reagent(PotionReagent.BLUE), "health potion accepts blue")
-	_expect(mixer.mix(), "health potion prepares")
+func _prepare_health_potion(potion_input: PotionInput, mixer: PotionMixer) -> void:
+	_prepare_potion(
+		potion_input,
+		mixer,
+		[PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE],
+		"health"
+	)
 
 
-func _prepare_damage_potion(mixer: PotionMixer) -> void:
+func _prepare_damage_potion(potion_input: PotionInput, mixer: PotionMixer) -> void:
+	_prepare_potion(
+		potion_input,
+		mixer,
+		[PotionReagent.GREEN, PotionReagent.GREEN, PotionReagent.BLUE],
+		"damage"
+	)
+
+
+func _prepare_potion(
+	potion_input: PotionInput,
+	mixer: PotionMixer,
+	reagents: Array[StringName],
+	potion_name: String
+) -> void:
 	mixer.clear()
-	_expect(mixer.add_reagent(PotionReagent.GREEN), "damage potion accepts first green")
-	_expect(mixer.add_reagent(PotionReagent.GREEN), "damage potion accepts second green")
-	_expect(mixer.add_reagent(PotionReagent.BLUE), "damage potion accepts blue")
-	_expect(mixer.mix(), "damage potion prepares")
+	potion_input.mixer_toggle_requested.emit()
+	for reagent in reagents:
+		potion_input.reagent_requested.emit(reagent)
+	_expect(mixer.get_layers() == reagents, "%s potion accepts input-driven reagents" % potion_name)
+	potion_input.mix_requested.emit()
+	_expect(mixer.has_prepared_potion(), "%s potion prepares through PotionInput" % potion_name)
 
 
 func _expect(condition: bool, message: String) -> void:
