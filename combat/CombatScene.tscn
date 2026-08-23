@@ -19,7 +19,6 @@ potion_input_path = NodePath("Systems/PotionInput")
 potion_mixer_path = NodePath("Systems/PotionMixer")
 potion_mixer_ui_path = NodePath("UI/PotionMixerUI")
 player_combat_controller_path = NodePath("Arena/Player")
-player_animation_controller_path = NodePath("Arena/Player/PlayerAnimationController")
 player_potion_target_path = NodePath("Arena/Player/PotionTarget")
 projectiles_parent_path = NodePath("Arena/Projectiles")
 
