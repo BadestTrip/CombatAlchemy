@@ -98,7 +98,7 @@ func _run_tests() -> void:
 	await _test_public_behavior(rig)
 	rig.queue_free()
 	await get_tree().process_frame
-	_test_missing_dependency_handling()
+	await _test_missing_dependency_handling()
 
 
 func _test_authored_structure(rig: Node) -> void:
@@ -415,7 +415,30 @@ func _test_missing_dependency_handling() -> void:
 	incomplete_rig.call(&"set_motion", Vector2.RIGHT * 220.0)
 	_expect(incomplete_rig.call(&"get_locomotion_state") as StringName == &"idle", "incomplete rigs keep playback disabled")
 	incomplete_rig.free()
+	await _test_missing_socket_dependency(&"HandSocket_L", ^"FacingRoot/Skeleton2D/Root/Torso/UpperArm_L/Forearm_L/Hand_L/HandSocket_L")
+	await _test_missing_socket_dependency(&"HandSocket_R", ^"FacingRoot/Skeleton2D/Root/Torso/UpperArm_R/Forearm_R/Hand_R/HandSocket_R")
 
+
+func _test_missing_socket_dependency(socket_name: StringName, socket_path: NodePath) -> void:
+	var model_scene := load(MODEL_SCENE_PATH) as PackedScene
+	_expect(model_scene != null, "%s fixture scene parses" % socket_name)
+	if model_scene == null:
+		return
+	var fixture := model_scene.instantiate()
+	var socket := fixture.get_node_or_null(socket_path) as Marker2D
+	_expect(socket != null, "%s fixture starts with the authored socket" % socket_name)
+	if socket == null:
+		fixture.free()
+		return
+	socket.get_parent().remove_child(socket)
+	socket.free()
+	add_child(fixture)
+	await get_tree().process_frame
+	_expect(not (fixture.call(&"_validate_dependencies", false) as bool), "%s fixture is rejected by dependency validation" % socket_name)
+	fixture.call(&"set_motion", Vector2.RIGHT * 220.0)
+	_expect(fixture.call(&"get_locomotion_state") as StringName == &"idle", "%s fixture keeps locomotion disabled" % socket_name)
+	fixture.queue_free()
+	await get_tree().process_frame
 
 func _calculate_visual_bounds(facing_root: Node2D, visuals: Array[Polygon2D]) -> Rect2:
 	var minimum := Vector2(INF, INF)
