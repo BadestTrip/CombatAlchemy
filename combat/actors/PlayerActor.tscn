@@ -1,14 +1,14 @@
 [gd_scene format=3 uid="uid://clqe5778u4ymb"]
 
 [ext_resource type="Script" uid="uid://baai5w3oponna" path="res://combat/actors/PlayerCombatController.gd" id="1_controller"]
-[ext_resource type="PackedScene" uid="uid://x8g7r0hrk42u" path="res://characters/animation/ResearcherCutoutRig.tscn" id="2_rig"]
+[ext_resource type="PackedScene" path="res://characters/player/PlayerModel.tscn" id="2_model"]
 [ext_resource type="Script" uid="uid://ceb28uu6sjyvt" path="res://combat/actors/HealthComponent.gd" id="3_health"]
 [ext_resource type="Script" uid="uid://b4v6tckq5puxn" path="res://combat/actors/PotionTarget.gd" id="4_target"]
 [ext_resource type="PackedScene" uid="uid://doydsebyrlpr6" path="res://combat/actors/ActorHealthBar.tscn" id="5_health_bar"]
-[ext_resource type="Script" uid="uid://bslqoqkf61fuy" path="res://combat/actors/PlayerAnimationController.gd" id="6_animation"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
-radius = 36.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 31.0
+height = 120.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_target"]
 radius = 42.0
@@ -16,15 +16,7 @@ radius = 42.0
 [node name="PlayerActor" type="CharacterBody2D" unique_id=1046958855]
 script = ExtResource("1_controller")
 
-[node name="PlayerVisual" parent="." unique_id=2048231341 instance=ExtResource("2_rig")]
-position = Vector2(0, -64)
-scale = Vector2(0.5, 0.5)
-
-[node name="PlayerAnimationController" type="Node" parent="." unique_id=1499324184]
-script = ExtResource("6_animation")
-rig_path = NodePath("../PlayerVisual")
-player_controller_path = NodePath("..")
-health_component_path = NodePath("../HealthComponent")
+[node name="PlayerModel" parent="." unique_id=2048231341 instance=ExtResource("2_model")]
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1640418613]
 position = Vector2(0, -55)
@@ -33,7 +25,8 @@ position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=442346357]
-shape = SubResource("CircleShape2D_body")
+position = Vector2(0, -22)
+shape = SubResource("CapsuleShape2D_body")
 
 [node name="HealthComponent" type="Node" parent="." unique_id=468260572]
 script = ExtResource("3_health")
@@ -46,6 +39,7 @@ script = ExtResource("4_target")
 health_component_path = NodePath("../HealthComponent")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PotionTarget" unique_id=1166987761]
+visible = false
 shape = SubResource("CircleShape2D_target")
 
 [node name="ActorHealthBar" parent="." unique_id=1975705846 instance=ExtResource("5_health_bar")]

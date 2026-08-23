@@ -8,8 +8,17 @@ signal movement_changed(current_velocity: Vector2)
 
 ## Movement speed in pixels per second.
 @export_range(0.0, 1000.0, 1.0) var speed: float = 220.0
+@export var player_model_path: NodePath = ^"PlayerModel"
+
+@onready var _player_model := get_node_or_null(player_model_path)
 
 var _movement_locked := false
+
+
+func _ready() -> void:
+	if _player_model == null or not _player_model.has_method(&"set_motion"):
+		push_error("PlayerCombatController requires a PlayerModel with set_motion().")
+		set_physics_process(false)
 
 
 func _physics_process(_delta: float) -> void:
@@ -20,6 +29,8 @@ func _physics_process(_delta: float) -> void:
 	)
 	velocity = movement * speed
 	move_and_slide()
+	if _player_model != null:
+		_player_model.call(&"set_motion", velocity)
 	movement_changed.emit(velocity)
 
 
@@ -37,6 +48,10 @@ func is_movement_locked() -> bool:
 
 ## Returns the world-space point where potion projectiles should spawn.
 func get_throw_origin() -> Vector2:
+	if _player_model != null and _player_model.has_method(&"get_socket"):
+		var socket := _player_model.call(&"get_socket", &"hand_right") as Marker2D
+		if socket != null:
+			return socket.global_position
 	return global_position
 
 
