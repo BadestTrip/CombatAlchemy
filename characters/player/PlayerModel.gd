@@ -69,7 +69,7 @@ func _ready() -> void:
 	_idle_playback = _animation_tree.get(&"parameters/IdleDirection/playback") as AnimationNodeStateMachinePlayback
 	_walk_playback = _animation_tree.get(&"parameters/WalkDirection/playback") as AnimationNodeStateMachinePlayback
 	if _idle_playback == null or _walk_playback == null:
-		push_error("CompactDirectionalHumanoidRig could not acquire direction state-machine playback.")
+		push_error("PlayerModel could not acquire direction state-machine playback.")
 		_animation_tree.active = false
 		set_process(false)
 		return
@@ -282,7 +282,7 @@ func _validate_dependencies(report_errors: bool) -> bool:
 		missing.append("AnimationTree BlendTree root")
 
 	if not missing.is_empty() and report_errors:
-		push_error("CompactDirectionalHumanoidRig requires: %s." % ", ".join(missing))
+		push_error("PlayerModel requires: %s." % ", ".join(missing))
 	return missing.is_empty()
 
 
