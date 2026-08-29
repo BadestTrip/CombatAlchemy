@@ -12,6 +12,7 @@ var _owned_nodes: Array[Node] = []
 func _ready() -> void:
 	_test_instance_creation_and_copy()
 	_test_invalid_creation()
+	_test_delivery_id_normalization()
 	_test_apply_once_and_discard()
 	_test_unsupported_and_invalid_contexts()
 	_free_owned_nodes()
@@ -42,6 +43,34 @@ func _test_invalid_creation() -> void:
 	_expect(PotionInstance.create(null, []) == null, "null recipe is rejected")
 	var wrong: Array[StringName] = [PotionReagent.RED, PotionReagent.GREEN, PotionReagent.BLUE]
 	_expect(PotionInstance.create(HEALTH_POTION, wrong) == null, "nonmatching layers are rejected")
+
+
+func _test_delivery_id_normalization() -> void:
+	var empty_delivery_context := PotionImpactContext.new().configure(
+		null,
+		null,
+		null,
+		Vector2.ZERO,
+		Vector2.ZERO,
+		&""
+	)
+	_expect(
+		empty_delivery_context.delivery_method == PotionDelivery.THROW,
+		"empty delivery falls back to throw"
+	)
+	var unknown_delivery: StringName = &"splash"
+	var unknown_delivery_context := PotionImpactContext.new().configure(
+		null,
+		null,
+		null,
+		Vector2.ZERO,
+		Vector2.ZERO,
+		unknown_delivery
+	)
+	_expect(
+		unknown_delivery_context.delivery_method == unknown_delivery,
+		"unknown non-empty delivery is preserved"
+	)
 
 
 func _test_apply_once_and_discard() -> void:
