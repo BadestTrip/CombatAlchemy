@@ -3,6 +3,7 @@ extends Node
 # Responsibility: Verify runtime potion instances own valid mixtures and consume once.
 
 const HEALTH_POTION := preload("res://combat/potions/resources/HealthPotion.tres")
+const POTION_ENTITY_SCENE := preload("res://combat/potions/PotionEntity.tscn")
 
 var _failures: Array[String] = []
 var _check_count := 0
@@ -15,6 +16,7 @@ func _ready() -> void:
 	_test_delivery_id_normalization()
 	_test_apply_once_and_discard()
 	_test_unsupported_and_invalid_contexts()
+	_test_held_slot_ownership()
 	_free_owned_nodes()
 	if _failures.is_empty():
 		print("PotionInstanceTests: PASS (%d checks)" % _check_count)
@@ -131,6 +133,66 @@ func _test_unsupported_and_invalid_contexts() -> void:
 		invalid.apply(PotionImpactContext.new()) == 0 and not invalid.is_consumed(),
 		"invalid context does not consume the potion"
 	)
+
+
+func _test_held_slot_ownership() -> void:
+	_expect(ResourceLoader.exists("res://combat/potions/HeldPotionSlot.gd"), "held slot script exists")
+	if not ResourceLoader.exists("res://combat/potions/HeldPotionSlot.gd"):
+		return
+	var slot_script := load("res://combat/potions/HeldPotionSlot.gd")
+	_expect(slot_script != null, "held slot script loads")
+	if slot_script == null:
+		return
+	var slot: Node = slot_script.new()
+	add_child(slot)
+	_owned_nodes.append(slot)
+	var first_potion := PotionInstance.create(
+		HEALTH_POTION,
+		[PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE]
+	)
+	var second_potion := PotionInstance.create(
+		HEALTH_POTION,
+		[PotionReagent.BLUE, PotionReagent.RED, PotionReagent.RED]
+	)
+	var first_entity := POTION_ENTITY_SCENE.instantiate() as PotionEntity
+	var second_entity := POTION_ENTITY_SCENE.instantiate() as PotionEntity
+	add_child(first_entity)
+	add_child(second_entity)
+	_owned_nodes.append(first_entity)
+	_owned_nodes.append(second_entity)
+	_expect(first_entity.initialize(first_potion, self), "first real entity initializes")
+	_expect(second_entity.initialize(second_potion, self), "second real entity initializes")
+	var changed: Array[Variant] = []
+	slot.connect(&"potion_changed", func(potion: PotionInstance) -> void:
+		changed.append(potion)
+	)
+	_expect(not slot.call(&"has_potion"), "new held slot is empty")
+	_expect(slot.call(&"get_potion") == null, "empty slot has no potion")
+	_expect(slot.call(&"get_entity") == null, "empty slot has no entity")
+	_expect(slot.call(&"hold", first_potion, first_entity), "matching potion and entity can be held")
+	_expect(slot.call(&"has_potion"), "successful hold occupies the slot")
+	_expect(slot.call(&"get_potion") == first_potion, "slot returns the held potion")
+	_expect(slot.call(&"get_entity") == first_entity, "slot returns the held entity")
+	_expect(changed == [first_potion], "hold emits the held potion")
+	_expect(
+		not slot.call(&"hold", second_potion, second_entity),
+		"occupied slot rejects another matching pair"
+	)
+	_expect(changed == [first_potion], "rejected occupied hold emits no change")
+	slot.call(&"clear")
+	_expect(not slot.call(&"has_potion"), "clear empties the slot")
+	_expect(slot.call(&"get_potion") == null, "clear removes the potion reference")
+	_expect(slot.call(&"get_entity") == null, "clear removes the entity reference")
+	_expect(changed == [first_potion, null], "clear emits null once")
+	slot.call(&"clear")
+	_expect(changed == [first_potion, null], "clearing an empty slot emits nothing")
+	_expect(
+		not slot.call(&"hold", first_potion, second_entity),
+		"slot rejects a potion that does not match the entity"
+	)
+	_expect(not slot.call(&"has_potion"), "mismatched rejection leaves the slot empty")
+	_expect(slot.call(&"hold", second_potion, second_entity), "slot can hold again after clear")
+	_expect(changed == [first_potion, null, second_potion], "second hold emits the new potion")
 
 
 func _free_owned_nodes() -> void:

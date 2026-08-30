@@ -9,10 +9,8 @@ signal mixer_toggle_requested
 signal reagent_requested(reagent: StringName)
 ## Emitted when the current mixture should be prepared.
 signal mix_requested
-## Emitted when the prepared potion should be consumed by the player.
-signal drink_requested
-## Emitted when the prepared potion should be thrown.
-signal throw_requested
+## Emitted when the held potion should use one delivery method.
+signal potion_use_requested(delivery_method: StringName)
 ## Emitted when the newest reagent layer should be removed.
 signal remove_reagent_requested
 ## Emitted when the active mixture or prepared potion should be cleared.
@@ -33,9 +31,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed(&"mix_potion"):
 		mix_requested.emit()
 	elif event.is_action_pressed(&"drink_potion"):
-		drink_requested.emit()
+		potion_use_requested.emit(PotionDelivery.DRINK)
 	elif event.is_action_pressed(&"throw_potion"):
-		throw_requested.emit()
+		potion_use_requested.emit(PotionDelivery.THROW)
+	elif event.is_action_pressed(&"place_potion"):
+		potion_use_requested.emit(PotionDelivery.PLACE)
 	elif event.is_action_pressed(&"remove_reagent"):
 		remove_reagent_requested.emit()
 	elif event.is_action_pressed(&"clear_mixture"):

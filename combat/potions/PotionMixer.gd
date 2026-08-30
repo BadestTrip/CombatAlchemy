@@ -1,12 +1,12 @@
 class_name PotionMixer
 extends Node
 
-# Responsibility: Collect potion layers and prepare recipes from a recipe book.
+# Responsibility: Collect unfinished potion layers and create runtime potion instances.
 
 ## Emitted after a layer is added or removed, with a copy of the current layers.
 signal layers_changed(layers: Array[StringName])
-## Emitted after a valid recipe becomes available to consume.
-signal potion_prepared(recipe: PotionRecipeData)
+## Emitted after a valid mixture creates a unique runtime potion.
+signal potion_prepared(potion: PotionInstance)
 ## Emitted when mixing cannot produce a valid recipe, with preserved layers.
 signal mix_rejected(layers: Array[StringName])
 ## Emitted after the active layer mixture is cleared.
@@ -20,12 +20,11 @@ signal mixture_cleared
 @export var recipe_book: PotionRecipeBookData
 
 var _layers: Array[StringName] = []
-var _prepared_recipe: PotionRecipeData
 
 
 ## Adds reagent when it is valid and the mixer can accept another layer.
 func add_reagent(reagent: StringName) -> bool:
-	if _prepared_recipe != null or not PotionReagent.is_valid(reagent) or _layers.size() >= max_layers:
+	if not PotionReagent.is_valid(reagent) or _layers.size() >= max_layers:
 		return false
 	_layers.append(reagent)
 	layers_changed.emit(get_layers())
@@ -41,11 +40,10 @@ func remove_last() -> bool:
 	return true
 
 
-## Clears all layers and discards any prepared recipe.
+## Clears all unfinished layers.
 func clear() -> void:
 	var had_layers := not _layers.is_empty()
 	_layers.clear()
-	_prepared_recipe = null
 	if had_layers:
 		layers_changed.emit(get_layers())
 	mixture_cleared.emit()
@@ -53,36 +51,23 @@ func clear() -> void:
 
 ## Attempts to prepare a recipe while preserving layers when no recipe matches.
 func mix() -> bool:
-	if _prepared_recipe != null or recipe_book == null:
+	if recipe_book == null:
 		mix_rejected.emit(get_layers())
 		return false
-	var recipe := recipe_book.find_match(_layers)
+	var creation_layers := get_layers()
+	var recipe := recipe_book.find_match(creation_layers)
 	if recipe == null:
-		mix_rejected.emit(get_layers())
+		mix_rejected.emit(creation_layers)
 		return false
-	_prepared_recipe = recipe
+	var potion := PotionInstance.create(recipe, creation_layers)
+	if potion == null:
+		mix_rejected.emit(creation_layers)
+		return false
 	_layers.clear()
 	layers_changed.emit(get_layers())
 	mixture_cleared.emit()
-	potion_prepared.emit(recipe)
+	potion_prepared.emit(potion)
 	return true
-
-
-## Returns whether a recipe is currently prepared for consumption.
-func has_prepared_potion() -> bool:
-	return _prepared_recipe != null
-
-
-## Returns the prepared recipe without consuming it, or null when none is ready.
-func get_prepared_recipe() -> PotionRecipeData:
-	return _prepared_recipe
-
-
-## Returns and consumes the prepared recipe, or null when no recipe is prepared.
-func take_prepared_recipe() -> PotionRecipeData:
-	var recipe := _prepared_recipe
-	_prepared_recipe = null
-	return recipe
 
 
 ## Returns a copy of the current reagent layers in insertion order.

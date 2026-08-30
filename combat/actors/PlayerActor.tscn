@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://baai5w3oponna" path="res://combat/actors/PlayerCombatController.gd" id="1_controller"]
 [ext_resource type="PackedScene" path="res://characters/player/PlayerModel.tscn" id="2_model"]
 [ext_resource type="Script" uid="uid://ceb28uu6sjyvt" path="res://combat/actors/HealthComponent.gd" id="3_health"]
-[ext_resource type="Script" uid="uid://b4v6tckq5puxn" path="res://combat/actors/PotionTarget.gd" id="4_target"]
+[ext_resource type="Script" path="res://combat/actors/ImpactHitbox.gd" id="4_hitbox"]
 [ext_resource type="PackedScene" uid="uid://doydsebyrlpr6" path="res://combat/actors/ActorHealthBar.tscn" id="5_health_bar"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
@@ -20,7 +20,7 @@ script = ExtResource("1_controller")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1640418613]
 position = Vector2(0, -55)
-zoom = Vector2(4, 4)
+zoom = Vector2(2, 2)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
@@ -32,13 +32,12 @@ shape = SubResource("CapsuleShape2D_body")
 script = ExtResource("3_health")
 current_health = 70
 
-[node name="PotionTarget" type="Area2D" parent="." unique_id=1609726918]
+[node name="ImpactHitbox" type="Area2D" parent="." unique_id=1609726918]
 collision_layer = 2
 collision_mask = 0
-script = ExtResource("4_target")
-health_component_path = NodePath("../HealthComponent")
+script = ExtResource("4_hitbox")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PotionTarget" unique_id=1166987761]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ImpactHitbox" unique_id=1166987761]
 visible = false
 shape = SubResource("CircleShape2D_target")
 

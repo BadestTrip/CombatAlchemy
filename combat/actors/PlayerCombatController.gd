@@ -9,6 +9,7 @@ signal movement_changed(current_velocity: Vector2)
 ## Movement speed in pixels per second.
 @export_range(0.0, 1000.0, 1.0) var speed: float = 220.0
 @export var player_model_path: NodePath = ^"PlayerModel"
+@export_range(0.0, 1000.0, 1.0) var place_distance: float = 64.0
 
 @onready var _player_model := get_node_or_null(player_model_path)
 
@@ -48,11 +49,16 @@ func is_movement_locked() -> bool:
 
 ## Returns the world-space point where potion projectiles should spawn.
 func get_throw_origin() -> Vector2:
-	if _player_model != null and _player_model.has_method(&"get_socket"):
-		var socket := _player_model.call(&"get_socket", &"hand_right") as Marker2D
-		if socket != null:
-			return socket.global_position
+	var holder := get_potion_holder()
+	if holder != null:
+		return holder.global_position
 	return global_position
+
+
+func get_potion_holder() -> Marker2D:
+	if _player_model != null and _player_model.has_method(&"get_socket"):
+		return _player_model.call(&"get_socket", &"hand_right") as Marker2D
+	return null
 
 
 ## Returns a normalized direction toward the global mouse, or right when it overlaps the origin.
@@ -61,3 +67,7 @@ func get_throw_direction() -> Vector2:
 	if direction.length_squared() <= 0.000001:
 		return Vector2.RIGHT
 	return direction.normalized()
+
+
+func get_place_position() -> Vector2:
+	return global_position + get_throw_direction() * place_distance

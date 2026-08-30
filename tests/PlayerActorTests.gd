@@ -37,8 +37,8 @@ func _run_tests() -> void:
 	var camera := player.get_node_or_null(^"Camera2D") as Camera2D
 	var body_collision := player.get_node_or_null(^"CollisionShape2D") as CollisionShape2D
 	var health := player.get_node_or_null(^"HealthComponent") as HealthComponent
-	var target := player.get_node_or_null(^"PotionTarget") as PotionTarget
-	var target_collision := target.get_node_or_null(^"CollisionShape2D") as CollisionShape2D if target != null else null
+	var hitbox := player.get_node_or_null(^"ImpactHitbox") as ImpactHitbox
+	var hitbox_collision := hitbox.get_node_or_null(^"CollisionShape2D") as CollisionShape2D if hitbox != null else null
 	var health_bar := player.get_node_or_null(^"ActorHealthBar") as Control
 	_expect(
 		model != null and model.scene_file_path == PLAYER_MODEL_SCENE_PATH,
@@ -53,7 +53,7 @@ func _run_tests() -> void:
 	_expect(
 		camera != null
 		and camera.position.is_equal_approx(Vector2(0.0, -55.0))
-		and camera.zoom.is_equal_approx(Vector2(4.0, 4.0))
+		and camera.zoom.is_equal_approx(Vector2(2.0, 2.0))
 		and camera.position_smoothing_enabled
 		and is_equal_approx(camera.position_smoothing_speed, 8.0),
 		"camera position, zoom, and smoothing are retained"
@@ -71,14 +71,15 @@ func _run_tests() -> void:
 		"capsule size and offset are retained"
 	)
 	_expect(health != null and health.current_health == 70, "player health is retained")
-	var target_circle := target_collision.shape as CircleShape2D if target_collision != null else null
+	var hitbox_circle := hitbox_collision.shape as CircleShape2D if hitbox_collision != null else null
 	_expect(
-		target != null
-		and target.collision_layer == 2
-		and target.collision_mask == 0
-		and target_circle != null
-		and is_equal_approx(target_circle.radius, 42.0),
-		"potion target layer, mask, and radius are retained"
+		hitbox != null
+		and hitbox.get_effect_subject() == player
+		and hitbox.collision_layer == 2
+		and hitbox.collision_mask == 0
+		and hitbox_circle != null
+		and is_equal_approx(hitbox_circle.radius, 42.0),
+		"neutral impact hitbox ownership, layer, mask, and radius are retained"
 	)
 	_expect(
 		health_bar != null
@@ -99,6 +100,7 @@ func _run_tests() -> void:
 	await get_tree().process_frame
 	await _test_movement(player, model)
 	_test_throw_origin(player, model)
+	_test_place_position(player)
 	_test_throw_origin_fallback()
 	_release_movement_actions()
 	player.queue_free()
@@ -147,9 +149,31 @@ func _test_throw_origin(player: PlayerCombatController, model: Node) -> void:
 	player.global_position = Vector2(320.0, 180.0)
 	var hand_right := model.call(&"get_socket", &"hand_right") as Marker2D if model != null else null
 	_expect(hand_right != null, "canonical model exposes the right-hand socket")
+	_expect(player.has_method(&"get_potion_holder"), "player exposes a potion holder")
+	var potion_holder := (
+		player.call(&"get_potion_holder") as Marker2D
+		if player.has_method(&"get_potion_holder")
+		else null
+	)
+	_expect(potion_holder == hand_right, "potion holder is the canonical right-hand socket")
 	_expect(
 		hand_right != null and player.get_throw_origin().is_equal_approx(hand_right.global_position),
 		"throw origin uses the canonical right-hand socket"
+	)
+
+
+func _test_place_position(player: PlayerCombatController) -> void:
+	_expect(player.has_method(&"get_place_position"), "player exposes potion placement geometry")
+	if not player.has_method(&"get_place_position"):
+		return
+	var direction := player.get_throw_direction()
+	var place_position := player.call(&"get_place_position") as Vector2
+	var place_distance := player.get(&"place_distance") as float
+	_expect(is_equal_approx(place_distance, 64.0), "player retains the default place distance")
+	_expect(direction.is_normalized(), "placement aim direction is normalized")
+	_expect(
+		place_position.is_equal_approx(player.global_position + direction * place_distance),
+		"place position is exactly place_distance along normalized aim"
 	)
 
 
