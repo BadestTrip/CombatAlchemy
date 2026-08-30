@@ -30,6 +30,7 @@ var _placed_elapsed := 0.0
 var _armed := false
 var _source_can_trigger := false
 var _source_gate_initialized := false
+var _source_gate_ready_frame := -1
 var _source_overlap_ids: Dictionary = {}
 
 
@@ -256,8 +257,21 @@ func _on_placement_collider_exited(collider: Node) -> void:
 		_source_can_trigger = true
 
 
+func _enable_placement_monitoring() -> void:
+	if _state != State.PLACED:
+		return
+	_placement_trigger.monitoring = true
+	# An idle activation misses the next query flush. Wait for a physics step
+	# with monitoring enabled AND the following flush before trusting overlaps.
+	_source_gate_ready_frame = Engine.get_physics_frames() + 2
+
+
 func _initialize_source_gate() -> void:
-	if not _placement_trigger.monitoring:
+	if (
+		not _placement_trigger.monitoring
+		or _source_gate_ready_frame < 0
+		or Engine.get_physics_frames() < _source_gate_ready_frame
+	):
 		return
 	_source_overlap_ids.clear()
 	for area in _placement_trigger.get_overlapping_areas():
@@ -402,7 +416,7 @@ func _set_state(next_state: State) -> void:
 			_sweep_cast.enabled = true
 		State.PLACED:
 			_flight_area.set_deferred(&"monitoring", false)
-			_placement_trigger.set_deferred(&"monitoring", true)
+			_enable_placement_monitoring.call_deferred()
 			_sweep_cast.enabled = false
 		State.CONSUMED:
 			_flight_area.set_deferred(&"monitoring", false)

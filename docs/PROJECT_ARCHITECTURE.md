@@ -227,8 +227,8 @@ exposes no item in that category.
 | `tests/PotionDomainTests.gd` | Validate reagents, recipes, mixer signals/state, health, and movement lock. | Potion-domain and actor scripts. | None | None | None |
 | `tests/PotionEffectPipelineTests.gd` | Validate impact subjects, recipe effect validation, health capability application, unsupported objects, and independent mixed-effect ordering. | Effect scripts, `ImpactHitbox`, and `HealthComponent`. | None | None | None |
 | `tests/PotionEntityTests.gd` | Validate held attachment, entity identity, state transitions, drink/discard, flight and placement expiry, and rejected transitions. | `PotionEntity.tscn` and potion instance/effect scripts. | None | None | None |
-| `tests/PotionEntityCollisionTests.gd` | Validate swept flight, actor/wall impacts, source exclusion, placement arming, initial overlap/re-entry, nearest overlap, unsupported subjects, and expiry. | `PotionEntity`, `ImpactHitbox`, physics bodies, and health data. | None | None | None |
-| `tests/PotionUseTests.gd` | Validate drink/throw/place input, same bottle identity, slot clearing, UI closure, Tab/reagent gating, discard, and held-entity creation failure. | `CombatScene.tscn` and potion/player runtime components. | None | None | None |
+| `tests/PotionEntityCollisionTests.gd` | Validate swept flight, actor/wall impacts, source exclusion, placement arming, stationary overlap, source exit/re-entry and first entry from outside, unsupported subjects, and expiry. Includes idle placement with production physics enabled at normal and zero arming delay. | `PotionEntity`, `ImpactHitbox`, physics bodies, and health data. | None | None | None |
+| `tests/PotionUseTests.gd` | Validate drink/throw/place input, same bottle identity, slot clearing, UI closure, held-potion Tab gating, discard, and input with an empty slot. | `CombatScene.tscn` and potion/player runtime components. | None | None | None |
 
 ## Potion Data Flow
 
@@ -309,9 +309,12 @@ remain untouched; this Markdown describes the verified runtime lifecycle.
   At arming, it chooses the nearest eligible currently overlapping collider;
   later eligible entries trigger immediately. The trigger monitors the actor
   layer, not ordinary world walls.
-- **Source overlap:** placement tracks source bodies/areas already inside the
-  trigger. They are ineligible until all source overlaps leave; re-entry can
-  then trigger the bottle. If the source starts outside, it is already eligible.
+- **Source overlap:** after deferred monitoring activation, placement waits for
+  a completed physics step and its overlap-query flush before initializing the
+  source gate. Monitoring alone does not mean the overlap list is current.
+  Source bodies/areas initially inside the trigger remain ineligible until all
+  source overlaps leave; re-entry can then trigger the bottle. If the source
+  starts outside, its first later entry is eligible.
   Other actors may trigger after arming even while the source remains inside.
   Placement context uses `PotionDelivery.PLACE` and the subject world position.
 - **Successful release/use:** the controller clears the held slot and closes
@@ -463,14 +466,21 @@ Observed output on 2026-08-30 (all nine exited `0`):
 - `PotionDomainTests: PASS (17 tests)`
 - `PotionEffectPipelineTests: PASS (20 checks)`
 - `PotionEntityTests: PASS (54 checks)`
-- `PotionEntityCollisionTests: PASS (68 checks)`
+- `PotionEntityCollisionTests: PASS (119 checks)`
 - `PotionUseTests: PASS (89 checks)`
 
-Total: `806 checks` plus `17 domain tests`. `PlayerModelTests` deliberately
+Total: `857 checks` plus `17 domain tests`. `PlayerModelTests` deliberately
 reports missing `HandSocket_L` and `HandSocket_R` from its dependency-failure
 fixtures. The other eight suite stderr logs are empty. These runs include
 automated input and physics coverage but do not establish GUI appearance,
 audible music, or manual interaction quality.
+
+The collision regression includes idle placement without prewarming or disabling
+production physics, at both `0.35` and `0.0` seconds arming delay. It checks
+initial source immunity, source exit/re-entry, first entry from outside, and an
+already-overlapping non-source while the source stays inside. Competing eligible
+overlap selection, held-reagent rejection, and entity construction/attachment
+failure cleanup are not covered by these retained suites.
 
 ### Static Validation
 

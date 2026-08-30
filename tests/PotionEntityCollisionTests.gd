@@ -20,6 +20,10 @@ func _ready() -> void:
 	await _test_placed_target_waits_for_arming()
 	await _test_placed_caster_requires_exit_and_reentry()
 	await _test_placed_unsupported_target_is_consumed()
+	for delay in [0.35, 0.0]:
+		await _test_idle_placement_source_requires_exit_and_reentry(delay)
+		await _test_idle_placement_source_starts_outside(delay)
+		await _test_idle_placement_non_source_already_overlaps(delay)
 	if _failures.is_empty():
 		print("PotionEntityCollisionTests: PASS (%d checks)" % _check_count)
 		get_tree().quit(0)
@@ -255,6 +259,89 @@ func _test_placed_unsupported_target_is_consumed() -> void:
 	_expect(potion.is_consumed(), "unsupported placed target consumes potion instance")
 	_expect(not is_instance_valid(entity), "unsupported placed target consumes entity")
 	_cleanup([source, unsupported])
+
+
+func _test_idle_placement_source_requires_exit_and_reentry(delay: float) -> void:
+	# Start in idle, before the trigger has participated in any collision update.
+	# Production physics stays enabled throughout placement, arming, and re-entry.
+	await get_tree().process_frame
+	var source := _new_actor(true)
+	add_child(source)
+	var health := source.get_node(^"HealthComponent") as HealthComponent
+	var potion := _new_damage_potion()
+	var entity := _new_entity(potion, source)
+	entity.arming_delay = delay
+	var contexts: Array[PotionImpactContext] = []
+	entity.resolved.connect(func(context: PotionImpactContext, _count: int) -> void: contexts.append(context))
+	_expect(entity.is_physics_processing(), "idle placement uses production physics")
+	_expect(entity.place_into(self, Vector2.ZERO), "idle placement starts over source (delay %.2f)" % delay)
+	await _wait_live_physics_frames(30)
+	_expect(health.current_health == 100, "idle placement protects stationary initial source after arming (delay %.2f)" % delay)
+	_expect(not potion.is_consumed() and is_instance_valid(entity), "idle placement keeps initial source bottle available (delay %.2f)" % delay)
+	_expect(contexts.is_empty(), "idle placement emits no initial source resolution (delay %.2f)" % delay)
+	source.position = Vector2(100.0, 0.0)
+	await _wait_live_physics_frames(3)
+	_expect(contexts.is_empty(), "idle placement source exit does not resolve (delay %.2f)" % delay)
+	source.position = Vector2.ZERO
+	await _wait_live_physics_frames(3)
+	_expect(health.current_health == 70, "idle placement source re-entry applies damage (delay %.2f)" % delay)
+	_expect(contexts.size() == 1 and contexts[0].subject == source and contexts[0].delivery_method == PotionDelivery.PLACE, "idle placement source re-entry resolves once with place delivery (delay %.2f)" % delay)
+	_expect(potion.is_consumed() and not is_instance_valid(entity), "idle placement source re-entry consumes bottle (delay %.2f)" % delay)
+	await _cleanup([source])
+
+
+func _test_idle_placement_source_starts_outside(delay: float) -> void:
+	await get_tree().process_frame
+	var source := _new_actor(true)
+	source.position = Vector2(100.0, 0.0)
+	add_child(source)
+	var health := source.get_node(^"HealthComponent") as HealthComponent
+	var potion := _new_damage_potion()
+	var entity := _new_entity(potion, source)
+	entity.arming_delay = delay
+	var contexts: Array[PotionImpactContext] = []
+	entity.resolved.connect(func(context: PotionImpactContext, _count: int) -> void: contexts.append(context))
+	_expect(entity.place_into(self, Vector2.ZERO), "idle placement starts outside source (delay %.2f)" % delay)
+	await _wait_live_physics_frames(30)
+	_expect(health.current_health == 100 and not potion.is_consumed(), "outside source does not trigger at arming (delay %.2f)" % delay)
+	source.position = Vector2.ZERO
+	await _wait_live_physics_frames(3)
+	_expect(health.current_health == 70, "initially outside source triggers on first entry (delay %.2f)" % delay)
+	_expect(contexts.size() == 1 and contexts[0].subject == source, "initially outside source resolves once (delay %.2f)" % delay)
+	_expect(potion.is_consumed() and not is_instance_valid(entity), "initially outside source entry consumes bottle (delay %.2f)" % delay)
+	await _cleanup([source])
+
+
+func _test_idle_placement_non_source_already_overlaps(delay: float) -> void:
+	await get_tree().process_frame
+	var source := _new_actor(true)
+	var target := _new_actor(true)
+	target.position = Vector2(20.0, 0.0)
+	add_child(source)
+	add_child(target)
+	var source_health := source.get_node(^"HealthComponent") as HealthComponent
+	var target_health := target.get_node(^"HealthComponent") as HealthComponent
+	var potion := _new_damage_potion()
+	var entity := _new_entity(potion, source)
+	entity.arming_delay = delay
+	var contexts: Array[PotionImpactContext] = []
+	entity.resolved.connect(func(context: PotionImpactContext, _count: int) -> void: contexts.append(context))
+	_expect(entity.place_into(self, Vector2.ZERO), "idle placement starts over source and target (delay %.2f)" % delay)
+	if delay > 0.0:
+		await _wait_live_physics_frames(10)
+		_expect(target_health.current_health == 100 and not potion.is_consumed(), "live placement waits for arming before stationary target (delay %.2f)" % delay)
+	await _wait_live_physics_frames(30)
+	_expect(source_health.current_health == 100, "overlapping source stays immune beside target (delay %.2f)" % delay)
+	_expect(target_health.current_health == 70, "already overlapping non-source triggers while source stays inside (delay %.2f)" % delay)
+	_expect(contexts.size() == 1 and contexts[0].subject == target, "stationary non-source receives the only resolution (delay %.2f)" % delay)
+	_expect(potion.is_consumed() and not is_instance_valid(entity), "stationary non-source consumes bottle (delay %.2f)" % delay)
+	await _cleanup([source, target])
+
+
+func _wait_live_physics_frames(count: int) -> void:
+	for _step in range(count):
+		await get_tree().physics_frame
+		await get_tree().process_frame
 
 
 func _new_entity(potion: PotionInstance, caster: Node) -> PotionEntity:
