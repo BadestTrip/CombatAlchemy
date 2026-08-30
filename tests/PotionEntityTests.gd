@@ -61,6 +61,11 @@ func _test_state_transitions_preserve_identity() -> void:
 		and thrown.get_state() == PotionEntity.State.FLYING,
 		"invalid flying transitions fail without changing state"
 	)
+	_expect(
+		not thrown.discard()
+		and thrown.get_state() == PotionEntity.State.FLYING,
+		"public discard rejects flying without changing state"
+	)
 
 	var placed_potion := _new_damage_potion()
 	var placed := POTION_ENTITY_SCENE.instantiate() as PotionEntity
@@ -82,6 +87,11 @@ func _test_state_transitions_preserve_identity() -> void:
 		and not placed.drink(source)
 		and placed.get_state() == PotionEntity.State.PLACED,
 		"invalid placed transitions fail without changing state"
+	)
+	_expect(
+		not placed.discard()
+		and placed.get_state() == PotionEntity.State.PLACED,
+		"public discard rejects placed without changing state"
 	)
 
 	fixture.queue_free()

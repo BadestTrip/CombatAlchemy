@@ -117,7 +117,7 @@ func place_into(world_parent: Node2D, world_position: Vector2) -> bool:
 
 ## Consumes an initialized entity without applying effects.
 func discard() -> bool:
-	if not _initialized or _state == State.CONSUMED:
+	if not _initialized or _state != State.HELD:
 		return false
 	return _consume()
 
