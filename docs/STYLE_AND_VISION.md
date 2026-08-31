@@ -2,8 +2,8 @@
 
 > Status: Living creative reference
 > Working title: CombatAlchemy
-> Vision version: 0.2
-> Last updated: 2026-07-23
+> Vision version: 0.3
+> Last updated: 2026-08-28
 > Technical companion: [Project Architecture](./PROJECT_ARCHITECTURE.md)
 > Visual companion: [Art Reference Index](./ART_REFERENCE_INDEX.md)
 
@@ -72,6 +72,51 @@ Discovery is the identity of the game. Combat gives discovery urgency and a
 place to prove its value. Consequences give discoveries emotional weight. A
 feature that adds combat breadth but weakens experimentation should not outrank
 a smaller feature that makes observation and mixing more meaningful.
+
+## Project Goals and Scope
+
+CombatAlchemy has three scope layers. Planning must identify which layer a
+feature belongs to and must not describe a later layer as current behavior.
+
+### Product Goals
+
+1. **Make potion discovery the central skill.** Observation, mixing, testing,
+   and interpretation should create more progress than choosing predefined
+   attacks.
+2. **Apply reactions consistently.** Potion effects should interact through
+   focused capabilities so the same preparation can affect actors, props, or
+   environmental conditions when they support that reaction.
+3. **Create readable real-time combat.** Movement, enemy intent, mixing risk,
+   targeting, impact, and recovery must remain legible without a combat log.
+4. **Build layered reactive enemy AI.** The first enemies should notice,
+   pursue, telegraph, attack, recover, and react to potion effects. Later enemy
+   families may gain different perception, hazard awareness, group behavior,
+   and material-specific reactions.
+5. **Make reagents part of field decisions.** Reagents should eventually be
+   observed, collected, carried in limited quantities, and spent under pressure
+   rather than acting as unlimited ability charges.
+6. **Complete the expedition and refuge loop.** One authored expedition should
+   support observation, collection, danger, withdrawal or success, return, and
+   preparation for another attempt.
+7. **Use knowledge as progression.** Recorded reactions, reliable recipes,
+   unresolved hypotheses, and consequences should unlock decisions before
+   conventional statistic growth.
+8. **Deliver one cohesive presentation.** Ink-wash art, restrained audio,
+   animation, interface feedback, music, pause, settings, and transitions should
+   support one readable vertical slice before content breadth expands.
+
+### Scope Layers
+
+| Layer | Included goals |
+| --- | --- |
+| **Current foundation** | Player movement and collision, compact directional model workshop, three-layer flask mixing, capability-based potion effects, one produced potion instance represented by the same physical entity while held, thrown, placed, or drunk, health-bearing test actors, pause, settings, music, scene transitions, and main-menu routing. |
+| **Next playable proof** | One real enemy with readable reactive combat AI; reagent pickup and limited runtime carrying; potion reactions on selected world objects; health pressure; victory, defeat, and encounter reset; stronger flask, action, impact, and target feedback. |
+| **Long-term game** | Refuge and discovery record; authored expeditions; expanded enemy perception, hazard awareness, group behavior, and alchemical reactions; environmental experimentation; knowledge progression; concrete consequences; and a cohesive vertical slice. |
+
+The next playable proof does not require persistent simulation, broad systemic
+world AI, several enemy factions, a large inventory, or multiple expeditions.
+Those additions must wait until one enemy, one encounter loop, and one world
+reaction are readable and worth repeating.
 
 ## Design Pillars
 
@@ -151,9 +196,11 @@ The distinction in this table is mandatory in planning and communication.
 | --- | --- | --- |
 | Entry flow | Main Menu opens a potion combat sandbox | Main Menu leads to a refuge and expedition cycle |
 | Player | Movable 15-bone geometric-placeholder `PlayerModel` with a following camera, four separately authored positive-scale facings, idle/walk locomotion, and hand sockets retained for future interactions | A production-refined occult researcher informed by the G06 visual target, with simplified gameplay-scale detail, directional sets where needed, and practical field equipment |
-| Encounters | Stationary Friend and Foe test targets | Enemies, allies, terrain, and pressure create potion decisions |
+| Encounters | Stationary Friend and Foe test targets with no AI | The first enemy uses readable notice, pursuit, telegraph, attack, recovery, and potion-reaction states; later families add perception, hazard, and group differences |
 | Mixing | Three RGB layers and two count-based recipes | A readable rule set expanded through discoveries and ingredient properties |
-| Application | Drink self or throw at a target | Drink, throw, and later interact with selected world conditions |
+| Application | Create one physical potion, then drink it, throw it, place it on the ground, or discard it | Store prepared potions and apply them through selected world conditions without delivery-specific effect logic |
+| Reagents | Unlimited red, green, and blue input swatches | Observable and collectible reagent families with limited field availability |
+| World reactions | Physics walls consume projectiles but expose no reaction capability | Selected props and environmental conditions expose focused capabilities for useful alchemical reactions |
 | Animation | The compact `PlayerModel` has four separately authored idle/walk facing families only; it uses no horizontal mirroring, action clips, animated flask, or coattail rig | Refined sprite parts, stronger future action silhouettes, restrained secondary motion, and legible commit timing when action animation is deliberately added |
 | Progression | None | Knowledge and recorded discoveries lead; statistics remain secondary |
 | Expedition | Not implemented | Authored locations support observation, collection, risk, and return |
@@ -623,7 +670,7 @@ These lines define tone, not mandatory game text.
    separation between objects.
 9. Treat generated UI as a visual brief. Rebuild functional UI in Godot.
 10. Review generated work against the asset checklist before adding it to the
-    project.
+	project.
 
 ### Canonical Style Prefix
 
@@ -891,11 +938,12 @@ flask interaction language, and representative heal/damage reactions. Prove that
 ink-wash atmosphere and mechanical readability can coexist before producing many
 assets.
 
-#### 2. Expand Potion Interactions and Combat Decisions
+#### 2. Add Reactive Enemy AI and Expand Combat Decisions
 
-Add enough variation for observation, mixing, drinking, and throwing to create
-different decisions. Prioritize rule clarity and target reaction over recipe
-quantity.
+Build one complete enemy loop with notice, pursuit, telegraph, attack, recovery,
+and potion-specific reactions. Add enough variation for observation, mixing,
+drinking, throwing, and selected world reactions to create different decisions.
+Prioritize intent readability and reaction clarity over enemy or recipe quantity.
 
 #### 3. Build One Complete Expedition
 
