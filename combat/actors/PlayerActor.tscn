@@ -1,13 +1,14 @@
 [gd_scene format=3 uid="uid://clqe5778u4ymb"]
 
 [ext_resource type="Script" uid="uid://baai5w3oponna" path="res://combat/actors/PlayerCombatController.gd" id="1_controller"]
-[ext_resource type="Texture2D" uid="uid://7ca0l6tnv8mj" path="res://sprites/characters/overworld_character_TRUE_TRANSPARENT.png" id="2_am844"]
+[ext_resource type="PackedScene" path="res://characters/player/PlayerModel.tscn" id="2_model"]
 [ext_resource type="Script" uid="uid://ceb28uu6sjyvt" path="res://combat/actors/HealthComponent.gd" id="3_health"]
-[ext_resource type="Script" uid="uid://b4v6tckq5puxn" path="res://combat/actors/PotionTarget.gd" id="4_target"]
-[ext_resource type="PackedScene" path="res://combat/actors/ActorHealthBar.tscn" id="5_health_bar"]
+[ext_resource type="Script" uid="uid://lcffl22wfauv" path="res://combat/actors/ImpactHitbox.gd" id="4_hitbox"]
+[ext_resource type="PackedScene" uid="uid://doydsebyrlpr6" path="res://combat/actors/ActorHealthBar.tscn" id="5_health_bar"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
-radius = 36.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 31.0
+height = 120.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_target"]
 radius = 42.0
@@ -15,36 +16,35 @@ radius = 42.0
 [node name="PlayerActor" type="CharacterBody2D" unique_id=1046958855]
 script = ExtResource("1_controller")
 
-[node name="PlayerVisual" type="Sprite2D" parent="." unique_id=2048231341]
-scale = Vector2(0.1, 0.1)
-texture = ExtResource("2_am844")
+[node name="PlayerModel" parent="." unique_id=2048231341 instance=ExtResource("2_model")]
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1640418613]
+position = Vector2(0, -55)
+zoom = Vector2(2, 2)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=442346357]
-shape = SubResource("CircleShape2D_body")
+position = Vector2(0, -22)
+shape = SubResource("CapsuleShape2D_body")
 
 [node name="HealthComponent" type="Node" parent="." unique_id=468260572]
 script = ExtResource("3_health")
 current_health = 70
 
-[node name="PotionTarget" type="Area2D" parent="." unique_id=1609726918]
+[node name="ImpactHitbox" type="Area2D" parent="." unique_id=1609726918]
 collision_layer = 2
 collision_mask = 0
-script = ExtResource("4_target")
-health_component_path = NodePath("../HealthComponent")
+script = ExtResource("4_hitbox")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PotionTarget" unique_id=1166987761]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ImpactHitbox" unique_id=1166987761]
+visible = false
 shape = SubResource("CircleShape2D_target")
 
 [node name="ActorHealthBar" parent="." unique_id=1975705846 instance=ExtResource("5_health_bar")]
-layout_mode = 3
-anchors_preset = 0
 offset_left = -70.0
-offset_top = -102.0
+offset_top = -166.0
 offset_right = 70.0
-offset_bottom = -54.0
+offset_bottom = -118.0
 display_name = "Player"
 health_component_path = NodePath("../HealthComponent")

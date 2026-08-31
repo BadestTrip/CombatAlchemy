@@ -7,6 +7,8 @@ extends Node
 signal health_changed(current_health: int, max_health: int)
 ## Emitted only when health moves from a positive value to zero.
 signal depleted
+## Emitted when take_damage removes positive health, with the amount actually removed.
+signal damaged(amount: int)
 
 var _max_health: int = 100
 var _current_health: int = 100
@@ -32,6 +34,8 @@ func take_damage(amount: int) -> int:
 		return 0
 	var actual_damage := mini(amount, _current_health)
 	current_health = _current_health - actual_damage
+	if actual_damage > 0:
+		damaged.emit(actual_damage)
 	return actual_damage
 
 

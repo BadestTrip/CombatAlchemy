@@ -1,14 +1,15 @@
 # CombatAlchemy Art Reference Index
 
 > Status: Visual development reference
-> Pack version: 1.0
+> Pack version: 1.2
 > Created: 2026-07-17
+> Updated: 2026-07-23
 > Creative source of truth: [Style and Vision](./STYLE_AND_VISION.md)
 
 ## Purpose
 
 This pack translates the CombatAlchemy style bible into concrete visual targets.
-It combines five project-specific generated concept plates with five historical
+It combines six project-specific generated concept plates with five historical
 public-domain works. Use the generated plates to align gameplay presentation.
 Use the sourced works to study individual techniques such as wash, value grouping,
 architectural density, silhouette, and apparatus construction.
@@ -25,6 +26,7 @@ reproduce its complete composition. Extract only the quality identified in its
 | --- | --- |
 | `ART_REF_G01_GAMEPLAY_NORTH_STAR.png` | Camera, arena readability, restrained color, flask placement |
 | `ART_REF_G02_RESEARCHER_SHEET.png` | Researcher silhouette, equipment, drink and throw poses |
+| `ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png` | Visual costume, silhouette, perspective, and directional-part reference |
 | `ART_REF_G03_ENEMY_PROCESS_SHEET.png` | Material-driven enemy families and gameplay silhouettes |
 | `ART_REF_G04_FLASK_UI_STATES.png` | Flask state consistency and physical mixer feedback |
 | `ART_REF_G05_POTION_VFX.png` | Healing and damage effect timing language |
@@ -39,6 +41,14 @@ reproduce its complete composition. Extract only the quality identified in its
 The following images were generated specifically as CombatAlchemy concept
 references. They are not production-ready assets. Rebuild final UI, sprites,
 effects, and environments for their actual in-engine requirements.
+
+The active Player uses the 15-bone `characters/player/PlayerModel.tscn` with
+geometric placeholders and four authored facings. G02 and G06 remain visual
+references for costume, silhouette, perspective, and future directional sprite
+parts; neither image defines an active atlas pipeline. Preserve the skeletal
+contract when producing replacement art: use separate body parts, pivots at
+local joint zero, and enough hidden overlap to cover the authored motion range.
+The replacement workflow is documented in `characters/player/README.md`.
 
 ### G01: Gameplay North Star
 
@@ -107,6 +117,10 @@ Avoid: photorealism, glossy 3D, anime, cel shading, cheerful cozy fantasy, neon 
 - Simplify interior costume detail aggressively at gameplay scale.
 - Keep the flask hand separated from the torso during actions.
 - Preserve the same joint placement when preparing future cutout-animation parts.
+- Treat the current researcher rig as a working motion, pivot, timing, and
+  assembly reference rather than immutable final anatomy or surface detail.
+- Deliver head, torso, upper/lower limbs, hands, feet, and articulated coat
+  sections as separate transparent assets when preparing production cutout art.
 
 <details>
 <summary>Exact generation prompt</summary>
@@ -121,6 +135,61 @@ Composition: wide concept sheet on a quiet paper-bone background with generous e
 Lighting/mood: upper-left key light, cool neutral ambience, very restrained ember reflection on copper. Soot-black and weathered parchment clothing; only one held liquid uses a small saturated lapis-blue accent.
 Constraints: cautious attentive posture, practical scholar before warrior, functional wear and repairs, no written annotations.
 Avoid: photorealism, glossy 3D, anime, cel shading, heroic power pose, wizard staff, glowing hands, stars, symbols, runes, chants, generic spellcasting, robes covered in glyphs, ornate armor, oversized weapon, glamorous fashion pose, excessive belts, excessive particles, heavy bloom, text, letters, labels, logo, signature, watermark.
+```
+
+</details>
+
+### G06: Researcher Cutout Target
+
+![Approved researcher cutout target](./ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png)
+
+**Use for**
+
+- The approved elevated top-down three-quarter perspective for future
+  four-facing directional sprite parts.
+- Consistent hat, obscured face, weathered coat, glass apparatus, satchel,
+  gloves, and boots across articulated parts.
+- A neutral A-pose that exposes shoulder, elbow, wrist, hip, knee, ankle, and
+  coat attachment seams.
+- Upper-left lighting and a restrained charcoal, parchment, copper, and glass
+  material hierarchy.
+
+**Do not copy**
+
+- Every strap, crack, scale-like fabric mark, or glass fitting as mandatory
+  final production detail.
+- The flattened target image as a gameplay sprite.
+- The single reference view as a substitute for authored directional art.
+- Chroma-background pixels or cleanup artifacts.
+
+**Production observations**
+
+- G06 is a visual costume and silhouette reference, not an active atlas
+  pipeline.
+- The active compact workshop uses geometric placeholders pending new
+  directional sprite parts.
+- Simplify internal texture noise before final production art; silhouette,
+  joints, and action readability take priority.
+- Preserve the 15-bone hierarchy, separate left/right facings, joint pivots,
+  positive scale, and stable sockets documented in
+  [`characters/player/README.md`](../characters/player/README.md).
+
+<details>
+<summary>Approved generation prompt</summary>
+
+```text
+Create one detailed forbidden occult field researcher for a pure 2D raster
+skeletal cutout game. Match the CombatAlchemy researcher references: broad
+weathered hat, face obscured by shadow and scarf, long asymmetrical dark coat,
+repaired chest glassware, copper fittings, sample satchel, field notebook,
+gloves, and practical boots. Show one full-body elevated top-down
+three-quarter view in a neutral mild A-pose, with both arms separated from the
+torso and both legs separated enough to expose every future joint. Both hands
+are empty. Preserve consistent upper-left lighting, strong gameplay
+silhouette, charcoal and ink-wash texture, restrained parchment highlights,
+and deliberate wear. Use a perfectly flat solid #ff00ff background. No floor,
+shadow, text, labels, grid, watermark, runes, spellcasting, weapon, potion,
+glossy 3D, anime rendering, or cropped body parts.
 ```
 
 </details>

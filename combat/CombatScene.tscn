@@ -8,7 +8,9 @@
 [ext_resource type="Script" uid="uid://dx7nefyynlygw" path="res://combat/potions/PotionMixer.gd" id="5_mixer"]
 [ext_resource type="Texture2D" uid="uid://dweoepaulchsb" path="res://sprites/characters/mini_boss_TRUE_TRANSPARENT.png" id="5_x7jh1"]
 [ext_resource type="Resource" path="res://combat/potions/resources/PotionRecipeBook_Default.tres" id="6_recipe_book"]
+[ext_resource type="Script" path="res://combat/potions/HeldPotionSlot.gd" id="6_slot"]
 [ext_resource type="PackedScene" path="res://combat/ui/PotionMixerUI.tscn" id="7_mixer_ui"]
+[ext_resource type="PackedScene" path="res://combat/potions/PotionEntity.tscn" id="7_potion_entity"]
 [ext_resource type="PackedScene" uid="uid://mt3v0si0wmk7" path="res://ui/PauseMenu.tscn" id="8_pause_menu"]
 [ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="9_level_music"]
 [ext_resource type="AudioStream" uid="uid://d3klg2jyuwpp0" path="res://music/CombatNew.mp3" id="12_x7jh1"]
@@ -17,14 +19,16 @@
 script = ExtResource("1_controller")
 potion_input_path = NodePath("Systems/PotionInput")
 potion_mixer_path = NodePath("Systems/PotionMixer")
+held_potion_slot_path = NodePath("Systems/HeldPotionSlot")
 potion_mixer_ui_path = NodePath("UI/PotionMixerUI")
 player_combat_controller_path = NodePath("Arena/Player")
-player_potion_target_path = NodePath("Arena/Player/PotionTarget")
-projectiles_parent_path = NodePath("Arena/Projectiles")
+potion_entities_parent_path = NodePath("Arena/PotionEntities")
+potion_entity_scene = ExtResource("7_potion_entity")
 
 [node name="Arena" type="Node2D" parent="." unique_id=874053048]
 
 [node name="ArenaFloor" type="ColorRect" parent="Arena" unique_id=1914808651]
+z_index = -20
 offset_left = -1800.0
 offset_top = -1100.0
 offset_right = 1800.0
@@ -45,8 +49,6 @@ texture = ExtResource("4_x7jh1")
 current_health = 50
 
 [node name="ActorHealthBar" parent="Arena/Friend" index="3"]
-layout_mode = 3
-anchors_preset = 0
 offset_left = 0.0
 offset_top = 0.0
 offset_right = 140.0
@@ -61,15 +63,13 @@ scale = Vector2(0.1, 0.1)
 texture = ExtResource("5_x7jh1")
 
 [node name="ActorHealthBar" parent="Arena/Foe" index="3"]
-layout_mode = 3
-anchors_preset = 0
 offset_left = 0.0
 offset_top = 0.0
 offset_right = 140.0
 offset_bottom = 48.0
 display_name = "Foe"
 
-[node name="Projectiles" type="Node2D" parent="Arena" unique_id=223784400]
+[node name="PotionEntities" type="Node2D" parent="Arena" unique_id=223784400]
 
 [node name="Systems" type="Node" parent="." unique_id=1554141428]
 
@@ -79,6 +79,9 @@ script = ExtResource("4_input")
 [node name="PotionMixer" type="Node" parent="Systems" unique_id=1353335448]
 script = ExtResource("5_mixer")
 recipe_book = ExtResource("6_recipe_book")
+
+[node name="HeldPotionSlot" type="Node" parent="Systems"]
+script = ExtResource("6_slot")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=63518013]
 
