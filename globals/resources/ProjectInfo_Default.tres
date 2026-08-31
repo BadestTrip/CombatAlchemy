@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_project_info")
-project_version = "Version 0.1.8"
-current_focus = "Player Movement"
+project_version = "Version 0.2.1"
+current_focus = "First game loop"
 build_label = "Prototype"
