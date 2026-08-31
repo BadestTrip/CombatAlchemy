@@ -1,6 +1,8 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://combat/potions/PotionRecipeData.gd" id="1_recipe"]
+[ext_resource type="Resource" path="res://combat/potions/resources/effects/Heal30.tres" id="2_effect"]
+[ext_resource type="Script" path="res://combat/potions/effects/PotionEffectData.gd" id="3_effect_type"]
 
 [resource]
 script = ExtResource("1_recipe")
@@ -8,5 +10,5 @@ recipe_id = "health_potion"
 display_name = "Health Potion"
 red_count = 2
 blue_count = 1
-effect_amount = 30
+effects = Array[ExtResource("3_effect_type")]([ExtResource("2_effect")])
 mixed_color = Color(0.8, 0.2, 0.8, 1)

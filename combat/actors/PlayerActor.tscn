@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://baai5w3oponna" path="res://combat/actors/PlayerCombatController.gd" id="1_controller"]
 [ext_resource type="PackedScene" path="res://characters/player/PlayerModel.tscn" id="2_model"]
 [ext_resource type="Script" uid="uid://ceb28uu6sjyvt" path="res://combat/actors/HealthComponent.gd" id="3_health"]
-[ext_resource type="Script" path="res://combat/actors/ImpactHitbox.gd" id="4_hitbox"]
+[ext_resource type="Script" uid="uid://lcffl22wfauv" path="res://combat/actors/ImpactHitbox.gd" id="4_hitbox"]
 [ext_resource type="PackedScene" uid="uid://doydsebyrlpr6" path="res://combat/actors/ActorHealthBar.tscn" id="5_health_bar"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]

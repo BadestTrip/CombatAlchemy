@@ -1,9 +1,7 @@
 class_name PotionRecipeData
 extends Resource
 
-# Responsibility: Describe and validate one exact three-layer potion recipe.
-
-enum EffectType { HEAL, DAMAGE }
+# Responsibility: Describe one exact three-layer recipe and its composable effects.
 
 ## The stable identifier used to distinguish this recipe.
 @export var recipe_id: String = ""
@@ -15,17 +13,22 @@ enum EffectType { HEAL, DAMAGE }
 @export var green_count: int = 0
 ## The number of blue reagent layers required.
 @export var blue_count: int = 0
-## The effect applied when this recipe is consumed.
-@export var effect_type: EffectType = EffectType.HEAL
-## The positive magnitude of the recipe effect.
-@export var effect_amount: int = 0
+## Stateless effects attempted when this potion is delivered to an object.
+@export var effects: Array[PotionEffectData] = []
 ## The display color of the prepared potion.
 @export var mixed_color: Color = Color.WHITE
 
 
-## Returns whether this recipe has exactly three layers and a positive effect.
+## Returns whether this recipe has exactly three layers and valid effects.
 func is_valid() -> bool:
-	return red_count >= 0 and green_count >= 0 and blue_count >= 0 and _total_layers() == 3 and effect_amount > 0
+	if red_count < 0 or green_count < 0 or blue_count < 0 or _total_layers() != 3:
+		return false
+	if effects.is_empty():
+		return false
+	for effect in effects:
+		if effect == null or not effect.is_valid():
+			return false
+	return true
 
 
 ## Returns whether layers contain this recipe's exact reagent counts in any order.

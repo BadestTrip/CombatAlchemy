@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://combat/actors/HealthComponent.gd" id="1_health"]
-[ext_resource type="Script" path="res://combat/actors/PotionTarget.gd" id="2_target"]
+[ext_resource type="Script" path="res://combat/actors/ImpactHitbox.gd" id="2_hitbox"]
 [ext_resource type="PackedScene" path="res://combat/actors/ActorHealthBar.tscn" id="3_health_bar"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_target"]
@@ -17,13 +17,12 @@ script = ExtResource("1_health")
 max_health = 100
 current_health = 100
 
-[node name="PotionTarget" type="Area2D" parent="."]
+[node name="ImpactHitbox" type="Area2D" parent="."]
 collision_layer = 2
 collision_mask = 0
-script = ExtResource("2_target")
-health_component_path = NodePath("../HealthComponent")
+script = ExtResource("2_hitbox")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PotionTarget"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ImpactHitbox"]
 shape = SubResource("CircleShape2D_target")
 
 [node name="ActorHealthBar" parent="." instance=ExtResource("3_health_bar")]
