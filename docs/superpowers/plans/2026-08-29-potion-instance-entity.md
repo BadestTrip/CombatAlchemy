@@ -25,14 +25,14 @@ Use this helper for every Godot command so Windows waits for the real editor pro
 ```powershell
 $godot = 'D:\SteamLibrary\steamapps\common\Godot Engine\godot.windows.opt.tools.64.exe'
 function Invoke-GodotWait([string]$arguments) {
-    $psi = [System.Diagnostics.ProcessStartInfo]::new()
-    $psi.FileName = $godot
-    $psi.Arguments = $arguments
-    $psi.WorkingDirectory = (Get-Location).Path
-    $psi.UseShellExecute = $false
-    $process = [System.Diagnostics.Process]::Start($psi)
-    $process.WaitForExit()
-    if ($process.ExitCode -ne 0) { throw "Godot exited $($process.ExitCode)" }
+	$psi = [System.Diagnostics.ProcessStartInfo]::new()
+	$psi.FileName = $godot
+	$psi.Arguments = $arguments
+	$psi.WorkingDirectory = (Get-Location).Path
+	$psi.UseShellExecute = $false
+	$process = [System.Diagnostics.Process]::Start($psi)
+	$process.WaitForExit()
+	if ($process.ExitCode -ne 0) { throw "Godot exited $($process.ExitCode)" }
 }
 ```
 
@@ -62,33 +62,33 @@ Create a headless test scene whose script checks these exact behaviors:
 const HEALTH_POTION := preload("res://combat/potions/resources/HealthPotion.tres")
 
 func _test_instance_creation_and_copy() -> void:
-    var source_layers: Array[StringName] = [PotionReagent.BLUE, PotionReagent.RED, PotionReagent.RED]
-    var potion := PotionInstance.create(HEALTH_POTION, source_layers)
-    _expect(potion != null and potion.is_valid(), "matching layers create a valid instance")
-    source_layers.clear()
-    _expect(potion.get_created_layers() == [PotionReagent.BLUE, PotionReagent.RED, PotionReagent.RED], "instance owns a layer copy")
-    _expect(potion.get_recipe() == HEALTH_POTION, "instance references its immutable recipe")
-    _expect(potion.get_color().is_equal_approx(HEALTH_POTION.mixed_color), "instance exposes recipe color")
+	var source_layers: Array[StringName] = [PotionReagent.BLUE, PotionReagent.RED, PotionReagent.RED]
+	var potion := PotionInstance.create(HEALTH_POTION, source_layers)
+	_expect(potion != null and potion.is_valid(), "matching layers create a valid instance")
+	source_layers.clear()
+	_expect(potion.get_created_layers() == [PotionReagent.BLUE, PotionReagent.RED, PotionReagent.RED], "instance owns a layer copy")
+	_expect(potion.get_recipe() == HEALTH_POTION, "instance references its immutable recipe")
+	_expect(potion.get_color().is_equal_approx(HEALTH_POTION.mixed_color), "instance exposes recipe color")
 
 func _test_invalid_creation() -> void:
-    _expect(PotionInstance.create(null, []) == null, "null recipe is rejected")
-    var wrong: Array[StringName] = [PotionReagent.RED, PotionReagent.GREEN, PotionReagent.BLUE]
-    _expect(PotionInstance.create(HEALTH_POTION, wrong) == null, "nonmatching layers are rejected")
+	_expect(PotionInstance.create(null, []) == null, "null recipe is rejected")
+	var wrong: Array[StringName] = [PotionReagent.RED, PotionReagent.GREEN, PotionReagent.BLUE]
+	_expect(PotionInstance.create(HEALTH_POTION, wrong) == null, "nonmatching layers are rejected")
 
 func _test_apply_once_and_discard() -> void:
-    var actor := Node2D.new()
-    var health := HealthComponent.new()
-    health.max_health = 100
-    health.current_health = 50
-    actor.add_child(health)
-    add_child(actor)
-    var context := PotionImpactContext.new().configure(actor, actor, actor, Vector2.ZERO, Vector2.ZERO, PotionDelivery.DRINK)
-    var potion := PotionInstance.create(HEALTH_POTION, [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE])
-    _expect(potion.apply(context) == 1 and health.current_health == 80, "first valid application resolves")
-    _expect(potion.apply(context) == 0 and health.current_health == 80, "second application is rejected")
-    var discarded := PotionInstance.create(HEALTH_POTION, [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE])
-    _expect(discarded.discard(), "unused potion can be discarded")
-    _expect(not discarded.discard() and discarded.is_consumed(), "discard is idempotent")
+	var actor := Node2D.new()
+	var health := HealthComponent.new()
+	health.max_health = 100
+	health.current_health = 50
+	actor.add_child(health)
+	add_child(actor)
+	var context := PotionImpactContext.new().configure(actor, actor, actor, Vector2.ZERO, Vector2.ZERO, PotionDelivery.DRINK)
+	var potion := PotionInstance.create(HEALTH_POTION, [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE])
+	_expect(potion.apply(context) == 1 and health.current_health == 80, "first valid application resolves")
+	_expect(potion.apply(context) == 0 and health.current_health == 80, "second application is rejected")
+	var discarded := PotionInstance.create(HEALTH_POTION, [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE])
+	_expect(discarded.discard(), "unused potion can be discarded")
+	_expect(not discarded.discard() and discarded.is_consumed(), "discard is idempotent")
 ```
 
 Also assert that an unsupported but valid wall context consumes the potion and returns `0`, and that an invalid context does not consume it.
@@ -118,24 +118,24 @@ Create `PotionInstance.gd` with private `_recipe`, copied `_created_layers`, and
 
 ```gdscript
 static func create(recipe: PotionRecipeData, layers: Array[StringName]) -> PotionInstance:
-    if recipe == null or not recipe.is_valid() or not recipe.matches_layers(layers):
-        return null
-    var potion := PotionInstance.new()
-    potion._recipe = recipe
-    potion._created_layers.append_array(layers)
-    return potion
+	if recipe == null or not recipe.is_valid() or not recipe.matches_layers(layers):
+		return null
+	var potion := PotionInstance.new()
+	potion._recipe = recipe
+	potion._created_layers.append_array(layers)
+	return potion
 
 func apply(context: PotionImpactContext) -> int:
-    if _consumed or not is_valid() or context == null or not context.is_valid():
-        return 0
-    _consumed = true
-    return PotionEffectResolver.apply_recipe(_recipe, context)
+	if _consumed or not is_valid() or context == null or not context.is_valid():
+		return 0
+	_consumed = true
+	return PotionEffectResolver.apply_recipe(_recipe, context)
 
 func discard() -> bool:
-    if _consumed:
-        return false
-    _consumed = true
-    return true
+	if _consumed:
+		return false
+	_consumed = true
+	return true
 ```
 
 Return copies from `get_created_layers()`. `is_valid()` requires a valid recipe, three matching copied layers, and no null recipe.
