@@ -1,0 +1,309 @@
+[gd_scene format=3 uid="uid://sqhvbincdxgg"]
+
+[ext_resource type="Script" uid="uid://dyhjpsxnmcf5t" path="res://mainmenu/MainMenuBackdrop.gd" id="1_backdrop"]
+[ext_resource type="Script" uid="uid://bad82fb6r8gxr" path="res://mainmenu/LoopingPixelLayer.gd" id="2_loop"]
+[ext_resource type="Texture2D" uid="uid://ehyli3ojpnpu" path="res://sprites/main_menu/animated/main_menu_lab_base.png" id="3_base"]
+[ext_resource type="Texture2D" uid="uid://cmslbx3ymscsn" path="res://sprites/main_menu/animated/clouds_far.png" id="4_far"]
+[ext_resource type="Texture2D" uid="uid://dqsoyoy2cyj8h" path="res://sprites/main_menu/animated/clouds_near.png" id="5_near"]
+[ext_resource type="Texture2D" uid="uid://ujjcu6jl2wkx" path="res://sprites/main_menu/animated/foliage_frames.png" id="6_foliage"]
+[ext_resource type="Texture2D" uid="uid://dmcgpl7nsx1au" path="res://sprites/main_menu/animated/note_frames.png" id="7_notes"]
+[ext_resource type="PackedScene" uid="uid://dysbknl636ayr" path="res://vfx/reactive_crystal/ReactiveCrystalPile.tscn" id="8_pile"]
+
+[sub_resource type="AtlasTexture" id="Foliage0"]
+atlas = ExtResource("6_foliage")
+region = Rect2(0, 0, 128, 160)
+
+[sub_resource type="AtlasTexture" id="Foliage1"]
+atlas = ExtResource("6_foliage")
+region = Rect2(128, 0, 128, 160)
+
+[sub_resource type="AtlasTexture" id="Foliage2"]
+atlas = ExtResource("6_foliage")
+region = Rect2(256, 0, 128, 160)
+
+[sub_resource type="AtlasTexture" id="Foliage3"]
+atlas = ExtResource("6_foliage")
+region = Rect2(384, 0, 128, 160)
+
+[sub_resource type="SpriteFrames" id="FoliageFrames"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Foliage0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Foliage1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Foliage2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Foliage3")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 1.25
+}]
+
+[sub_resource type="AtlasTexture" id="Note0"]
+atlas = ExtResource("7_notes")
+region = Rect2(0, 0, 96, 128)
+
+[sub_resource type="AtlasTexture" id="Note1"]
+atlas = ExtResource("7_notes")
+region = Rect2(96, 0, 96, 128)
+
+[sub_resource type="AtlasTexture" id="Note2"]
+atlas = ExtResource("7_notes")
+region = Rect2(192, 0, 96, 128)
+
+[sub_resource type="AtlasTexture" id="Note3"]
+atlas = ExtResource("7_notes")
+region = Rect2(288, 0, 96, 128)
+
+[sub_resource type="SpriteFrames" id="NoteFrames"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Note0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Note1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Note2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Note3")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 1.111111
+}]
+
+[sub_resource type="Animation" id="AmbientReset"]
+length = 0.1
+
+[sub_resource type="Animation" id="AmbientSway"]
+resource_name = "ambient_sway"
+length = 3.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Notes/Note1:rotation")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.9, 1.8, 2.7, 3.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [-0.0174533, 0.0, 0.0174533, 0.0, -0.0174533]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Notes/Note2:rotation")
+tracks/1/interp = 0
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.9, 1.8, 2.7, 3.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [0.0, 0.020944, 0.0, -0.020944, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Notes/Note3:rotation")
+tracks/2/interp = 0
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.9, 1.8, 2.7, 3.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [0.015708, 0.0, -0.015708, 0.0, 0.015708]
+}
+
+[sub_resource type="AnimationLibrary" id="AmbientLibrary"]
+_data = {
+&"RESET": SubResource("AmbientReset"),
+&"ambient_sway": SubResource("AmbientSway")
+}
+
+[node name="MainMenuBackdrop" type="Control" unique_id=440197521]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+script = ExtResource("1_backdrop")
+
+[node name="Base" type="TextureRect" parent="." unique_id=1319282824]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_base")
+expand_mode = 1
+
+[node name="CloudWindow" type="Control" parent="." unique_id=954973514]
+clip_contents = true
+anchors_preset = 0
+offset_left = 1247.0
+offset_top = 21.0
+offset_right = 1833.0
+offset_bottom = 410.0
+mouse_filter = 2
+
+[node name="FarClouds" type="Control" parent="CloudWindow" unique_id=2002249789]
+modulate = Color(1, 1, 1, 0.8)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_loop")
+speed_pixels_per_second = 8.0
+
+[node name="TileA" type="TextureRect" parent="CloudWindow/FarClouds" unique_id=864690496]
+layout_mode = 0
+offset_left = 227.0
+offset_top = 36.0
+offset_right = 2048.0
+offset_bottom = 216.0
+mouse_filter = 2
+texture = ExtResource("4_far")
+expand_mode = 1
+
+[node name="TileB" type="TextureRect" parent="CloudWindow/FarClouds" unique_id=1866121047]
+layout_mode = 0
+offset_left = -2048.0
+offset_top = 36.0
+offset_right = 227.0
+offset_bottom = 216.0
+mouse_filter = 2
+texture = ExtResource("4_far")
+expand_mode = 1
+
+[node name="NearClouds" type="Control" parent="CloudWindow" unique_id=2097113463]
+modulate = Color(1, 1, 1, 0.35)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_loop")
+speed_pixels_per_second = 16.0
+
+[node name="TileA" type="TextureRect" parent="CloudWindow/NearClouds" unique_id=403015054]
+layout_mode = 0
+offset_left = 227.0
+offset_top = 162.0
+offset_right = 2048.0
+offset_bottom = 382.0
+mouse_filter = 2
+texture = ExtResource("5_near")
+expand_mode = 1
+
+[node name="TileB" type="TextureRect" parent="CloudWindow/NearClouds" unique_id=1270646012]
+layout_mode = 0
+offset_left = -2048.0
+offset_top = 162.0
+offset_right = 227.0
+offset_bottom = 382.0
+mouse_filter = 2
+texture = ExtResource("5_near")
+expand_mode = 1
+
+[node name="Foliage" type="Node2D" parent="." unique_id=1004366329]
+
+[node name="FoliageLeft" type="AnimatedSprite2D" parent="Foliage" unique_id=648820491]
+position = Vector2(1182, 254)
+scale = Vector2(0.65, 0.65)
+sprite_frames = SubResource("FoliageFrames")
+autoplay = "default"
+
+[node name="FoliageRight" type="AnimatedSprite2D" parent="Foliage" unique_id=674359810]
+position = Vector2(1710, 706)
+scale = Vector2(0.75, 0.75)
+sprite_frames = SubResource("FoliageFrames")
+autoplay = "default"
+frame = 2
+frame_progress = 0.5
+flip_h = true
+
+[node name="Notes" type="Node2D" parent="." unique_id=1611360199]
+
+[node name="Note1" type="AnimatedSprite2D" parent="Notes" unique_id=435806817]
+position = Vector2(688.02997, 342.59106)
+scale = Vector2(0.55, 0.55)
+sprite_frames = SubResource("NoteFrames")
+autoplay = "default"
+
+[node name="Note2" type="AnimatedSprite2D" parent="Notes" unique_id=1653672059]
+position = Vector2(776.5396, 347.40442)
+scale = Vector2(0.6, 0.6)
+sprite_frames = SubResource("NoteFrames")
+autoplay = "default"
+frame = 1
+frame_progress = 0.25
+
+[node name="Note3" type="AnimatedSprite2D" parent="Notes" unique_id=1732688069]
+position = Vector2(852.44867, 342.80157)
+scale = Vector2(0.55, 0.55)
+sprite_frames = SubResource("NoteFrames")
+autoplay = "default"
+frame = 2
+frame_progress = 0.5
+
+[node name="ReagentLights" type="Node2D" parent="." unique_id=818790857]
+
+[node name="TableRed" parent="ReagentLights" unique_id=361553406 instance=ExtResource("8_pile")]
+position = Vector2(666.94904, 484.4481)
+random_seed = 11
+
+[node name="TableGreen" parent="ReagentLights" unique_id=492329564 instance=ExtResource("8_pile")]
+position = Vector2(767.62396, 487.91797)
+color_id = &"green"
+crystal_color = Color(0.611765, 1, 0.219608, 1)
+random_seed = 23
+
+[node name="TableBlue" parent="ReagentLights" unique_id=1285559592 instance=ExtResource("8_pile")]
+position = Vector2(917, 381)
+color_id = &"blue"
+crystal_color = Color(0.160784, 0.85098, 1, 1)
+random_seed = 37
+
+[node name="ShelfRed" parent="ReagentLights" unique_id=1361588578 instance=ExtResource("8_pile")]
+position = Vector2(725, 172)
+scale = Vector2(0.55, 0.55)
+mote_amount = 2
+random_seed = 53
+
+[node name="ShelfGreen" parent="ReagentLights" unique_id=1849414478 instance=ExtResource("8_pile")]
+position = Vector2(836, 169)
+scale = Vector2(0.55, 0.55)
+color_id = &"green"
+crystal_color = Color(0.611765, 1, 0.219608, 1)
+mote_amount = 2
+random_seed = 71
+
+[node name="ShelfBlue" parent="ReagentLights" unique_id=1229332807 instance=ExtResource("8_pile")]
+position = Vector2(911, 302)
+scale = Vector2(0.55, 0.55)
+color_id = &"blue"
+crystal_color = Color(0.160784, 0.85098, 1, 1)
+mote_amount = 2
+random_seed = 89
+
+[node name="AmbientAnimation" type="AnimationPlayer" parent="." unique_id=1803234181]
+libraries/ = SubResource("AmbientLibrary")
+autoplay = &"ambient_sway"

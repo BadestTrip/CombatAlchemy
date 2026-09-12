@@ -1,10 +1,13 @@
 # Project Architecture
 
 > Status: Technical source of truth
-> Automated verification: 2026-08-30 with Godot 4.7.2; GUI/manual checks pending
+> Documentation review: 2026-09-15; small-flask combat brewing implemented
+> Automated verification: current results are recorded below
 > Creative companion: [Style and Vision](./STYLE_AND_VISION.md)
 > Player model guide: [PlayerModel](../characters/player/README.md)
 > Visual reference pack: [Art Reference Index](./ART_REFERENCE_INDEX.md)
+> Approved presentation plan: [Pixel-Art Conversion](./plannings/plans/2026-09-12-pixel-art-conversion.md)
+> Approved gameplay direction: [Brewing, Vessels, and Strategic Placement](./plannings/specs/2026-09-15-potion-brewing-vision-design.md)
 
 ## Project Scope
 
@@ -13,30 +16,87 @@ real-time potion combat sandbox reached from the main menu. The current slice
 has player movement and collision, actors with reusable health components,
 capability-based potion effects, one held physical potion, immediate drinking,
 throwing and proximity placement,
-mixer UI, scene transitions, music, settings, and pause navigation.
+hold/release/settle small-flask brewing, mixer UI, scene transitions, music,
+settings, and pause navigation.
 
 There is no exploration layer, enemy AI, victory state, defeat state,
 permanent save data, reagent inventory, or automatic combat-completion return
 flow. The next technical goals, in order, are:
 
-1. Add one enemy entity with readable notice, pursuit, telegraph, attack,
+1. Review and tune the implemented animated main menu; decide gameplay
+   composition before converting gameplay presentation or fixing gameplay asset sizes.
+2. Playtest and tune the implemented small-flask hold/release/settle interaction
+   before adding more recipes or vessel tiers.
+3. Add one enemy entity with readable notice, pursuit, telegraph, attack,
    recovery, and potion-reaction states.
-2. Add reagent pickups and limited runtime carrying without permanent storage.
-3. Add selected world objects with focused capabilities that existing potion
+4. Add reagent pickups and limited runtime carrying without permanent storage.
+5. Add selected world objects with focused capabilities that existing potion
    effects can query.
-4. Add victory, defeat, and encounter reset around the proven combat loop.
+6. Add victory, defeat, and encounter reset around the proven combat loop.
 
 Exploration, refuge, discovery records, persistence, richer enemy perception,
 group behavior, and full expedition routing remain future vision rather than
 current runtime architecture. See [Project Goals and Scope](./STYLE_AND_VISION.md#project-goals-and-scope)
 for the layered product direction.
 
+Larger vessels, staged recipes, transformation, dormant placement with deliberate
+activation, and prepared-potion storage are approved future direction, not new
+runtime features. See [Brewing Evolution](#implemented-small-flask-and-future-brewing-evolution)
+for the boundaries that a later implementation must preserve.
+
 The code favors scene-local components. The only autoloads are application
 shell services: settings, music, transitions, and scene routing. Potion data,
 health, input translation, UI rendering, player presentation, and potion entity
 motion remain independent of those autoloads.
 
-## Runtime Flow
+## Presentation Migration Status
+
+The [saved conversion plan](./plannings/plans/2026-09-12-pixel-art-conversion.md)
+changes presentation, not the real-time alchemy concept. Its main-menu stage is
+now implemented through the separate
+[animated menu plan](./plannings/plans/2026-09-12-animated-main-menu-rebuild.md).
+The `640 x 360` approval sample remains a composition reference only. The active
+menu uses a native `1920 x 1080` redraw and scene-authored controls and layers.
+Gameplay composition and production asset dimensions remain undecided.
+
+| Boundary | Current implementation | Approved replacement |
+| --- | --- | --- |
+| Display | Native `1920 x 1080` project canvas with nearest texture filtering | Keep `1920 x 1080` as the permanent project canvas; validate responsive layout at other 16:9 and wider windows |
+| Camera and art scale | Player camera at default zoom `(1, 1)` with smoothing; existing world units | Undecided until gameplay composition is approved; do not infer world scale from the menu |
+| Player visual | 15-bone skeleton, geometric parts, AnimationPlayer/AnimationTree | Pixel-art replacement remains planned, but production cell and sheet dimensions are not fixed |
+| Animation | Four authored idle/walk families and skeletal interpolation | Four authored facings and low-frame playback remain preferred; exact frame budget follows gameplay-composition approval |
+| Direction | Positive-scale front/back/side-left/side-right, phase-aware turns and 0.10 hysteresis | Preserve facing rules, gait phase, idle retention, and anatomical hands; no mirroring or image crossfades |
+| Sockets | Markers beneath hand bones; a held entity follows `hand_right` | Stable `hand_left`/`hand_right` lookup with per-frame marker positions; the bottle remains separate from character art |
+| Workshop | Same model, movement room, readouts, bone overlay | Same model/workflow with frame bounds and socket guides; no separate production rig |
+| Sandbox and UI | Static Friend/Foe, plain arena, geometric bottle/flask, rebuilt animated main menu, existing pause/settings | Gameplay composition and asset sizes are intentionally undecided; retain flask-first interaction and hybrid detail |
+| Transitions | Snapshot-based ink reveal | Pixel-grid reveal with unchanged duration/input-blocking/completion contract |
+
+### Contracts to Preserve
+
+- Keep `PlayerModel.set_motion()`, `set_facing_direction()`, `reset_to_idle()`,
+  `set_playback_speed()`, `get_facing()`, `get_locomotion_state()`, `get_socket()`,
+  and its facing/locomotion signals. Callers must not rely on bone paths.
+- Plan to add `set_debug_guides_visible()` and retain
+  `set_debug_bones_visible()` as a compatibility wrapper. The new method does
+  **not** exist yet and is therefore absent from the current API tables.
+- Keep physics coordinates, collision shapes, movement speed, health, recipes,
+  projectile trajectories, placement rules, and current immediate potion use.
+  Render quantization must not quantize physics or continuous mouse aim.
+- Preserve `PotionRecipeData` -> `PotionInstance` -> `PotionEntity` ownership,
+  `HeldPotionSlot`, delivery-independent effects, and one-use consumption.
+- Preserve autoload names, registered scene paths, music, audio buses,
+  `user://settings.cfg`, pause, and scene routing. No new managers are required.
+- Keep existing art/music as source material. Do not add AI, inventory, pickup,
+  expeditions, or new diegetic menu interactions during this conversion.
+
+The produced researcher and menu samples remain approved references. The menu
+sample now guides composition only; it is not the runtime background. Gameplay
+composition remains undecided and must be designed separately before any
+gameplay-art conversion. Exact character, terrain, and flask dimensions are not
+production contracts. Bone-specific tests will need frame/socket replacements;
+the existing gameplay suites retain their contracts.
+
+## Current Runtime Flow
 
 ```text
 project.godot
@@ -50,7 +110,10 @@ CombatScene
   -> PlayerActor (world movement, camera, collision, health)
 	  -> PlayerModel (15-bone visuals, four-facing idle/walk, sockets)
   -> PotionCombatController
-	  -> PotionMixer.mix() -> potion_prepared(PotionInstance)
+	  -> PotionInput: Space press/release intent
+	  -> PotionMixer: layers + recipe match
+		  -> BrewingReaction: agitate -> settle/recover -> complete
+		  -> potion_prepared(PotionInstance) after successful settling
 		  -> one PotionEntity attaches to PlayerModel.hand_right
 		  -> HeldPotionSlot retains the instance/entity pair
 			  -> drink(Player): direct PotionImpactContext
@@ -75,18 +138,46 @@ routes through `GameManager`; Quit calls `GameManager.quit_game()`.
 | `combat/CombatScene.tscn` | Active potion sandbox composition and dependency wiring. |
 | `combat/actors/` | Player movement, actor capabilities, neutral impact hitboxes, collision, cameras, and world health bars. |
 | `combat/potions/` | Reagent constants, recipes, unfinished mixer layers, runtime potion instances, one held slot, delivery IDs, and physical potion entities. |
+| `combat/potions/brewing/` | Deterministic reaction simulation, editable vessel tuning, and small-flask implementation notes. |
 | `combat/potions/effects/` | Stateless effect contracts, delivery context, resolver, and effect implementations. |
 | `combat/potions/resources/` | Editable default recipe book and recipe resources. |
 | `combat/ui/` | Flask rendering and bottom-center mixer controls. |
+| `shared/alchemy/` | Project-wide semantic Charged Neon palette data shared by potion UI, recipes, menus, and VFX. |
+| `vfx/reactive_crystal/` | Reusable crystal pile and shatter scenes plus an isolated five-color workshop. The shatter scene is not wired into active impacts yet. |
 | `globals/` | Autoload services and scene-level music declarations. |
 | `globals/resources/` | Scene registry and project information resources. |
-| `mainmenu/` | Main menu, settings overlay, version plaque, and alchemy decoration. |
+| `mainmenu/` | Native 1920 x 1080 animated backdrop, reusable text commands, inline stepped settings, version metadata, and retained pause-settings scene. |
 | `ui/` | Reusable pause menu. |
-| `tests/` | Nine retained headless scene suites for player, potion, and collision behavior. |
+| `tests/` | Retained player/potion suites plus headless main-menu and reactive-crystal contracts. |
 | `docs/` | Active architecture, visual direction, and local art references. |
+| `docs/plannings/` | Dated designs/plans; historical entries carry scope notices. The 2026-09-12 conversion plan owns presentation migration; the 2026-09-15 brewing design records current small-flask and future vessel direction. |
 | `music/`, `sprites/`, `extra/` | Audio, remaining images, fonts, and shaders. |
 
 ## Scene Composition
+
+### StartMenu And MainMenu
+
+`mainmenu/StartMenu.tscn` remains the registered entry scene. It composes the
+active `MainMenu.tscn` and the existing `LevelMusic` request for
+`music/MainMenuNew.mp3`. Settings are now an inline view inside `MainMenu`; the
+pause-specific `mainmenu/Settings.tscn` is no longer instanced by StartMenu and
+remains owned by `ui/PauseMenu.tscn`.
+
+`mainmenu/MainMenu.tscn` is authored on the permanent `1920 x 1080` project
+canvas. It contains:
+
+- `MainMenuBackdrop`: the approved grayscale laboratory base, two integer-wrapped
+  cloud strips, two foliage loops, three pinned-note loops, three table crystal
+  piles, three smaller shelf deposits, and editor-facing speed/glow tuning;
+- a scene-authored two-line title and reusable text commands for New Game,
+  Settings, and Quit;
+- `MainMenuSettingsView`, which replaces only the command list and maps Music
+  and SFX between persisted decibels and ten visible steps;
+- `VersionStone`, now an unframed version/build/current-focus text block.
+
+Opening Settings does not reload or pause the backdrop. Back or Escape closes
+the inline view and restores focus to Settings. New Game still forwards the
+transition duration before routing through `GameManager`.
 
 ### CombatScene
 
@@ -102,11 +193,16 @@ routes through `GameManager`; Quit calls `GameManager.quit_game()`.
 - `Arena/PotionEntities`: runtime parent for flying and placed potion entities.
   A newly mixed entity is added here before attachment; while held, its parent
   is the PlayerModel's `hand_right` socket. Release reparents the same node here.
-- `Systems/PotionInput`: maps Input Map actions to potion intent signals.
-- `Systems/PotionMixer`: owns unfinished reagent layers only; emits a new
-  `PotionInstance` on a successful mix.
+- `Systems/PotionInput`: maps Input Map actions to potion intent signals,
+  including distinct Space press and release events.
+- `Systems/PotionMixer`: owns unfinished reagent layers and recipe matching.
+  Its authored `BrewingReaction` child owns progress, energy, settling, and
+  overreaction recovery. The mixer emits a new `PotionInstance` only after a
+  successful settle.
 - `Systems/HeldPotionSlot`: holds references to exactly one instance/entity pair.
-- `UI/PotionMixerUI`: displays layers, prepared color, and reagent controls.
+- `UI/PotionMixerUI`: displays layers, geometric reaction motion, current and
+  predicted-settle markers, success range, recovery foam, prepared color, and
+  reagent controls.
 - `UI/PauseMenu`: reusable pause and settings overlay.
 - `LevelMusic`: requests `music/CombatNew.mp3` from `MusicManager`.
 
@@ -153,8 +249,9 @@ facings use authored positive-scale states; they are not mirrored at runtime.
 
 Stable socket IDs are `hand_left` and `hand_right`. Consumers call
 `get_socket()` instead of depending on internal bone paths. The complete bone
-tree and sprite-replacement contract are in
-`characters/player/README.md`.
+tree and separate planned sprite-sheet workflow are in the
+[PlayerModel guide](../characters/player/README.md). The 15-bone hierarchy
+describes current internals, not a restriction on the approved visual conversion.
 
 ### PlayerModelWorkshop
 
@@ -169,6 +266,8 @@ registered in `project.godot` and is not a runtime dependency of combat.
 Public methods below exclude Godot lifecycle callbacks and private methods
 whose names begin with an underscore. `None` means the script intentionally
 exposes no item in that category.
+These are current script interfaces; future pixel rendering does not add or
+remove methods from this reference until it is implemented.
 
 ### Player And Combat
 
@@ -178,15 +277,18 @@ exposes no item in that category.
 | `characters/player/PlayerModelWorkshop.gd` | Synchronize workshop status controls with the canonical model. | Workshop `PlayerModel`, labels, and bones toggle. | None | None | None |
 | `characters/player/PlayerModelWorkshopActor.gd` | Move and collide the workshop actor while forwarding velocity to the model. | Input Map movement actions and a model exposing `set_motion()`. | None | `movement_speed`, `player_model_path` | None |
 | `combat/PotionCombatController.gd` | Coordinate input, unfinished mixing, held ownership, UI, and entity delivery. | `PotionInput`, `PotionMixer`, `HeldPotionSlot`, `PotionMixerUI`, `PlayerCombatController`, entity parent and scene. | None | `potion_input_path`, `potion_mixer_path`, `held_potion_slot_path`, `potion_mixer_ui_path`, `player_combat_controller_path`, `potion_entities_parent_path`, `potion_entity_scene` | None |
-| `combat/PotionInput.gd` | Translate named Input Map actions into potion intent. | Project input actions, `PotionReagent`, `PotionDelivery`. | `mixer_toggle_requested`, `reagent_requested(reagent: StringName)`, `mix_requested`, `potion_use_requested(delivery_method: StringName)`, `remove_reagent_requested`, `clear_mixture_requested` | None | None |
+| `combat/PotionInput.gd` | Translate named Input Map actions into potion intent and guarantee paired agitation release on key-up, pause, Escape, or focus loss. | Project input actions, `PotionReagent`, `PotionDelivery`. | `mixer_toggle_requested`, `reagent_requested(reagent: StringName)`, `agitation_started`, `agitation_released`, `potion_use_requested(delivery_method: StringName)`, `remove_reagent_requested`, `clear_mixture_requested` | None | None |
 | `combat/actors/PlayerCombatController.gd` | Move the active player and provide holder and world-space delivery geometry. | Movement actions and `PlayerModel.set_motion()`/`get_socket()`. | `movement_changed(current_velocity: Vector2)` | `speed`, `player_model_path`, `place_distance` (`64.0`) | `set_movement_locked()`, `is_movement_locked()`, `get_potion_holder() -> Marker2D`, `get_throw_origin() -> Vector2`, `get_throw_direction() -> Vector2`, `get_place_position() -> Vector2` |
 | `combat/actors/HealthComponent.gd` | Own bounded actor health. | None. | `health_changed`, `depleted`, `damaged` | `max_health`, `current_health` | `take_damage()`, `heal()`, `reset_health()`, `get_health_ratio()` |
 | `combat/actors/ImpactHitbox.gd` | Map a collision-only area to the entity whose components effects may query. | Configured subject node. | Inherited `Area2D` signals | `effect_subject_path` | `get_effect_subject()` |
 | `combat/actors/ActorHealthBar.gd` | Display an actor name and exact world-space health values. | Configured `HealthComponent` and scene labels/bar. | None | `display_name`, `health_component_path` | None |
-| `combat/potions/PotionReagent.gd` | Define supported reagent IDs and colors. | None. | None | None | Static `is_valid()`, `get_color()` |
+| `shared/alchemy/AlchemyPaletteData.gd` | Provide the project-wide semantic Charged Neon reagent and prepared-potion colors. | None. | None | `red_color`, `green_color`, `blue_color`, `health_color`, `damage_color` | `get_color(color_id: StringName) -> Color` |
+| `combat/potions/PotionReagent.gd` | Define supported reagent IDs and resolve their shared colors. | `ChargedNeonPalette.tres`. | None | None | Static `is_valid()`, `get_color()` |
 | `combat/potions/PotionRecipeData.gd` | Describe one exact three-layer potion recipe and its composable effects. | `PotionReagent`, `PotionEffectData`. | None | ID, name, three counts, effects, mixed color | `is_valid()`, `matches_layers()` |
 | `combat/potions/PotionRecipeBookData.gd` | Find an order-independent recipe match. | `PotionRecipeData` resources. | None | `recipes` | `find_match()` |
-| `combat/potions/PotionMixer.gd` | Collect unfinished layers and create a runtime instance. | `PotionReagent` and configured `PotionRecipeBookData`. | `layers_changed(layers: Array[StringName])`, `potion_prepared(potion: PotionInstance)`, `mix_rejected(layers: Array[StringName])`, `mixture_cleared` | `max_layers` (`3`, clamped `1..3`), `recipe_book` | `add_reagent(reagent: StringName) -> bool`, `remove_last() -> bool`, `clear() -> void`, `mix() -> bool`, `get_layers() -> Array[StringName]` |
+| `combat/potions/brewing/BrewingProfileData.gd` | Store editable timing, success-window, cooldown, and recovery values for one vessel. | None. | None | `energy_ramp_time`, `progress_rate`, `energy_dissipation_time`, `success_min_progress`, `success_max_progress`, `overreaction_cooldown`, `recovery_progress` | `is_valid() -> bool` |
+| `combat/potions/brewing/BrewingReaction.gd` | Simulate deterministic reaction progress and energy independently of recipes, UI, entities, and effects. | Valid `BrewingProfileData`. | `state_changed(state)`, `reaction_changed(progress, energy, predicted_settled_progress)`, `completed`, `overreacted`, `recovered` | `profile` | `start_agitation() -> bool`, `release_agitation()`, `advance(delta)`, `cancel()`, `get_state()`, `get_progress()`, `get_energy()`, `get_predicted_settled_progress()`, `is_editable()` |
+| `combat/potions/PotionMixer.gd` | Own unfinished layers, validate recipes, coordinate one reaction, and create one runtime instance after successful settling. | `PotionReagent`, configured `PotionRecipeBookData`, authored `BrewingReaction`. | `layers_changed(layers)`, `potion_prepared(potion)`, `mix_rejected(layers)`, `mixture_cleared`, `brewing_changed(state, progress, energy, predicted_settled_progress)`, `brewing_overreacted`, `brewing_recovered` | `max_layers` (`3`, clamped `1..3`), `recipe_book`, `brewing_reaction_path` | `add_reagent()`, `remove_last()`, `clear()`, `start_brewing()`, `release_brewing()`, brewing getters, `get_layers()` |
 | `combat/potions/PotionInstance.gd` | Own one valid recipe reference, copied creation layers, and one-shot consumption state. | `PotionRecipeData`, `PotionImpactContext`, `PotionEffectResolver`. | None | None | Static `create(recipe: PotionRecipeData, layers: Array[StringName]) -> PotionInstance`; `get_recipe() -> PotionRecipeData`, `get_created_layers() -> Array[StringName]`, `get_color() -> Color`, `is_valid() -> bool`, `is_consumed() -> bool`, `apply(context: PotionImpactContext) -> int`, `discard() -> bool` |
 | `combat/potions/HeldPotionSlot.gd` | Retain the one currently held instance/entity pair. | `PotionInstance`, `PotionEntity`. | `potion_changed(potion: PotionInstance)` (null on clear) | None | `hold(potion: PotionInstance, entity: PotionEntity) -> bool`, `clear() -> void`, `has_potion() -> bool`, `get_potion() -> PotionInstance`, `get_entity() -> PotionEntity` |
 | `combat/potions/PotionEntity.gd` | Own one bottle through `HELD`, `FLYING`, `PLACED`, `CONSUMED` states. | `PotionInstance`, `PotionDelivery`, `PotionImpactContext`, scene visuals and collision nodes. | `state_changed(state: State)`, `resolved(context: PotionImpactContext, applied_effect_count: int)` | `flight_speed` (`650.0` px/s), `flight_lifetime` (`2.5` s), `arming_delay` (`0.35` s), `placed_lifetime` (`20.0` s) | `initialize(potion: PotionInstance, source: Node) -> bool`, `attach_to(holder: Node2D) -> bool`, `drink(target: Node) -> bool`, `throw_into(world_parent: Node2D, origin: Vector2, direction: Vector2) -> bool`, `place_into(world_parent: Node2D, world_position: Vector2) -> bool`, `discard() -> bool`, `get_state() -> State`, `get_potion() -> PotionInstance` |
@@ -195,8 +297,11 @@ exposes no item in that category.
 | `combat/potions/effects/HealthPotionEffectData.gd` | Heal or damage an impacted subject when it exposes `HealthComponent`. | `PotionEffectData`, `PotionImpactContext`, `HealthComponent`. | None | `operation`, `amount` | `is_valid()`, `apply()` |
 | `combat/potions/effects/PotionImpactContext.gd` | Carry delivery source, subject, collider, world geometry, and direct-child capability lookup. | Impacted scene nodes. | None | None | `configure()`, `is_valid()`, `find_component()` |
 | `combat/potions/effects/PotionEffectResolver.gd` | Apply every valid recipe effect and count supported applications. | `PotionRecipeData`, `PotionEffectData`, `PotionImpactContext`. | None | None | `apply_recipe()` |
-| `combat/ui/FlaskView.gd` | Render layers, a completed mixture, and failed-mix feedback. | Child polygons/outline and `PotionReagent` colors. | None | None | `set_layers()`, `show_mixed()`, `show_failure()`, `reset_view()` |
-| `combat/ui/PotionMixerUI.gd` | Present reagent controls and reflect mixer state. | `FlaskView` and three reagent buttons. | `reagent_selected` | None | `set_open()`, `show_mixing()`, `show_ready()`, `show_mix_failure()`, `reset_view()` |
+| `combat/ui/FlaskView.gd` | Render scene-authored layers, agitation/settling motion, progress prediction, success range, cooldown foam, prepared liquid, and rejection feedback. | Authored polygons/lines and `PotionReagent` colors. | None | None | `set_layers()`, `show_brewing()`, `show_mixed()`, `show_failure()`, `reset_view()` |
+| `combat/ui/PotionMixerUI.gd` | Present reagent controls and reflect editable, brewing, recovery, and prepared states. | `FlaskView` and three reagent buttons. | `reagent_selected` | None | `set_open()`, `show_mixing()`, `show_brewing()`, `show_ready()`, `show_mix_failure()`, `reset_view()`, `are_reagent_buttons_enabled()` |
+| `vfx/reactive_crystal/ReactiveCrystalPile.gd` | Present one editable crystal deposit with settled geometry, localized glow, reflection, and low-simmer motes. | `AlchemyPaletteData`, authored polygons, `GPUParticles2D`. | None | `palette`, `color_id`, `crystal_color`, `glow_strength`, `motion_strength`, `mote_amount`, `random_seed` | `set_crystal_color()`, `set_glow_strength()`, `set_emitting()` |
+| `vfx/reactive_crystal/PotionShatterParticles.gd` | Play and self-retire a color-configurable one-shot potion shatter visual. It does not resolve impacts or effects. | Two authored `GPUParticles2D` groups and cleanup timer. | None | `glow_strength`, `cleanup_delay` | `play_burst(world_position, color, incoming_direction)` |
+| `vfx/reactive_crystal/ReactiveCrystalVFXWorkshop.gd` | Preview all five palette colors and manually trigger isolated shatter bursts. | Shared palette, pile scene, shatter scene, five authored controls. | None | None | None |
 
 ### Application Shell
 
@@ -209,11 +314,14 @@ exposes no item in that category.
 | `globals/LevelMusic.gd` | Describe a scene's music request. | `AudioStream` and named audio bus. | None | `music`, `volume_db`, `crossfade`, `loop`, `bus` | `get_music()`, `get_crossfade()`, `get_loop()`, `get_volume_db()`, `get_bus()` |
 | `globals/resources/SceneRegistryData.gd` | Register main-menu and combat scenes. | `PackedScene`. | None | `main_menu_scene`, `combat_scene` | None |
 | `globals/resources/ProjectInfoData.gd` | Supply main-menu project metadata. | None. | None | `project_version`, `current_focus`, `build_label`, `show_focus`, `show_build_label` | None |
-| `mainmenu/MainMenu.gd` | Coordinate menu controls, styling, settings visibility, and game start/quit. | `GameManager`, `SceneTransition`, `SettingsMenu`, `AlchemySeal`, `MainMenuStyleData`. | None | `transition_duration`, `menu_style` | None |
+| `mainmenu/MainMenu.gd` | Switch the main command list and inline settings, preserve focus, lock transition input, and forward start/quit. | `GameManager`, `SceneTransition`, `MainMenuSettingsView`, command components. | None | `transition_duration` | `set_interaction_enabled()` |
+| `mainmenu/MainMenuBackdrop.gd` | Apply authored cloud, wind, and reagent-light tuning without knowing menu navigation. | `LoopingPixelLayer`, ambient scene nodes, `AnimationPlayer`. | None | `far_cloud_speed`, `near_cloud_speed`, `wind_speed_multiplier`, `reagent_glow_strength` | `apply_tuning()` |
+| `mainmenu/LoopingPixelLayer.gd` | Move two identical strips at integer positions and wrap them seamlessly. | `TileA` and `TileB` `TextureRect` nodes. | None | `speed_pixels_per_second`, `loop_width` | None |
+| `mainmenu/MainMenuCommandButton.gd` | Present one reusable text command with focus rule and pressed displacement. | Authored Button and focus-rule nodes. | `activated` | `command_text` | `set_interaction_enabled()`, `grab_button_focus()`, `get_button()` |
+| `mainmenu/AudioStepControl.gd` | Own a clamped 0-10 value and ten authored visual segments. | Minus/Plus buttons and segment nodes. | `step_changed(step: int)` | `label_text`, `initial_step` | `set_step()`, `get_step()`, `set_interaction_enabled()`, `focus_default()` |
+| `mainmenu/MainMenuSettingsView.gd` | Convert stepped values to persisted Music/SFX decibels and request inline closure. | `Settings` autoload and two `AudioStepControl` components. | `close_requested` | None | `open()`, `close()`, `focus_default()`, `set_interaction_enabled()`, static `step_to_db()`, static `db_to_step()` |
 | `mainmenu/SettingsMenu.gd` | Synchronize audio sliders with persistent settings. | `Settings` autoload and menu controls. | `close_requested` | None | None |
 | `mainmenu/VersionStone.gd` | Present project version and focus metadata. | Labels and optional `ProjectInfoData`. | None | `project_info` | None |
-| `mainmenu/AlchemySeal.gd` | Draw and animate the decorative menu seal. | `CanvasItem` drawing. | None | Geometry, animation, and appearance tuning values | None |
-| `mainmenu/resources/MainMenuStyleData.gd` | Store main-menu visual tuning. | Optional background texture. | None | Background, seal, shader, vignette, and pulse values | None |
 | `ui/PauseMenu.gd` | Own pause input, settings navigation, resume, menu routing, and quit. | `SettingsMenu`, `GameManager`, and `ui_cancel`. | None | None | None |
 
 ### Test Runners
@@ -229,6 +337,10 @@ exposes no item in that category.
 | `tests/PotionEntityTests.gd` | Validate held attachment, entity identity, state transitions, drink/discard, flight and placement expiry, and rejected transitions. | `PotionEntity.tscn` and potion instance/effect scripts. | None | None | None |
 | `tests/PotionEntityCollisionTests.gd` | Validate swept flight, actor/wall impacts, source exclusion, placement arming, stationary overlap, source exit/re-entry and first entry from outside, unsupported subjects, and expiry. Includes idle placement with production physics enabled at normal and zero arming delay. | `PotionEntity`, `ImpactHitbox`, physics bodies, and health data. | None | None | None |
 | `tests/PotionUseTests.gd` | Validate drink/throw/place input, same bottle identity, slot clearing, UI closure, held-potion Tab gating, discard, and input with an empty slot. | `CombatScene.tscn` and potion/player runtime components. | None | None | None |
+| `tests/MainMenuTests.gd` | Validate menu parsing, text commands, focus, inline settings replacement, 0-10 audio conversion, transition locking, native art, transparency, and ambient loops. | Main-menu scenes, imported menu textures, and application autoloads. | None | None | None |
+| `tests/ReactiveCrystalParticleTests.gd` | Validate the shared palette, pile/shatter scene contracts, particle counts, cleanup, and five-color workshop composition. | Charged Neon palette and reactive-crystal scenes. | None | None | None |
+| `tests/BrewingReactionTests.gd` | Validate early release/resume, success boundaries, overreaction recovery, idempotence, and frame-step-independent simulation. | Brewing reaction and small-flask profile. | None | None | None |
+| `tests/BrewingCombatTests.gd` | Validate press/release input, forced release, pause freezing/resume, authored flask feedback, hidden settling, button locks, and clearing active reactions. | `CombatScene.tscn`, mixer UI, input, reaction, and held slot. | None | None | None |
 
 ## Potion Data Flow
 
@@ -250,23 +362,39 @@ from `is_consumed()`.
 
 ### Mixing And One Held Slot
 
-1. `PotionInput` converts one handled Input Map action into one signal.
-   Drink, throw, and place share `potion_use_requested(delivery_method)`.
+1. `PotionInput` converts handled Input Map actions into intent signals. Space
+   emits `agitation_started` once on press and `agitation_released` once on
+   release. Pause, Escape, and focus loss also force a release. Drink, throw,
+   and place share `potion_use_requested(delivery_method)`.
 2. `PotionCombatController` accepts reagent edits and mixing only while the
    mixer is open and `HeldPotionSlot` is empty. Tab is ignored while holding.
-3. `PotionMixer` validates reagent IDs and asks `PotionRecipeBookData` for an
-   order-independent exact three-layer match. Rejection preserves layers.
-4. Success creates a fresh `PotionInstance`, clears unfinished layers, then
+3. `PotionMixer.start_brewing()` asks `PotionRecipeBookData` for an
+   order-independent exact three-layer match. Invalid and incomplete recipes
+   emit `mix_rejected` without changing ingredients or reaction progress.
+4. `BrewingReaction` integrates energy and progress from the editable
+   `SmallFlaskBrewingProfile.tres`. Releasing stops energy input immediately;
+   residual energy dissipates and advances progress. An early settle returns
+   to editable idle with progress preserved. Settling in the inclusive
+   `0.70..0.90` window completes. Exceeding `0.90` enters a `0.6` second
+   cooldown, then restores `0.40` progress and the same ingredients.
+5. Success creates a fresh `PotionInstance`, clears unfinished layers, then
    emits `layers_changed`, `mixture_cleared`, and `potion_prepared(instance)`
    in that order. The mixer retains no finished preparation.
-5. The controller instantiates `potion_entity_scene` once, validates its type,
+6. The controller instantiates `potion_entity_scene` once, validates its type,
    adds it to `Arena/PotionEntities`, calls `initialize(instance, Player)`,
    attaches it to the right-hand holder, then calls `HeldPotionSlot.hold()`.
    The slot requires an empty slot, a valid unused instance, and an entity
-   referencing that instance. The mixer stays open with the completed color.
-6. If construction, attachment, or holding fails, the new instance is discarded,
+   referencing that instance. If Tab hid the mixer while settling, completion
+   keeps it hidden; otherwise it stays open with the completed color.
+7. If construction, attachment, or holding fails, the new instance is discarded,
    the candidate is cleaned up, and the empty mixer stays open. No orphaned
    preparation remains available for use.
+
+Ingredient edits are locked during agitation, settling, and cooldown. Editing
+an early-settled idle mixture resets its reaction progress before changing the
+layers. C cancels immediately, clears layers, and invalidates unfinished
+completion. The reaction runs in normal scene time: movement remains available,
+and pausing the tree freezes progression.
 
 ### Bottle Lifecycle
 
@@ -350,6 +478,78 @@ attachment belongs to `PotionEntity`; the mixer remains a creator of instances,
 not a storage service. Save formats, inventory UI, and transfer rules are not
 implemented by this slice.
 
+## Implemented Small Flask And Future Brewing Evolution
+
+The [approved design record](./plannings/specs/2026-09-15-potion-brewing-vision-design.md)
+owns the broader vessel and laboratory direction. Its one-stage small-flask
+interaction is implemented; larger apparatus, multiple stages, storage, and
+deliberate persistent placement remain future scope.
+
+### Behavior and Ownership Boundaries
+
+| Concern | Current small-flask behavior | Future boundary |
+| --- | --- | --- |
+| Reaction input | Hold Space agitates; release, Tab-hide, pause, Escape, or focus loss stops agitation. Residual energy settles in normal scene time. | Reuse the press/release language for larger equipment without routing rules through UI or autoloads. |
+| Reaction state | `BrewingReaction` owns idle, agitating, settling, cooldown, and completed states. Early release resumes; overreaction retains ingredients and recovers to 40%. | Keep future stage state scene-local and separate from `PotionEntity.State`. |
+| Recipe completion | Only a settled result in the configured window produces one `PotionInstance`. | Multi-stage recipes must create no usable bottle before their final successful stage. |
+| Vessels | The active small flask accepts exactly three ingredient units and uses one shared profile resource. | Larger apparatus needs explicit capacity and stage data; changing `max_layers` alone is insufficient. |
+| Flask feedback | Authored geometry shows layers, motion, current progress, predicted settle, success bracket, foam, and prepared liquid. | Replace geometry with art/sound without moving simulation into presentation. |
+| Finished effects | Drink, throw, and later activation deliver the same formula to compatible subjects. | Preserve immutable recipe/effect resources and target-owned capability state. Timing does not create delivery-specific health or transformation implementations. |
+| Placement | Dormant bottle with deliberate activation on return; additional trigger types are optional later work. | Separate trigger policy and lifetime from the effect resolver. Current proximity behavior stays in force until explicitly replaced and tested. |
+| Storage and revisits | Preserve unused preparations and relevant world placements for later use. | Store domain identity and session placement records, not inactive scene nodes; retain one owner and once-only consumption. Permanent save/load remains separate. |
+
+The initial field experiment uses one short reaction. A later laboratory recipe
+adds meaningful stages rather than stretching the same hold. Capacities such as
+3/5/8 units and a roughly 1-3 second field reaction are examples, not configured
+values. Recipe knowledge may precede access to a suitable vessel. Portable bottle
+size, batch yield, and storage are separate from brewing apparatus size.
+
+The existing two recipes remain count-based and order-independent. Future stage
+requirements must be explicit recipe data, not rules inferred from UI click
+order. Larger recipes cannot work simply by changing an Inspector maximum:
+`PotionMixer`, recipe validation/matching, instance validation, and flask layer
+presentation all currently assume the three-unit model and need coordinated tests.
+
+The intended final-stage handoff remains:
+
+```text
+ingredients + suitable vessel + brewing stage state
+  -> successful final settle
+  -> one PotionInstance
+  -> one PotionEntity / HeldPotionSlot
+  -> drink, throw, place, or later transfer to storage
+  -> one activation resolves recipe effects against eligible capabilities
+```
+
+There is no requirement for gel/solid forms, per-bottle potency rolls, permanent
+brewing decay, or animation-delayed use. Unfinished brewing is distinct from a
+finished potion waiting to be used.
+
+### Transformation and Strategic Activation
+
+A future transformation effect belongs in a `PotionEffectData` implementation
+that asks a compatible subject component to own the transformation state.
+Neither the receiving actor's Friend/Foe name nor the delivery method changes
+the formula. Transformation duration, stats, visuals, and any area footprint are
+not implemented or fixed by this vision.
+
+The current resolver receives one subject per application. Any future area
+activation needs explicit recipient collection and one consumption for the whole
+activation; calling `PotionInstance.apply()` repeatedly for different subjects
+would fail its once-only contract. Do not claim splash or area support exists.
+
+The current placed bottle arms after `0.35` seconds, triggers eligible contact,
+expires after `20` seconds, and is lost on scene unload. Return-and-activate play
+therefore requires a separate change covering dormant state, intentional trigger,
+safe placement, activation range, session identity, restoration, and consumption
+across revisits. Raising `placed_lifetime` alone cannot implement that strategy.
+
+Current tests cover predictable release outcomes, resumable early release,
+recoverable overreaction, inclusive boundaries, one creation, input interruption,
+hidden completion, and frame-step independence. Future vessel/storage work still
+needs capacity and stage compatibility plus no duplication or resurrection of
+placed or stored preparations.
+
 ## Default Recipes
 
 | Resource | Layers, any order | Effect |
@@ -381,7 +581,7 @@ effects should ask a target component to create and own their runtime state.
 | `move_up`, `move_down`, `move_left`, `move_right` | W/S/A/D and arrows | `PlayerCombatController`, workshop actor |
 | `toggle_mixer` | Tab | `PotionInput` |
 | `add_red_reagent`, `add_green_reagent`, `add_blue_reagent` | 1/2/3 | `PotionInput` |
-| `mix_potion` | Space | `PotionInput` |
+| `mix_potion` | Hold Space to agitate; release to settle | `PotionInput` |
 | `drink_potion` | Right Mouse | `PotionInput` |
 | `throw_potion` | Left Mouse | `PotionInput` |
 | `place_potion` | Q | `PotionInput` |
@@ -389,7 +589,16 @@ effects should ask a target component to create and own their runtime state.
 | `clear_mixture` | C | `PotionInput` |
 | `ui_cancel` | Escape | `PauseMenu` |
 
-## Verification
+Space key repeat is ignored. A fresh press is required after cooldown, pause,
+focus loss, or a forced release. Tab may hide an unfinished reaction; settling
+and cooldown continue while gameplay is active.
+
+## Recorded Runtime Verification
+
+The import, scene smokes, active resource validation, and all thirteen retained
+test scenes were run on **2026-09-15** after integrating small-flask brewing.
+The checks cover simulation and contracts; the visual/manual checklist remains
+separate below.
 
 Godot `4.7.2.stable.steam.ed1daf0bf` was observed on 2026-08-30.
 The GUI-subsystem executable is launched through `ProcessStartInfo` and
@@ -432,14 +641,8 @@ Invoke-GodotWait '--headless --fixed-fps 60 --quit-after 120 --path . res://comb
 Invoke-GodotWait '--headless --fixed-fps 60 --quit-after 120 --path .'
 ```
 
-Observed: all three processes exited `0` with no parser, missing-resource,
-or duplicate-UID diagnostics. Editor import had empty stderr. Each forced
-scene shutdown reported `2 ObjectDB instances were leaked` and
-`1 resources still in use at exit`. Additional `--verbose` runs (also exit `0`)
-identified `AudioStreamMP3` and `AudioStreamPlaybackMP3`, with
-`res://music/CombatNew.mp3` and `res://music/MainMenuNew.mp3` respectively.
-These are retained shutdown diagnostics, not missing-resource failures;
-the smokes are not described as error-free.
+Observed on 2026-09-15: all three processes exited `0` with no parser,
+missing-resource, duplicate-UID, script, or failed-load diagnostics.
 
 ### Retained Test Scenes
 
@@ -455,23 +658,33 @@ Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/PotionE
 Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/PotionEntityTests.tscn'
 Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/PotionEntityCollisionTests.tscn'
 Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/PotionUseTests.tscn'
+Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/MainMenuTests.tscn'
+Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/ReactiveCrystalParticleTests.tscn'
+Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/BrewingReactionTests.tscn'
+Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/BrewingCombatTests.tscn'
 ```
 
-Observed output on 2026-08-30 (all nine exited `0`):
+Observed output on 2026-09-15 (all thirteen exited `0`):
 
 - `PlayerModelTests: PASS (469 checks)`
 - `PlayerModelWorkshopTests: PASS (41 checks)`
 - `PlayerActorTests: PASS (28 checks)`
 - `PotionInstanceTests: PASS (37 checks)`
-- `PotionDomainTests: PASS (17 tests)`
+- `PotionDomainTests: PASS (18 tests)`
 - `PotionEffectPipelineTests: PASS (20 checks)`
 - `PotionEntityTests: PASS (54 checks)`
 - `PotionEntityCollisionTests: PASS (119 checks)`
-- `PotionUseTests: PASS (89 checks)`
+- `PotionUseTests: PASS (98 checks)`
+- `MainMenuTests: PASS (menu contracts)`
+- `ReactiveCrystalParticleTests: PASS`
+- `BrewingReactionTests: PASS (30 checks)`
+- `BrewingCombatTests: PASS (37 checks)`
 
-Total: `857 checks` plus `17 domain tests`. `PlayerModelTests` deliberately
+The ten counted player/potion/brewing suites report `933 checks` plus `18`
+domain tests; the two presentation suites report contract-level pass/fail.
+`PlayerModelTests` deliberately
 reports missing `HandSocket_L` and `HandSocket_R` from its dependency-failure
-fixtures. The other eight suite stderr logs are empty. These runs include
+fixtures. The other twelve suites ran without engine errors. These runs include
 automated input and physics coverage but do not establish GUI appearance,
 audible music, or manual interaction quality.
 
@@ -484,26 +697,23 @@ failure cleanup are not covered by these retained suites.
 
 ### Static Validation
 
-The obsolete-interface scan of `combat/`, `tests/`, `project.godot`, and this
-document returned no matches (ripgrep exit `1`, meaning no matches).
-Validation of quoted `res://` paths in `.gd`, `.tscn`, `.tres`, `.godot`, and
-`.gdshader` files inspected `85` source files, `128` reference occurrences,
-and `87` unique paths: zero missing paths. Dynamic paths and serialized
-`uid://` identifiers are outside that literal-path check; editor import
-separately checked resource loading.
+The stale-interface scan found no active `mix_requested`, `PotionMixer.mix()`,
+or instant-mixing references. Validation of quoted `res://` paths in active
+`.gd`, `.tscn`, `.tres`, `.godot`, and `.gdshader` files inspected `110` source
+files, `172` reference occurrences, and `104` unique paths: zero missing paths.
+Archived `.superpowers` clean-head snapshots were excluded because they retain
+historical paths intentionally and are not loaded by Godot. Dynamic paths and
+serialized `uid://` identifiers remain outside the literal-path scan; editor
+import separately checked resource loading.
 
-`git diff --check` exited `0`. SHA-256 comparison of the `232` existing
-tracked/untracked files found only this Markdown changed by Task 5.
-The existing diagram, import metadata, `STYLE_AND_VISION.md`, and unrelated
-capability-pipeline work were preserved. These results describe the tested
-working tree, including that pre-existing uncommitted pipeline work, rather
-than a clean checkout of the documentation commit alone.
+`git diff --check` exited `0`. The working tree also contains unrelated and
+pre-existing main-menu, palette, VFX, player-art, and documentation changes;
+verification describes the combined working tree and does not imply those
+changes were created by the brewing implementation.
 
 ### Manual Godot Checklist
 
-Status on 2026-08-30: every item below is **pending**, not manually verified.
-The controller's Computer Use session could not start because of Windows
-sandbox deny-read ACLs, including its reset/retry.
+Status on 2026-09-15: every item below is **pending**, not manually verified.
 
 1. Open `characters/player/PlayerModel.tscn`. Verify the 15 bones, geometric
    parts, both hand sockets, `AnimationPlayer`, and `AnimationTree` are
@@ -512,41 +722,64 @@ sandbox deny-read ACLs, including its reset/retry.
    movement directions, stop in every facing, collide with all four walls,
    and toggle debug bones.
 3. Start New Game. Verify combat displays the compact model, the camera follows
-   it, arena collision blocks movement, and the health bar follows.
-4. Open the mixer with Tab; mix red, red, blue. Confirm one bottle appears at
-   the right hand and follows it while walking in each facing.
-5. Use Right Mouse while Player is below maximum health. Confirm immediate
+   it, actor collision remains intact, and the health bar follows. Use the
+   workshop or collision-test fixtures for wall checks; the sandbox is not an
+   authored bounded expedition room.
+4. Open the mixer with Tab; add red, red, blue. Hold Space and release when the
+   predicted-settle marker is inside the bracket. Confirm residual motion ends
+   in one prepared bottle at the right hand.
+5. Release early, let the mixture settle unfinished, and press Space again.
+   Confirm ingredients and progress are retained and the second reaction can
+   complete. Edit an early-settled mixture and confirm progress resets.
+6. Hold past the upper boundary. Confirm foam/cooldown appears, ingredients
+   remain, progress recovers to 40%, and a fresh Space press is required.
+7. While agitating, press Tab. Confirm the flask hides, agitation releases,
+   and settling continues. Reopen during settling and verify markers return and
+   reagent controls remain disabled. Hide again and confirm success can create
+   the held bottle without reopening the UI.
+8. Confirm Backspace and reagent inputs are blocked during agitation, settling,
+   and cooldown. Press C during each phase and confirm it immediately clears
+   ingredients and prevents later completion.
+9. Start agitation, then pause or switch application focus. Confirm agitation
+   releases, pause freezes reaction time, and resuming requires a fresh press
+   before adding more energy. Movement should remain available while brewing.
+10. Use Right Mouse while Player is below maximum health. Confirm immediate
    healing, bottle removal, mixer closure, and no duplicate use on another press.
-6. Mix green, green, blue; use Left Mouse. Confirm the same bottle leaves the
+11. Brew green, green, blue; use Left Mouse. Confirm the same bottle leaves the
    hand, flies toward the cursor, and damages Friend or Foe.
-7. Throw into empty space and confirm expiry after `2.5` seconds. Throw at a
-   wall and confirm consumption with no health reaction.
-8. Mix another potion; press Q. Confirm the same bottle is placed `64` pixels
+12. Throw into empty space and confirm expiry after `2.5` seconds. In a wall
+   collision fixture, confirm consumption with no health reaction.
+13. Brew another potion; press Q. Confirm the same bottle is placed `64` pixels
    from Player in the aim direction, clears the held slot, and closes the mixer.
-9. Confirm it waits `0.35` seconds before triggering another actor, ignores
+14. Confirm it waits `0.35` seconds before triggering another actor, ignores
    Player's initial overlap, and expires after `20` seconds if unused.
-10. With a surviving placed healing potion fixture initially overlapping Player,
+15. With a surviving placed healing potion fixture initially overlapping Player,
 	step fully away and back after arming; confirm source re-entry is eligible.
 	Ensure Player has missing health so the reaction is visible.
-11. Press C while holding. Confirm the bottle is discarded, the held slot and
+16. Press C while holding. Confirm the bottle is discarded, the held slot and
 	unfinished layers clear, and the empty mixer stays open.
-12. Verify Tab and reagent/mix edits are blocked while holding; Tab toggles the
+17. Verify Tab and reagent/mix edits are blocked while holding; Tab toggles the
 	empty mixer normally. Confirm mixing and use do not lock movement.
-13. Verify movement, camera following, arena collision, pause, settings, resume,
+18. Verify movement, camera following, actor collision, pause, settings, resume,
 	music playback, and Main Menu/New Game routing.
-14. Resize to a smaller 16:9 window and verify the mixer and world remain usable.
+19. Inspect at `1920 x 1080` and `1280 x 720`; verify all reaction geometry is
+	clipped to the flask and both progress markers remain distinguishable.
 
 ## Change Guidelines
 
 - Keep `PlayerModel` presentation-only; world movement, collision, camera, and
   health belong to `PlayerActor` and its actor components.
-- Preserve the 15-bone hierarchy, authored four-facing clips, positive model
-  scale, and stable socket IDs when replacing geometric parts with sprites.
+- During current-rig maintenance, preserve its bone/rest contracts. The approved
+  pixel conversion may replace those internals, but must preserve four authored
+  facings, positive scale, gait phase, public motion API, and stable socket IDs.
 - Keep delivery coordination in `PotionCombatController`, physical lifecycle
   in `PotionEntity`, and one-shot application in `PotionInstance`; animation is
   visual feedback and must not own gameplay outcomes.
 - Keep recipe matching in resource data and mixer code, not scene controllers
   or UI scripts.
+- Keep brewing-stage state separate from finished bottle lifecycle;
+  create an instance only after the final successful stage. Do not expand
+  recipe capacity, trigger behavior, or persistence as part of an art-only change.
 - Keep health reusable and free of scene routing or victory decisions.
 - Keep collision consumption separate from effect support. A bottle impact
   must not require a health component or a universal potion receiver.
@@ -555,3 +788,5 @@ sandbox deny-read ACLs, including its reset/retry.
 - Add new routed scenes through `SceneRegistryData` and `GameManager`.
 - Keep developer workshops out of `project.godot` runtime routing.
 - Add or update focused headless scene coverage when a public contract changes.
+- Keep current behavior, approved migration, and later goals separate in docs.
+  Historical plans are not evidence that every described feature is implemented.

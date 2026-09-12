@@ -1,7 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://cir4qvynhpykg"]
 
-[ext_resource type="Script" path="res://combat/ui/PotionMixerUI.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://combat/ui/FlaskView.tscn" id="2_flask"]
+[ext_resource type="Script" uid="uid://de4h1cbs7x01e" path="res://combat/ui/PotionMixerUI.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://bw6vyc7jl8yjt" path="res://combat/ui/FlaskView.tscn" id="2_flask"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_red"]
 bg_color = Color(0.9, 0.16, 0.2, 1)
@@ -39,7 +39,7 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[node name="PotionMixerUI" type="Control"]
+[node name="PotionMixerUI" type="Control" unique_id=683349040]
 visible = false
 custom_minimum_size = Vector2(360, 210)
 layout_mode = 3
@@ -52,19 +52,18 @@ offset_left = -180.0
 offset_top = -230.0
 offset_right = 180.0
 offset_bottom = -20.0
-grow_horizontal = 1
 grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="FlaskView" parent="." instance=ExtResource("2_flask")]
+[node name="FlaskView" parent="." unique_id=785342854 instance=ExtResource("2_flask")]
 layout_mode = 0
 offset_left = 20.0
 offset_top = 10.0
 offset_right = 164.0
 offset_bottom = 200.0
 
-[node name="ReagentButtons" type="VBoxContainer" parent="."]
+[node name="ReagentButtons" type="VBoxContainer" parent="." unique_id=2018846746]
 layout_mode = 0
 offset_left = 216.0
 offset_top = 7.0
@@ -72,7 +71,7 @@ offset_right = 276.0
 offset_bottom = 203.0
 theme_override_constants/separation = 8
 
-[node name="RedButton" type="Button" parent="ReagentButtons"]
+[node name="RedButton" type="Button" parent="ReagentButtons" unique_id=2040099499]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 focus_mode = 0
@@ -80,7 +79,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_red")
 text = "R"
 
-[node name="GreenButton" type="Button" parent="ReagentButtons"]
+[node name="GreenButton" type="Button" parent="ReagentButtons" unique_id=452280934]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 focus_mode = 0
@@ -88,7 +87,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_green")
 text = "G"
 
-[node name="BlueButton" type="Button" parent="ReagentButtons"]
+[node name="BlueButton" type="Button" parent="ReagentButtons" unique_id=280623152]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 focus_mode = 0

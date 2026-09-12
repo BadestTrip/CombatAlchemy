@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://shared/alchemy/AlchemyPaletteData.gd" id="1_palette"]
+
+[resource]
+script = ExtResource("1_palette")
+red_color = Color(1, 0.180392, 0.313725, 1)
+green_color = Color(0.611765, 1, 0.219608, 1)
+blue_color = Color(0.160784, 0.85098, 1, 1)
+health_color = Color(1, 0.231373, 0.831373, 1)
+damage_color = Color(0.12549, 0.960784, 0.815686, 1)

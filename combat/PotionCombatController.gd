@@ -78,7 +78,8 @@ func _disable_controller() -> void:
 func _connect_signals() -> void:
 	_potion_input.mixer_toggle_requested.connect(_on_mixer_toggle_requested)
 	_potion_input.reagent_requested.connect(_on_reagent_requested)
-	_potion_input.mix_requested.connect(_on_mix_requested)
+	_potion_input.agitation_started.connect(_on_agitation_started)
+	_potion_input.agitation_released.connect(_on_agitation_released)
 	_potion_input.potion_use_requested.connect(_on_potion_use_requested)
 	_potion_input.remove_reagent_requested.connect(_on_remove_reagent_requested)
 	_potion_input.clear_mixture_requested.connect(_on_clear_mixture_requested)
@@ -87,15 +88,18 @@ func _connect_signals() -> void:
 	_potion_mixer.potion_prepared.connect(_on_potion_prepared)
 	_potion_mixer.mix_rejected.connect(_on_mix_rejected)
 	_potion_mixer.mixture_cleared.connect(_on_mixture_cleared)
+	_potion_mixer.brewing_changed.connect(_on_brewing_changed)
 
 
 func _on_mixer_toggle_requested() -> void:
 	if _held_potion_slot.has_potion():
 		return
+	if _mixer_open:
+		_potion_mixer.release_brewing()
 	_mixer_open = not _mixer_open
 	_potion_mixer_ui.set_open(_mixer_open)
 	if _mixer_open:
-		_potion_mixer_ui.show_mixing(_potion_mixer.get_layers())
+		_show_current_mixer_state()
 
 
 func _on_reagent_requested(reagent: StringName) -> void:
@@ -104,10 +108,14 @@ func _on_reagent_requested(reagent: StringName) -> void:
 	_potion_mixer.add_reagent(reagent)
 
 
-func _on_mix_requested() -> void:
+func _on_agitation_started() -> void:
 	if not _mixer_open or _held_potion_slot.has_potion():
 		return
-	_potion_mixer.mix()
+	_potion_mixer.start_brewing()
+
+
+func _on_agitation_released() -> void:
+	_potion_mixer.release_brewing()
 
 
 func _on_potion_use_requested(delivery_method: StringName) -> void:
@@ -184,8 +192,7 @@ func _on_potion_prepared(potion: PotionInstance) -> void:
 	if not _held_potion_slot.hold(potion, entity):
 		_reject_prepared_potion(potion, entity, "Prepared PotionEntity could not enter HeldPotionSlot.")
 		return
-	_mixer_open = true
-	_potion_mixer_ui.set_open(true)
+	_potion_mixer_ui.set_open(_mixer_open)
 	_potion_mixer_ui.show_ready(potion.get_color())
 
 
@@ -215,6 +222,37 @@ func _on_mix_rejected(_layers: Array[StringName]) -> void:
 func _on_mixture_cleared() -> void:
 	if _mixer_open and not _held_potion_slot.has_potion():
 		_potion_mixer_ui.reset_view()
+
+
+func _on_brewing_changed(
+	state: BrewingReaction.State,
+	progress: float,
+	energy: float,
+	predicted_settled_progress: float
+) -> void:
+	if not _mixer_open or _held_potion_slot.has_potion():
+		return
+	_potion_mixer_ui.show_brewing(
+		_potion_mixer.get_layers(),
+		state,
+		progress,
+		energy,
+		predicted_settled_progress,
+		_potion_mixer.get_brewing_profile()
+	)
+
+
+func _show_current_mixer_state() -> void:
+	var state := _potion_mixer.get_brewing_state()
+	if state == BrewingReaction.State.IDLE and is_zero_approx(_potion_mixer.get_brewing_progress()):
+		_potion_mixer_ui.show_mixing(_potion_mixer.get_layers())
+		return
+	_on_brewing_changed(
+		state,
+		_potion_mixer.get_brewing_progress(),
+		_potion_mixer.get_brewing_energy(),
+		_potion_mixer.get_predicted_settled_progress()
+	)
 
 
 func _close_mixer_after_use() -> void:

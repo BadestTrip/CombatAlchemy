@@ -1,0 +1,93 @@
+[gd_scene format=3 uid="uid://dysbknl636ayr"]
+
+[ext_resource type="Script" uid="uid://dn4oj4j858mrt" path="res://vfx/reactive_crystal/ReactiveCrystalPile.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://b8xv5hh5uv7sl" path="res://vfx/reactive_crystal/reactive_crystal_particle.svg" id="2_particle"]
+[ext_resource type="Shader" uid="uid://be85hdnfvbf8f" path="res://vfx/reactive_crystal/reactive_crystal_particle.gdshader" id="3_shader"]
+
+[sub_resource type="ShaderMaterial" id="MoteMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("3_shader")
+shader_parameter/crystal_color = Color(1, 0.180392, 0.313725, 1)
+shader_parameter/glow_strength = 1.0
+shader_parameter/core_size = 0.3
+
+[sub_resource type="ParticleProcessMaterial" id="MoteProcess"]
+resource_local_to_scene = true
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(36, 5, 1)
+direction = Vector3(0, -1, 0)
+spread = 28.0
+initial_velocity_min = 5.0
+initial_velocity_max = 10.0
+gravity = Vector3(0, -2, 0)
+scale_min = 0.35
+scale_max = 0.7
+
+[node name="ReactiveCrystalPile" type="Node2D" unique_id=283329387]
+script = ExtResource("1_script")
+crystal_color = Color(1, 0.180392, 0.313725, 1)
+
+[node name="StaticPile" type="Node2D" parent="." unique_id=1911626324]
+
+[node name="MoundHalo" type="Polygon2D" parent="StaticPile" unique_id=1408526827]
+color = Color(0.3, 0.0541176, 0.0941175, 0.56)
+polygon = PackedVector2Array(-48, 3, -39, -8, -22, -13, 0, -11, 21, -15, 42, -7, 49, 4, 38, 11, -39, 11)
+
+[node name="CrystalBodyLeft" type="Polygon2D" parent="StaticPile" unique_id=522578962]
+color = Color(1, 0.180392, 0.313725, 0.92)
+polygon = PackedVector2Array(-35, 4, -28, -22, -17, -29, -12, -5, -17, 7)
+
+[node name="CrystalCoreLeft" type="Polygon2D" parent="StaticPile" unique_id=953958158]
+color = Color(1, 0.901647, 0.917647, 1)
+polygon = PackedVector2Array(-27, -19, -22, -23, -19, -5, -23, 1)
+
+[node name="CrystalBodyCenter" type="Polygon2D" parent="StaticPile" unique_id=1337140133]
+color = Color(1, 0.180392, 0.313725, 0.92)
+polygon = PackedVector2Array(-15, 5, -7, -34, 5, -42, 14, -8, 8, 7)
+
+[node name="CrystalCoreCenter" type="Polygon2D" parent="StaticPile" unique_id=1379377912]
+color = Color(1, 0.901647, 0.917647, 1)
+polygon = PackedVector2Array(-4, -30, 3, -36, 9, -9, 4, 0)
+
+[node name="CrystalBodyRight" type="Polygon2D" parent="StaticPile" unique_id=765939907]
+color = Color(1, 0.180392, 0.313725, 0.92)
+polygon = PackedVector2Array(12, 6, 21, -25, 32, -31, 39, -4, 34, 8)
+
+[node name="CrystalCoreRight" type="Polygon2D" parent="StaticPile" unique_id=932825788]
+color = Color(1, 0.901647, 0.917647, 1)
+polygon = PackedVector2Array(24, -20, 30, -25, 35, -5, 30, 2)
+
+[node name="ShardBodyA" type="Polygon2D" parent="StaticPile" unique_id=2128530250]
+color = Color(1, 0.180392, 0.313725, 0.92)
+polygon = PackedVector2Array(-45, 7, -38, -11, -29, -3, -31, 9)
+
+[node name="ShardBodyB" type="Polygon2D" parent="StaticPile" unique_id=1415477865]
+color = Color(1, 0.180392, 0.313725, 0.92)
+polygon = PackedVector2Array(2, 8, 12, -17, 22, -6, 19, 9)
+
+[node name="GrainBodyLeft" type="Polygon2D" parent="StaticPile" unique_id=1629838423]
+color = Color(1, 0.180392, 0.313725, 0.92)
+polygon = PackedVector2Array(-46, 8, -41, 3, -36, 8, -41, 11)
+
+[node name="GrainBodyRight" type="Polygon2D" parent="StaticPile" unique_id=1715403526]
+color = Color(1, 0.180392, 0.313725, 0.92)
+polygon = PackedVector2Array(37, 8, 43, 2, 48, 8, 43, 11)
+
+[node name="Reflection" type="Polygon2D" parent="." unique_id=160598710]
+position = Vector2(0, 1)
+color = Color(1, 0.385294, 0.48529375, 0.18)
+polygon = PackedVector2Array(-48, 12, -28, 9, 3, 10, 49, 13, 34, 17, -35, 17)
+
+[node name="DriftMotes" type="GPUParticles2D" parent="." unique_id=1601145763]
+material = SubResource("MoteMaterial")
+position = Vector2(0, -9)
+amount = 4
+texture = ExtResource("2_particle")
+lifetime = 1.5
+preprocess = 0.173
+randomness = 0.65
+fixed_fps = 12
+interpolate = false
+fract_delta = false
+process_material = SubResource("MoteProcess")

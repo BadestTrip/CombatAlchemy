@@ -8,12 +8,13 @@
 [ext_resource type="Script" uid="uid://dx7nefyynlygw" path="res://combat/potions/PotionMixer.gd" id="5_mixer"]
 [ext_resource type="Texture2D" uid="uid://dweoepaulchsb" path="res://sprites/characters/mini_boss_TRUE_TRANSPARENT.png" id="5_x7jh1"]
 [ext_resource type="Resource" path="res://combat/potions/resources/PotionRecipeBook_Default.tres" id="6_recipe_book"]
-[ext_resource type="Script" path="res://combat/potions/HeldPotionSlot.gd" id="6_slot"]
-[ext_resource type="PackedScene" path="res://combat/ui/PotionMixerUI.tscn" id="7_mixer_ui"]
-[ext_resource type="PackedScene" path="res://combat/potions/PotionEntity.tscn" id="7_potion_entity"]
+[ext_resource type="Script" uid="uid://cidwkifqoy3bd" path="res://combat/potions/HeldPotionSlot.gd" id="6_slot"]
+[ext_resource type="PackedScene" uid="uid://cir4qvynhpykg" path="res://combat/ui/PotionMixerUI.tscn" id="7_mixer_ui"]
 [ext_resource type="PackedScene" uid="uid://mt3v0si0wmk7" path="res://ui/PauseMenu.tscn" id="8_pause_menu"]
 [ext_resource type="PackedScene" uid="uid://4nc00skw10kf" path="res://globals/LevelMusic.tscn" id="9_level_music"]
 [ext_resource type="AudioStream" uid="uid://d3klg2jyuwpp0" path="res://music/CombatNew.mp3" id="12_x7jh1"]
+[ext_resource type="Script" uid="uid://hfdef3k7hirm" path="res://combat/potions/brewing/BrewingReaction.gd" id="13_brewing_reaction"]
+[ext_resource type="Resource" path="res://combat/potions/brewing/SmallFlaskBrewingProfile.tres" id="14_brewing_profile"]
 
 [node name="CombatScene" type="Node2D" unique_id=1979150264]
 script = ExtResource("1_controller")
@@ -23,11 +24,11 @@ held_potion_slot_path = NodePath("Systems/HeldPotionSlot")
 potion_mixer_ui_path = NodePath("UI/PotionMixerUI")
 player_combat_controller_path = NodePath("Arena/Player")
 potion_entities_parent_path = NodePath("Arena/PotionEntities")
-potion_entity_scene = ExtResource("7_potion_entity")
 
 [node name="Arena" type="Node2D" parent="." unique_id=874053048]
 
 [node name="ArenaFloor" type="ColorRect" parent="Arena" unique_id=1914808651]
+modulate = Color(0, 0, 0, 1)
 z_index = -20
 offset_left = -1800.0
 offset_top = -1100.0
@@ -80,12 +81,17 @@ script = ExtResource("4_input")
 script = ExtResource("5_mixer")
 recipe_book = ExtResource("6_recipe_book")
 
-[node name="HeldPotionSlot" type="Node" parent="Systems"]
+[node name="BrewingReaction" type="Node" parent="Systems/PotionMixer" unique_id=139163087]
+script = ExtResource("13_brewing_reaction")
+profile = ExtResource("14_brewing_profile")
+
+[node name="HeldPotionSlot" type="Node" parent="Systems" unique_id=1667154760]
 script = ExtResource("6_slot")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=63518013]
 
 [node name="PotionMixerUI" parent="UI" unique_id=1218744205 instance=ExtResource("7_mixer_ui")]
+grow_horizontal = 2
 
 [node name="PauseMenu" parent="UI" unique_id=1041878019 instance=ExtResource("8_pause_menu")]
 z_index = 100
