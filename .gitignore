@@ -1,6 +1,8 @@
 # Godot 4+ specific ignores
 .godot/
 .nomedia
+.plannings/
+.superpowers/
 
 # Godot-specific ignores
 .import/
