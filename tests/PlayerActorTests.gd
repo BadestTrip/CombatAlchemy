@@ -53,7 +53,7 @@ func _run_tests() -> void:
 	_expect(
 		camera != null
 		and camera.position.is_equal_approx(Vector2(0.0, -55.0))
-		and camera.zoom.is_equal_approx(Vector2(2.0, 2.0))
+		and camera.zoom.is_equal_approx(Vector2.ONE)
 		and camera.position_smoothing_enabled
 		and is_equal_approx(camera.position_smoothing_speed, 8.0),
 		"camera position, zoom, and smoothing are retained"

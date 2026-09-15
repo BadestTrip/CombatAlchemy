@@ -36,3 +36,63 @@ default_color = Color(0.82, 0.94, 1, 1)
 joint_mode = 2
 begin_cap_mode = 2
 end_cap_mode = 2
+
+[node name="SuccessWindow" type="Line2D" parent="."]
+visible = false
+points = PackedVector2Array(138, 92, 130, 92, 130, 112, 138, 112)
+width = 3.0
+default_color = Color(0.9, 0.95, 0.82, 0.95)
+joint_mode = 2
+
+[node name="CurrentProgressMarker" type="Polygon2D" parent="."]
+visible = false
+position = Vector2(16, 180)
+color = Color(1, 1, 1, 1)
+polygon = PackedVector2Array(0, 0, 8, -5, 8, 5)
+
+[node name="PredictedSettleMarker" type="Polygon2D" parent="."]
+visible = false
+position = Vector2(125, 180)
+color = Color(0.72, 0.94, 1, 0.9)
+polygon = PackedVector2Array(0, -5, 5, 0, 0, 5, -5, 0)
+
+[node name="Grains" type="Node2D" parent="."]
+visible = false
+
+[node name="Grain1" type="Polygon2D" parent="Grains"]
+position = Vector2(52, 150)
+color = Color(1, 1, 1, 0.9)
+polygon = PackedVector2Array(0, -3, 3, 0, 0, 3, -3, 0)
+
+[node name="Grain2" type="Polygon2D" parent="Grains"]
+position = Vector2(75, 132)
+color = Color(1, 1, 1, 0.75)
+polygon = PackedVector2Array(-2, -2, 2, -2, 2, 2, -2, 2)
+
+[node name="Grain3" type="Polygon2D" parent="Grains"]
+position = Vector2(91, 158)
+color = Color(1, 1, 1, 0.85)
+polygon = PackedVector2Array(0, -3, 3, 2, -3, 2)
+
+[node name="Grain4" type="Polygon2D" parent="Grains"]
+position = Vector2(66, 104)
+color = Color(1, 1, 1, 0.7)
+polygon = PackedVector2Array(-2, 0, 0, -3, 2, 0, 0, 3)
+
+[node name="Foam" type="Node2D" parent="."]
+visible = false
+
+[node name="Bubble1" type="Polygon2D" parent="Foam"]
+position = Vector2(50, 91)
+color = Color(1, 1, 1, 0.9)
+polygon = PackedVector2Array(-5, -3, 0, -6, 5, -3, 5, 3, 0, 6, -5, 3)
+
+[node name="Bubble2" type="Polygon2D" parent="Foam"]
+position = Vector2(72, 86)
+color = Color(1, 1, 1, 0.8)
+polygon = PackedVector2Array(-6, -4, 0, -7, 6, -4, 6, 4, 0, 7, -6, 4)
+
+[node name="Bubble3" type="Polygon2D" parent="Foam"]
+position = Vector2(95, 92)
+color = Color(1, 1, 1, 0.85)
+polygon = PackedVector2Array(-5, -3, 0, -6, 5, -3, 5, 3, 0, 6, -5, 3)

@@ -1,6 +1,6 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://bsq7f75r5jlt6"]
 
-[ext_resource type="Script" path="res://combat/potions/PotionEntity.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://c5k4bmirwxcod" path="res://combat/potions/PotionEntity.gd" id="1_script"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_flight"]
 radius = 13.0
@@ -8,43 +8,39 @@ radius = 13.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_placement"]
 radius = 42.0
 
-[node name="PotionEntity" type="Node2D"]
+[node name="PotionEntity" type="Node2D" unique_id=543789206]
 script = ExtResource("1_script")
+placed_lifetime = 90.0
 
-[node name="BottleVisual" type="Polygon2D" parent="."]
+[node name="BottleVisual" type="Polygon2D" parent="." unique_id=1960158586]
 polygon = PackedVector2Array(-12, -6, -4, -16, 9, -12, 14, 0, 8, 13, -7, 15, -15, 5)
-color = Color(1, 1, 1, 1)
 
-[node name="Outline" type="Line2D" parent="."]
+[node name="Outline" type="Line2D" parent="." unique_id=1946202858]
 points = PackedVector2Array(-12, -6, -4, -16, 9, -12, 14, 0, 8, 13, -7, 15, -15, 5, -12, -6)
 width = 2.0
-default_color = Color(1, 1, 1, 1)
 
-[node name="FlightArea" type="Area2D" parent="."]
+[node name="FlightArea" type="Area2D" parent="." unique_id=954443722]
 collision_layer = 0
 collision_mask = 3
 monitoring = false
-monitorable = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="FlightArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FlightArea" unique_id=1720506896]
 shape = SubResource("CircleShape2D_flight")
 
-[node name="SweepCast" type="ShapeCast2D" parent="."]
+[node name="SweepCast" type="ShapeCast2D" parent="." unique_id=1069644510]
 enabled = false
+shape = SubResource("CircleShape2D_flight")
 target_position = Vector2(0, 0)
+max_results = 16
 collision_mask = 3
 collide_with_areas = true
-collide_with_bodies = true
-max_results = 16
-shape = SubResource("CircleShape2D_flight")
 
-[node name="PlacementTrigger" type="Area2D" parent="."]
+[node name="PlacementTrigger" type="Area2D" parent="." unique_id=117084859]
 collision_layer = 0
 collision_mask = 2
 monitoring = false
-monitorable = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PlacementTrigger"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlacementTrigger" unique_id=385955393]
 shape = SubResource("CircleShape2D_placement")
 
 [connection signal="area_entered" from="FlightArea" to="." method="_on_flight_area_entered"]

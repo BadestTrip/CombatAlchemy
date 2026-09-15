@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BrewingProfileData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://combat/potions/brewing/BrewingProfileData.gd" id="1_profile"]
+
+[resource]
+script = ExtResource("1_profile")
+energy_ramp_time = 0.25
+progress_rate = 0.55
+energy_dissipation_time = 0.45
+success_min_progress = 0.7
+success_max_progress = 0.9
+overreaction_cooldown = 0.6
+recovery_progress = 0.4

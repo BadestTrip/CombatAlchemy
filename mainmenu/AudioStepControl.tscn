@@ -1,0 +1,98 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://mainmenu/AudioStepControl.gd" id="1_script"]
+
+[node name="AudioStepControl" type="VBoxContainer"]
+custom_minimum_size = Vector2(520, 86)
+theme_override_constants/separation = 8
+script = ExtResource("1_script")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Audio"
+
+[node name="ControlRow" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Minus" type="Button" parent="ControlRow"]
+custom_minimum_size = Vector2(52, 48)
+layout_mode = 2
+focus_mode = 2
+mouse_default_cursor_shape = 2
+text = "-"
+flat = true
+
+[node name="Segments" type="HBoxContainer" parent="ControlRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 6
+
+[node name="Segment01" type="ColorRect" parent="ControlRow/Segments"]
+custom_minimum_size = Vector2(24, 16)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.25, 1)
+
+[node name="Segment02" type="ColorRect" parent="ControlRow/Segments"]
+custom_minimum_size = Vector2(24, 16)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.25, 1)
+
+[node name="Segment03" type="ColorRect" parent="ControlRow/Segments"]
+custom_minimum_size = Vector2(24, 16)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.25, 1)
+
+[node name="Segment04" type="ColorRect" parent="ControlRow/Segments"]
+custom_minimum_size = Vector2(24, 16)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.25, 1)
+
+[node name="Segment05" type="ColorRect" parent="ControlRow/Segments"]
+custom_minimum_size = Vector2(24, 16)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.25, 1)
+
+[node name="Segment06" type="ColorRect" parent="ControlRow/Segments"]
+custom_minimum_size = Vector2(24, 16)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.25, 1)
+
+[node name="Segment07" type="ColorRect" parent="ControlRow/Segments"]
+custom_minimum_size = Vector2(24, 16)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.25, 1)
+
+[node name="Segment08" type="ColorRect" parent="ControlRow/Segments"]
+custom_minimum_size = Vector2(24, 16)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.25, 1)
+
+[node name="Segment09" type="ColorRect" parent="ControlRow/Segments"]
+custom_minimum_size = Vector2(24, 16)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.25, 1)
+
+[node name="Segment10" type="ColorRect" parent="ControlRow/Segments"]
+custom_minimum_size = Vector2(24, 16)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.25, 1)
+
+[node name="Plus" type="Button" parent="ControlRow"]
+custom_minimum_size = Vector2(52, 48)
+layout_mode = 2
+focus_mode = 2
+mouse_default_cursor_shape = 2
+text = "+"
+flat = true

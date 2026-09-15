@@ -1,0 +1,95 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://vfx/reactive_crystal/ReactiveCrystalVFXWorkshop.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://vfx/reactive_crystal/ReactiveCrystalPile.tscn" id="2_pile"]
+[ext_resource type="Resource" path="res://shared/alchemy/ChargedNeonPalette.tres" id="3_palette"]
+
+[node name="ReactiveCrystalVFXWorkshop" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="WorkshopBackground" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(0, 0, 1920, 0, 1920, 1080, 0, 1080)
+color = Color(0.035, 0.043, 0.05, 1)
+
+[node name="Workbench" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(180, 610, 1740, 610, 1740, 760, 180, 760)
+color = Color(0.12, 0.13, 0.14, 1)
+
+[node name="Piles" type="Node2D" parent="."]
+
+[node name="Red" parent="Piles" instance=ExtResource("2_pile")]
+position = Vector2(420, 610)
+palette = ExtResource("3_palette")
+color_id = &"red"
+random_seed = 11
+
+[node name="Green" parent="Piles" instance=ExtResource("2_pile")]
+position = Vector2(690, 610)
+palette = ExtResource("3_palette")
+color_id = &"green"
+random_seed = 23
+
+[node name="Blue" parent="Piles" instance=ExtResource("2_pile")]
+position = Vector2(960, 610)
+palette = ExtResource("3_palette")
+color_id = &"blue"
+random_seed = 37
+
+[node name="Health" parent="Piles" instance=ExtResource("2_pile")]
+position = Vector2(1230, 610)
+palette = ExtResource("3_palette")
+color_id = &"health"
+random_seed = 53
+
+[node name="Damage" parent="Piles" instance=ExtResource("2_pile")]
+position = Vector2(1500, 610)
+palette = ExtResource("3_palette")
+color_id = &"damage"
+random_seed = 71
+
+[node name="BurstOrigin" type="Marker2D" parent="."]
+position = Vector2(960, 350)
+
+[node name="OriginMarker" type="Polygon2D" parent="BurstOrigin"]
+polygon = PackedVector2Array(-4, 0, 0, -4, 4, 0, 0, 4)
+color = Color(0.72, 0.72, 0.72, 0.7)
+
+[node name="Bursts" type="Node2D" parent="."]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Title" type="Label" parent="UI"]
+offset_left = 64.0
+offset_top = 48.0
+offset_right = 600.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(0.86, 0.86, 0.84, 1)
+theme_override_font_sizes/font_size = 28
+text = "REACTIVE CRYSTAL VFX WORKSHOP"
+
+[node name="BurstControls" type="HBoxContainer" parent="UI"]
+offset_left = 542.0
+offset_top = 900.0
+offset_right = 1378.0
+offset_bottom = 956.0
+theme_override_constants/separation = 16
+
+[node name="Red" type="Button" parent="UI/BurstControls"]
+custom_minimum_size = Vector2(150, 48)
+text = "RED BURST"
+
+[node name="Green" type="Button" parent="UI/BurstControls"]
+custom_minimum_size = Vector2(150, 48)
+text = "GREEN BURST"
+
+[node name="Blue" type="Button" parent="UI/BurstControls"]
+custom_minimum_size = Vector2(150, 48)
+text = "BLUE BURST"
+
+[node name="Health" type="Button" parent="UI/BurstControls"]
+custom_minimum_size = Vector2(150, 48)
+text = "HEALTH BURST"
+
+[node name="Damage" type="Button" parent="UI/BurstControls"]
+custom_minimum_size = Vector2(150, 48)
+text = "DAMAGE BURST"

@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://mainmenu/MainMenuSettingsView.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://mainmenu/AudioStepControl.tscn" id="2_audio"]
+[ext_resource type="PackedScene" path="res://mainmenu/MainMenuCommandButton.tscn" id="3_command"]
+[ext_resource type="Theme" path="res://mainmenu/resources/MainMenuTheme.tres" id="4_theme"]
+
+[node name="MainMenuSettingsView" type="VBoxContainer"]
+custom_minimum_size = Vector2(540, 340)
+theme = ExtResource("4_theme")
+theme_override_constants/separation = 18
+script = ExtResource("1_script")
+
+[node name="Heading" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.94, 0.94, 1)
+theme_override_font_sizes/font_size = 34
+text = "SETTINGS"
+
+[node name="Music" parent="." instance=ExtResource("2_audio")]
+layout_mode = 2
+label_text = "Music"
+
+[node name="SFX" parent="." instance=ExtResource("2_audio")]
+layout_mode = 2
+label_text = "SFX"
+
+[node name="Back" parent="." instance=ExtResource("3_command")]
+layout_mode = 2
+command_text = "Back"

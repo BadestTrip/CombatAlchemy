@@ -50,6 +50,12 @@ func _run_tests() -> void:
 		potion_input != null and potion_input.has_signal(&"potion_use_requested"),
 		"PotionInput exposes one unified delivery signal"
 	)
+	_expect(
+		potion_input != null
+		and potion_input.has_signal(&"agitation_started")
+		and potion_input.has_signal(&"agitation_released"),
+		"PotionInput exposes brewing press and release signals"
+	)
 	_expect(mixer != null, "CombatScene exposes PotionMixer")
 	_expect(slot != null, "CombatScene exposes HeldPotionSlot")
 	_expect(mixer_ui != null, "CombatScene exposes PotionMixerUI")
@@ -253,7 +259,15 @@ func _prepare_potion(
 	for reagent in reagents:
 		potion_input.reagent_requested.emit(reagent)
 	_expect(mixer.get_layers() == reagents, "%s potion accepts input-driven reagents" % potion_name)
-	potion_input.mix_requested.emit()
+	var reaction := mixer.get_node(^"BrewingReaction") as BrewingReaction
+	_expect(reaction != null, "%s potion has a brewing reaction" % potion_name)
+	if reaction == null:
+		return null
+	potion_input.agitation_started.emit()
+	reaction.advance(1.35)
+	_expect(not (slot.call(&"has_potion") as bool), "%s potion is not created before release" % potion_name)
+	potion_input.agitation_released.emit()
+	reaction.advance(0.45)
 	_expect(slot.call(&"has_potion") as bool, "%s potion occupies HeldPotionSlot" % potion_name)
 	var entity := slot.call(&"get_entity") as PotionEntity
 	_expect(entity != null, "%s potion exposes its held entity" % potion_name)

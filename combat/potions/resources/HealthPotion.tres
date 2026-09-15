@@ -11,4 +11,4 @@ display_name = "Health Potion"
 red_count = 2
 blue_count = 1
 effects = Array[ExtResource("3_effect_type")]([ExtResource("2_effect")])
-mixed_color = Color(0.8, 0.2, 0.8, 1)
+mixed_color = Color(1, 0.231373, 0.831373, 1)

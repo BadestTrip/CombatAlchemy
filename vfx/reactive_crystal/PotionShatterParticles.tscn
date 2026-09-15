@@ -1,0 +1,80 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://vfx/reactive_crystal/PotionShatterParticles.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://vfx/reactive_crystal/reactive_crystal_particle.svg" id="2_particle"]
+[ext_resource type="Shader" path="res://vfx/reactive_crystal/reactive_crystal_particle.gdshader" id="3_shader"]
+
+[sub_resource type="ShaderMaterial" id="GrainMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("3_shader")
+shader_parameter/crystal_color = Color(0.12549, 0.960784, 0.815686, 1)
+shader_parameter/glow_strength = 1.0
+shader_parameter/core_size = 0.24
+
+[sub_resource type="ParticleProcessMaterial" id="GrainProcess"]
+resource_local_to_scene = true
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 180.0
+gravity = Vector3(0, 82, 0)
+damping_min = 26.0
+damping_max = 42.0
+initial_velocity_min = 78.0
+initial_velocity_max = 142.0
+scale_min = 0.25
+scale_max = 0.55
+
+[sub_resource type="ShaderMaterial" id="FragmentMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("3_shader")
+shader_parameter/crystal_color = Color(0.12549, 0.960784, 0.815686, 1)
+shader_parameter/glow_strength = 1.1
+shader_parameter/core_size = 0.36
+
+[sub_resource type="ParticleProcessMaterial" id="FragmentProcess"]
+resource_local_to_scene = true
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 155.0
+gravity = Vector3(0, 105, 0)
+damping_min = 18.0
+damping_max = 30.0
+initial_velocity_min = 115.0
+initial_velocity_max = 190.0
+scale_min = 0.55
+scale_max = 0.95
+
+[node name="PotionShatterParticles" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Grains" type="GPUParticles2D" parent="."]
+material = SubResource("GrainMaterial")
+emitting = false
+amount = 28
+lifetime = 0.72
+one_shot = true
+explosiveness = 0.92
+randomness = 0.62
+fixed_fps = 12
+interpolate = false
+fract_delta = false
+process_material = SubResource("GrainProcess")
+texture = ExtResource("2_particle")
+
+[node name="Fragments" type="GPUParticles2D" parent="."]
+material = SubResource("FragmentMaterial")
+emitting = false
+amount = 6
+lifetime = 0.82
+one_shot = true
+explosiveness = 1.0
+randomness = 0.48
+fixed_fps = 12
+interpolate = false
+fract_delta = false
+process_material = SubResource("FragmentProcess")
+texture = ExtResource("2_particle")
+
+[node name="CleanupTimer" type="Timer" parent="."]
+wait_time = 0.95
+one_shot = true

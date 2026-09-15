@@ -1,18 +1,30 @@
 # CombatAlchemy Art Reference Index
 
-> Status: Visual development reference
-> Pack version: 1.2
+> Status: Historical visual references with current pixel-art usage guidance
+> Pack version: 1.3
 > Created: 2026-07-17
-> Updated: 2026-07-23
+> Updated: 2026-09-13
 > Creative source of truth: [Style and Vision](./STYLE_AND_VISION.md)
+> Approved next production pass: [Pixel-Art Conversion](./plannings/plans/2026-09-12-pixel-art-conversion.md)
 
 ## Purpose
 
-This pack translates the CombatAlchemy style bible into concrete visual targets.
-It combines six project-specific generated concept plates with five historical
-public-domain works. Use the generated plates to align gameplay presentation.
-Use the sourced works to study individual techniques such as wash, value grouping,
-architectural density, silhouette, and apparatus construction.
+This pack preserves six generated concept plates and five historical
+public-domain works from the project's earlier ink-wash direction. They now
+guide mood, value grouping, silhouette, composition, and apparatus construction,
+**not the final production medium**. The approved game presentation is full
+2D pixel art on the permanent 1920 x 1080 project canvas. Compact-character
+proportions remain approved, while gameplay composition and exact asset sizes do not.
+
+Generated concepts are not production-ready sprite sheets or public-domain
+source records. The historical museum images have their own recorded source
+credits and public-domain status below. This documentation update preserves
+those records and all local images; it does not regenerate art or relicense it.
+
+Some preserved generation prompts below name the earlier muted RGB values.
+Those values are historical prompt records, not current production guidance.
+All new assets use the exact Charged Neon colors in
+`shared/alchemy/ChargedNeonPalette.tres` and `STYLE_AND_VISION.md`.
 
 These images are references, not a license to combine every visible detail into
 one asset. Historical clothing, symbols, architecture, inscriptions, and cultural
@@ -20,13 +32,31 @@ details are not automatically part of the setting. Do not trace a source image o
 reproduce its complete composition. Extract only the quality identified in its
 `Use for` section.
 
+## Pixel-Art Approval Status
+
+| Item | Status |
+| --- | --- |
+| Conversion direction, canvas, frame budget, and grayscale foundation | Approved; see the saved plan |
+| Four neutral researcher facings in pixel art | [Approved 2026-09-12](./pixel_art_samples/README.md#a01-researcher-facings) for manual sprite-sheet production |
+| Pixel gameplay composition | Intentionally undecided; no local sample retained |
+| Pixel main-menu composition | [Approved 2026-09-12](./pixel_art_samples/README.md#a03-main-menu-composition) for later menu production |
+| Complete sheet, environment, UI, and effects | Researcher and menu work may proceed; gameplay-facing work waits for a separate composition decision |
+
+Use the current [image generation kit](./STYLE_AND_VISION.md#image-generation-kit)
+for new work. Exact prompts preserved below are **historical records**, including
+their old palette, painterly treatment, and cutout requirements. They are not
+instructions for new pixel assets. G06's earlier approval is separate from the
+approved pixel-art samples. Do not downsample these plates and call them finished
+assets. The pixel approval pack records its native-size derivatives separately;
+it does not replace the historical reference files.
+
 ## Quick Reference
 
-| File | Primary decision |
+| File | Retained reference value, not a pixel-production specification |
 | --- | --- |
 | `ART_REF_G01_GAMEPLAY_NORTH_STAR.png` | Camera, arena readability, restrained color, flask placement |
-| `ART_REF_G02_RESEARCHER_SHEET.png` | Researcher silhouette, equipment, drink and throw poses |
-| `ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png` | Visual costume, silhouette, perspective, and directional-part reference |
+| `ART_REF_G02_RESEARCHER_SHEET.png` | Hat/coat/equipment identity; action silhouettes are future-only reference |
+| `ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png` | Historically approved costume and silhouette to simplify into full-body frames |
 | `ART_REF_G03_ENEMY_PROCESS_SHEET.png` | Material-driven enemy families and gameplay silhouettes |
 | `ART_REF_G04_FLASK_UI_STATES.png` | Flask state consistency and physical mixer feedback |
 | `ART_REF_G05_POTION_VFX.png` | Healing and damage effect timing language |
@@ -42,13 +72,12 @@ The following images were generated specifically as CombatAlchemy concept
 references. They are not production-ready assets. Rebuild final UI, sprites,
 effects, and environments for their actual in-engine requirements.
 
-The active Player uses the 15-bone `characters/player/PlayerModel.tscn` with
-geometric placeholders and four authored facings. G02 and G06 remain visual
-references for costume, silhouette, perspective, and future directional sprite
-parts; neither image defines an active atlas pipeline. Preserve the skeletal
-contract when producing replacement art: use separate body parts, pivots at
-local joint zero, and enough hidden overlap to cover the authored motion range.
-The replacement workflow is documented in `characters/player/README.md`.
+The active Player still uses the 15-bone geometric `PlayerModel` and four authored
+facings. Its approved replacement is one full-body pixel sheet, not separate
+joint parts. Preserve the public movement/facing/socket contract while replacing
+the visual internals. Keep hands empty in the frames so the separate physical
+potion remains visible only when held. The current and planned workflows are
+separated in the [PlayerModel guide](../characters/player/README.md).
 
 ### G01: Gameplay North Star
 
@@ -67,13 +96,16 @@ The replacement workflow is documented in `characters/player/README.md`.
 - The exact courtyard, observatory instrument, enemy anatomy, or prop placement.
 - The exact reagent swatch shapes as final UI controls.
 - The amount of crystal growth as a default for every mineral enemy.
+- Painted surface texture, amber/cool environment colors, or exact pixel scale.
 
 **Production observations**
 
-- Keep the gameplay camera near 35 to 45 degrees above the ground.
+- Translate the elevated three-quarter view into the eventual approved gameplay frame.
 - Preserve a calm value region around movement and targeting space.
 - Use upper-left world lighting and let reactions add only short local light.
-- Keep UI color more saturated than environment color, but limited in area.
+- Use eight grayscale values for ordinary world/UI art; reserve saturated color
+  for liquid, labeled reagent swatches, and meaningful reaction information.
+- Test compact silhouettes in the broader view before fixing production dimensions.
 
 <details>
 <summary>Exact generation prompt</summary>
@@ -101,9 +133,9 @@ Avoid: photorealism, glossy 3D, anime, cel shading, cheerful cozy fantasy, neon 
 
 **Use for**
 
-- The broad hat, shoulder line, long asymmetrical coat, and visible flask hand.
+- The broad hat, shoulder line, coat silhouette, and visible flask hand.
 - A practical field-research silhouette rather than a conventional wizard.
-- Drink and throw poses that communicate their action before detail is read.
+- Drink and throw silhouettes as future action reference, not new clip scope.
 - Equipment based on containers, notes, repairs, ties, gloves, and worn hardware.
 
 **Do not copy**
@@ -115,12 +147,12 @@ Avoid: photorealism, glossy 3D, anime, cel shading, cheerful cozy fantasy, neon 
 **Production observations**
 
 - Simplify interior costume detail aggressively at gameplay scale.
-- Keep the flask hand separated from the torso during actions.
-- Preserve the same joint placement when preparing future cutout-animation parts.
-- Treat the current researcher rig as a working motion, pivot, timing, and
-  assembly reference rather than immutable final anatomy or surface detail.
-- Deliver head, torso, upper/lower limbs, hands, feet, and articulated coat
-  sections as separate transparent assets when preparing production cutout art.
+- Approve four neutral facings at the chosen gameplay scale before producing idle/walk frames
+  per facing. Keep both hands empty and locate the bottle through hand markers.
+- Use the current model as an API and facing reference, not a demand for skeletal
+  assembly, hidden joint overlap, or a separate coat-tail animation pipeline.
+- New production deliverables are full-body frames with stable feet and clean
+  transparency. Do not generate new articulated body-part atlases.
 
 <details>
 <summary>Exact generation prompt</summary>
@@ -141,18 +173,15 @@ Avoid: photorealism, glossy 3D, anime, cel shading, heroic power pose, wizard st
 
 ### G06: Researcher Cutout Target
 
-![Approved researcher cutout target](./ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png)
+![Historically approved researcher cutout target](./ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png)
 
 **Use for**
 
-- The approved elevated top-down three-quarter perspective for future
-  four-facing directional sprite parts.
+- The historically approved elevated three-quarter view and overall identity.
 - Consistent hat, obscured face, weathered coat, glass apparatus, satchel,
-  gloves, and boots across articulated parts.
-- A neutral A-pose that exposes shoulder, elbow, wrist, hip, knee, ankle, and
-  coat attachment seams.
-- Upper-left lighting and a restrained charcoal, parchment, copper, and glass
-  material hierarchy.
+  gloves, and boots, simplified into a few readable grayscale pixel clusters.
+- Empty hands and readable separation of limbs from the coat.
+- Upper-left light and material/value hierarchy, not its colored materials.
 
 **Do not copy**
 
@@ -161,21 +190,19 @@ Avoid: photorealism, glossy 3D, anime, cel shading, heroic power pose, wizard st
 - The flattened target image as a gameplay sprite.
 - The single reference view as a substitute for authored directional art.
 - Chroma-background pixels or cleanup artifacts.
+- Its A-pose, exact proportions, or attachment seams as a sprite-sheet requirement.
 
 **Production observations**
 
-- G06 is a visual costume and silhouette reference, not an active atlas
-  pipeline.
-- The active compact workshop uses geometric placeholders pending new
-  directional sprite parts.
-- Simplify internal texture noise before final production art; silhouette,
-  joints, and action readability take priority.
-- Preserve the 15-bone hierarchy, separate left/right facings, joint pivots,
-  positive scale, and stable sockets documented in
-  [`characters/player/README.md`](../characters/player/README.md).
+- G06 is a costume/mood reference, not a new pixel approval or active atlas brief.
+- The current compact workshop remains skeletal pending sprite-sheet conversion.
+- Prioritize the gameplay-scale silhouette over painted texture or equipment density.
+- Preserve four separate facings, positive scale, phase, and socket lookup as
+  documented in the [PlayerModel guide](../characters/player/README.md), not the
+  old bone internals as a new production requirement.
 
 <details>
-<summary>Approved generation prompt</summary>
+<summary>Historically approved generation prompt (unchanged)</summary>
 
 ```text
 Create one detailed forbidden occult field researcher for a pure 2D raster
@@ -216,6 +243,8 @@ glossy 3D, anime rendering, or cropped body parts.
 - Reduce detail until each enemy remains identifiable at gameplay zoom.
 - Treat the material condition as anatomy and behavior, not surface ornament.
 - Reserve the small blue, red, or green clue for intentional mechanics.
+- Convert material noise into a few stable pixel shapes. Friend/Foe stay static
+  in this presentation pass; expanded enemy families and AI remain future work.
 
 <details>
 <summary>Exact generation prompt</summary>
@@ -243,7 +272,7 @@ Avoid: photorealism, glossy 3D, anime, zombie gore, body-horror close-up, generi
 - One identical flask outline across empty, layered, prepared, and rejected states.
 - Three mechanically readable liquid bands and adjacent reagent controls.
 - A prepared potion becoming one uniform liquid.
-- Rejection communicated through physical shake, ink flare, and glass stress.
+- Rejection communicated physically while preserving all mixture layers.
 
 **Do not copy**
 
@@ -254,8 +283,10 @@ Avoid: photorealism, glossy 3D, anime, zombie gore, body-horror close-up, generi
 
 **Production observations**
 
-- The final Godot UI must keep stable dimensions across every state.
-- Keep layer boundaries cleaner than distant environment brushwork.
+- Keep the flask compact with adjacent R/G/B swatches; approve its dimensions from gameplay composition.
+- Preserve stable dimensions and crisp horizontal layer boundaries in every state.
+- Translate painted flare/shake into brief pixel-step motion or an outline flash,
+  not smooth scaling, blur, permanent cracks, or a combat log.
 - Build labels and accessibility indicators in-engine, never into raster art.
 
 <details>
@@ -283,7 +314,7 @@ Avoid: fantasy hotbar, inventory grid, card layout, ornate frame, giant glowing 
 
 - Four readable stages: anticipation, travel, contact, and consequence.
 - Rounded violet-magenta healing motion versus sharper teal damage motion.
-- Saturated cores that quickly dissolve into desaturated ink edges.
+- Saturated liquid cores with a brief, sparse outer breakup.
 - Small impact footprints that do not hide the target or terrain.
 
 **Do not copy**
@@ -294,9 +325,12 @@ Avoid: fantasy hotbar, inventory grid, card layout, ornate frame, giant glowing 
 
 **Production observations**
 
-- Time the clearest silhouette to the mechanical commit frame.
+- Align feedback to the existing immediate use/impact; do not add an action-event
+  delay because the concept plate separates anticipation from contact.
 - Keep travel effects compact enough to preserve aim direction.
 - Let aftermath marks fade before they accumulate into visual noise.
+- Reuse a grayscale bottle with tinted liquid and sparse pixel effect frames.
+  Discrete visual orientations must not quantize aim or physical flight.
 
 <details>
 <summary>Exact generation prompt</summary>
@@ -320,6 +354,11 @@ Avoid: laser beams, generic fireballs, glowing glyphs, rune circles, spellcastin
 The local files below are museum-provided public-domain images. Their legal
 status does not make their complete compositions part of CombatAlchemy. Keep
 source credit in this index and use the works analytically.
+
+For pixel production, translate the named quality into a few value clusters.
+Do not import paper texture, etching density, tinted washes, or smooth edges as
+the rendering rule. The following source/creator/date/license records remain
+unchanged from the stored pack; no new museum downloads occur in this update.
 
 ### S01: Concentrated Atmospheric Wash
 
@@ -415,25 +454,32 @@ gameplay function and use the project's top-down three-quarter perspective.
 
 | Aspect | CombatAlchemy target | Primary references |
 | --- | --- | --- |
-| Camera | Fixed top-down three-quarter, approximately 35 to 45 degrees | G01, G02, G03, G05 |
-| Lighting | Upper-left key light with short local reaction light | G01, G02, G04, G05 |
-| Base palette | Soot, paper bone, cool mist, weathered materials | G01-G05, S01, S02 |
+| Medium/grid | Native 2D pixel art on the 1920 x 1080 project canvas with nearest sampling; gameplay grid remains undecided | Current style bible, approval pack, and saved plan |
+| Camera | Fixed elevated three-quarter, broad readable view, no isometric tile grid | G01, G02, G03, G05 for perspective only |
+| Lighting | Upper-left stepped values; colored light only for small alchemical reactions | G01, G02, G04, G05 for hierarchy |
+| Base palette | Eight neutral grayscale values, not painted parchment or tinted mist | S01/S02/S04 for value grouping; style bible for the working ramp |
 | Active color | Saturated RGB or prepared-potion color in small mechanical areas | G01, G04, G05 |
-| Silhouette | One dominant shape readable before material detail | G02, G03, S04 |
-| Environment detail | Quiet routes framed by denser structural and organic marks | G01, S02, S03 |
-| UI | One flask, stable outline, adjacent compact reagent controls | G01, G04 |
-| Effects | Compact directional travel, clear contact, brief aftermath | G01, G05 |
+| Silhouette | Compact full-body character frames; hat/coat/hand read before detail; exact dimensions require gameplay approval | G02, G06, S04 |
+| Environment detail | Quiet routes framed by simple reusable terrain/prop clusters | G01, S02, S03 |
+| UI | One compact flask, stable outline, adjacent labeled reagent controls; exact dimensions remain open | G01/G04 for layout, not surface treatment |
+| Effects | Grayscale bottle, tinted liquid, compact travel, clear contact, brief pixel aftermath | G01, G05 |
 | Props | Functional construction, wear, repair, and process | G02, S05 |
 
 ## Review Checklist
 
-- [ ] The image reads as pure 2D raster ink wash rather than glossy 3D.
+- [ ] New work follows native-grid pixel art, not the historical painterly prompts.
+- [x] Retained researcher-facing and main-menu samples are explicitly approved.
+- [ ] Gameplay composition is decided and approved before gameplay-art production.
+- [ ] Ordinary art stays within the agreed eight-value grayscale ramp.
+- [ ] Native and integer-enlarged previews show deliberate consistent pixel clusters.
 - [ ] Gameplay art uses the shared top-down three-quarter perspective.
 - [ ] Upper-left lighting remains consistent unless an exception is documented.
-- [ ] The primary silhouette survives reduction to gameplay scale.
+- [ ] The primary silhouette reads at its actual source size, not only enlarged.
 - [ ] Saturated color communicates alchemy instead of tinting the whole image.
 - [ ] Traversal, target, and interface areas remain visually calm enough to read.
 - [ ] No historical symbol or complete cultural design is copied without research.
 - [ ] No runes, chants, spellcasting pose, magic alphabet, or generic glowing glyphs appear.
 - [ ] Functional text and accessibility labels are authored in Godot, not baked into art.
 - [ ] Generated concepts are rebuilt and cleaned before production use.
+- [ ] Character frames, hand markers, and empty hands support one separate bottle.
+- [ ] The historical references and exact prompts remain attributed and unchanged.
