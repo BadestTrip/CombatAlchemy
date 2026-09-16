@@ -1,7 +1,7 @@
 # Project Architecture
 
 > Status: Technical source of truth
-> Documentation review: 2026-09-15; small-flask combat brewing implemented
+> Documentation review: 2026-09-16; small-flask brewing and two enemy archetypes implemented
 > Automated verification: current results are recorded below
 > Creative companion: [Style and Vision](./STYLE_AND_VISION.md)
 > Player model guide: [PlayerModel](../characters/player/README.md)
@@ -17,9 +17,9 @@ has player movement and collision, actors with reusable health components,
 capability-based potion effects, one held physical potion, immediate drinking,
 throwing and proximity placement,
 hold/release/settle small-flask brewing, mixer UI, scene transitions, music,
-settings, and pause navigation.
+settings, pause navigation, and two disposable enemy archetypes for combat testing.
 
-There is no exploration layer, enemy AI, victory state, defeat state,
+There is no exploration layer, victory state, defeat state,
 permanent save data, reagent inventory, or automatic combat-completion return
 flow. The next technical goals, in order, are:
 
@@ -27,8 +27,8 @@ flow. The next technical goals, in order, are:
    composition before converting gameplay presentation or fixing gameplay asset sizes.
 2. Playtest and tune the implemented small-flask hold/release/settle interaction
    before adding more recipes or vessel tiers.
-3. Add one enemy entity with readable notice, pursuit, telegraph, attack,
-   recovery, and potion-reaction states.
+3. Tune the Pursuer and Skirmisher behaviours, then add obstacle-aware
+   navigation only when arena geometry makes it useful.
 4. Add reagent pickups and limited runtime carrying without permanent storage.
 5. Add selected world objects with focused capabilities that existing potion
    effects can query.
@@ -68,7 +68,7 @@ Gameplay composition and production asset dimensions remain undecided.
 | Direction | Positive-scale front/back/side-left/side-right, phase-aware turns and 0.10 hysteresis | Preserve facing rules, gait phase, idle retention, and anatomical hands; no mirroring or image crossfades |
 | Sockets | Markers beneath hand bones; a held entity follows `hand_right` | Stable `hand_left`/`hand_right` lookup with per-frame marker positions; the bottle remains separate from character art |
 | Workshop | Same model, movement room, readouts, bone overlay | Same model/workflow with frame bounds and socket guides; no separate production rig |
-| Sandbox and UI | Static Friend/Foe, plain arena, geometric bottle/flask, rebuilt animated main menu, existing pause/settings | Gameplay composition and asset sizes are intentionally undecided; retain flask-first interaction and hybrid detail |
+| Sandbox and UI | Passive Friend, H/J-spawned Pursuer/Skirmisher, plain arena, geometric bottle/flask, rebuilt animated main menu, existing pause/settings | Gameplay composition and asset sizes are intentionally undecided; retain flask-first interaction and hybrid detail |
 | Transitions | Snapshot-based ink reveal | Pixel-grid reveal with unchanged duration/input-blocking/completion contract |
 
 ### Contracts to Preserve
@@ -122,6 +122,9 @@ CombatScene
 				  -> eligible collision creates PotionImpactContext
 			  -> PotionInstance.apply() -> PotionEffectResolver
 				  -> recipe effects query subject components
+  -> EnemyTestSpawner: H/J spawn requests
+	  -> Pursuer: notice -> chase -> melee windup -> recovery
+	  -> Skirmisher: approach/retreat distance band -> ranged windup -> projectile
 
 Play Current Scene
   -> characters/player/PlayerModelWorkshop.tscn
@@ -137,6 +140,7 @@ routes through `GameManager`; Quit calls `GameManager.quit_game()`.
 | `characters/player/` | Canonical compact player model, locomotion library, sockets, workshop, and model guide. |
 | `combat/CombatScene.tscn` | Active potion sandbox composition and dependency wiring. |
 | `combat/actors/` | Player movement, actor capabilities, neutral impact hitboxes, collision, cameras, and world health bars. |
+| `combat/enemies/` | Reusable enemy actors, profiles, local sensing/movement, separate tactical brains, attacks, projectiles, and sandbox spawning. |
 | `combat/potions/` | Reagent constants, recipes, unfinished mixer layers, runtime potion instances, one held slot, delivery IDs, and physical potion entities. |
 | `combat/potions/brewing/` | Deterministic reaction simulation, editable vessel tuning, and small-flask implementation notes. |
 | `combat/potions/effects/` | Stateless effect contracts, delivery context, resolver, and effect implementations. |
@@ -188,8 +192,10 @@ transition duration before routing through `GameManager`.
   `PlayerCombatController`, `characters/player/PlayerModel.tscn`, collision,
   following camera, `HealthComponent`, neutral `ImpactHitbox`, and
   `ActorHealthBar`.
-- `Arena/Friend` and `Arena/Foe`: `TargetActor.tscn` instances with distinct
-  visuals and starting health.
+- `Arena/Friend`: passive `TargetActor.tscn` potion-testing target with starting health.
+- `Arena/EnemyTestSpawner`: H/J developer spawner with authored Pursuer/Skirmisher
+  markers, an `Enemies` runtime parent, and an `EnemyProjectiles` runtime parent.
+  Combat deliberately begins without hostiles.
 - `Arena/PotionEntities`: runtime parent for flying and placed potion entities.
   A newly mixed entity is added here before attachment; while held, its parent
   is the PlayerModel's `hand_right` socket. Release reparents the same node here.
@@ -206,8 +212,29 @@ transition duration before routing through `GameManager`.
 - `UI/PauseMenu`: reusable pause and settings overlay.
 - `LevelMusic`: requests `music/CombatNew.mp3` from `MusicManager`.
 
-Actors remain present and targetable at zero health. Healing can raise them
-above zero. No component changes scenes or decides victory or defeat.
+Player and Friend remain present and targetable at zero health. Healing can
+raise them above zero. Spawned enemies cancel their attack and remove
+themselves at zero health. No component changes scenes or decides victory or
+defeat.
+
+### Enemy Actors
+
+`Pursuer.tscn` and `Skirmisher.tscn` are independent `CharacterBody2D`
+actors. Both own a body shape, `HealthComponent`, neutral `ImpactHitbox`,
+world health bar, `EnemyMovement`, `EnemySenses`, an `EnemyAttack`, and
+an archetype-specific brain. An actor receives its target explicitly from the
+spawner; it does not scan the scene or rely on an autoload.
+
+The Pursuer notices the Player within 900 pixels, chases until it is within
+96 pixels, and commits one 10-damage sector strike after a 0.50-second windup.
+The captured aim and 110-pixel / 120-degree hit sector make the strike
+dodgeable. It has 90 HP and 0.85-second recovery.
+
+The Skirmisher has 60 HP. It approaches beyond 480 pixels, retreats inside
+280 pixels until 340 pixels, and holds/shoots at 420 pixels. After a
+0.65-second windup it releases an 8-damage, fixed-direction dart; the dart
+does not home, passes ignored actors, stops on a world body or Player, and
+expires after 3.5 seconds. Recovery lasts 1.20 seconds.
 
 ### PlayerActor
 
@@ -282,6 +309,17 @@ remove methods from this reference until it is implemented.
 | `combat/actors/HealthComponent.gd` | Own bounded actor health. | None. | `health_changed`, `depleted`, `damaged` | `max_health`, `current_health` | `take_damage()`, `heal()`, `reset_health()`, `get_health_ratio()` |
 | `combat/actors/ImpactHitbox.gd` | Map a collision-only area to the entity whose components effects may query. | Configured subject node. | Inherited `Area2D` signals | `effect_subject_path` | `get_effect_subject()` |
 | `combat/actors/ActorHealthBar.gd` | Display an actor name and exact world-space health values. | Configured `HealthComponent` and scene labels/bar. | None | `display_name`, `health_component_path` | None |
+| `combat/enemies/EnemyProfileData.gd` | Store immutable Inspector tuning for one enemy archetype. | None. | None | Health, awareness, movement, attack, range, and projectile tuning. | `is_valid() -> bool` |
+| `combat/enemies/EnemyActor.gd` | Wire local enemy capabilities, order sensing/decision/attack/movement, and remove depleted enemies. | Valid profile, health/hitbox, movement, senses, brain, attack, and body shape. | None | `profile` | `set_target(target: Node2D)` |
+| `combat/enemies/EnemySenses.gd` | Track one assigned living target with notice/disengage hysteresis. | Explicit target and `EnemyProfileData`. | None | None | `set_target(target: Node2D)`, `refresh(origin, profile)`, `get_target() -> Node2D` |
+| `combat/enemies/EnemyMovement.gd` | Convert a local movement request into `CharacterBody2D.move_and_slide()`. | Explicit body and speed. | None | None | `configure(body, speed)`, `move_in_direction(direction)`, `stop()`, `advance()` |
+| `combat/enemies/PursuerBrain.gd` | Choose idle, chase, or melee attack for the close-range archetype. | Configured senses, movement, attack, profile. | None | None | Inherited `configure()`, `tick()`, `get_state()` |
+| `combat/enemies/SkirmisherBrain.gd` | Choose approach, retreat, hold, or ranged attack using stable distance bands. | Configured senses, movement, attack, profile. | None | None | Inherited `configure()`, `tick()`, `get_state()` |
+| `combat/enemies/EnemyAttack.gd` | Own cancellable windup/recovery timing and authored telegraph feedback. | Actor, profile, authored `Telegraph` and `ImpactFlash`. | `executed` | None | `configure()`, `try_start(target) -> bool`, `advance(delta)`, `is_busy() -> bool`, `cancel()` |
+| `combat/enemies/MeleeEnemyAttack.gd` | Resolve one captured-direction, range, and sector-checked strike. | Base attack and target `HealthComponent`. | Inherited `executed` | None | Inherited attack API. |
+| `combat/enemies/RangedEnemyAttack.gd` | Release one fixed-direction projectile from a captured attack aim. | Base attack, configured `EnemyProjectile` scene, world projectile parent. | Inherited `executed` | `projectile_scene` | Inherited attack API. |
+| `combat/enemies/EnemyProjectile.gd` | Sweep a fixed-direction enemy dart to Player/world collision or expiry. | Scene-authored `ShapeCast2D`, assigned target/source, target direct-child `HealthComponent`. | None | None | `launch(origin, direction, target, source, damage, speed, lifetime)` |
+| `combat/enemies/EnemyTestSpawner.gd` | Handle H/J sandbox spawns and reject occupied markers. | Player, enemy/projectile parents, two markers, and two enemy scenes. | None | Paths, scenes, `spawn_clearance` | None |
 | `shared/alchemy/AlchemyPaletteData.gd` | Provide the project-wide semantic Charged Neon reagent and prepared-potion colors. | None. | None | `red_color`, `green_color`, `blue_color`, `health_color`, `damage_color` | `get_color(color_id: StringName) -> Color` |
 | `combat/potions/PotionReagent.gd` | Define supported reagent IDs and resolve their shared colors. | `ChargedNeonPalette.tres`. | None | None | Static `is_valid()`, `get_color()` |
 | `combat/potions/PotionRecipeData.gd` | Describe one exact three-layer potion recipe and its composable effects. | `PotionReagent`, `PotionEffectData`. | None | ID, name, three counts, effects, mixed color | `is_valid()`, `matches_layers()` |
@@ -341,6 +379,9 @@ remove methods from this reference until it is implemented.
 | `tests/ReactiveCrystalParticleTests.gd` | Validate the shared palette, pile/shatter scene contracts, particle counts, cleanup, and five-color workshop composition. | Charged Neon palette and reactive-crystal scenes. | None | None | None |
 | `tests/BrewingReactionTests.gd` | Validate early release/resume, success boundaries, overreaction recovery, idempotence, and frame-step-independent simulation. | Brewing reaction and small-flask profile. | None | None | None |
 | `tests/BrewingCombatTests.gd` | Validate press/release input, forced release, pause freezing/resume, authored flask feedback, hidden settling, button locks, and clearing active reactions. | `CombatScene.tscn`, mixer UI, input, reaction, and held slot. | None | None | None |
+| `tests/EnemyBehaviourTests.gd` | Validate tactical states, range hysteresis, melee dodging, windup/recovery, target loss, pause, and enemy deletion. | Enemy scenes and local components. | None | None | None |
+| `tests/EnemyProjectileTests.gd` | Validate dart sweeps, source/other-actor filtering, wall blocking, fixed aim, expiry, and pause. | `EnemyProjectile`, Player, actor hitboxes, and physics fixtures. | None | None | None |
+| `tests/EnemyCombatTests.gd` | Validate active H/J spawns, visible marker locations, occupied-spawn rejection, potion effects, and Player recovery. | `CombatScene.tscn`, real potion entity flow, enemy scenes. | None | None | None |
 
 ## Potion Data Flow
 
@@ -641,8 +682,10 @@ Invoke-GodotWait '--headless --fixed-fps 60 --quit-after 120 --path . res://comb
 Invoke-GodotWait '--headless --fixed-fps 60 --quit-after 120 --path .'
 ```
 
-Observed on 2026-09-15: all three processes exited `0` with no parser,
-missing-resource, duplicate-UID, script, or failed-load diagnostics.
+Observed on 2026-09-16: all three processes exited `0` with no parser,
+missing-resource, duplicate-UID, script, or failed-load diagnostics. Direct
+scene shutdown still reports the pre-existing CombatNew.mp3 audio-resource
+warning after otherwise successful scene loading.
 
 ### Retained Test Scenes
 
@@ -662,9 +705,12 @@ Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/MainMen
 Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/ReactiveCrystalParticleTests.tscn'
 Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/BrewingReactionTests.tscn'
 Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/BrewingCombatTests.tscn'
+Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/EnemyBehaviourTests.tscn'
+Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/EnemyProjectileTests.tscn'
+Invoke-GodotWait '--headless --fixed-fps 60 --path . --scene res://tests/EnemyCombatTests.tscn'
 ```
 
-Observed output on 2026-09-15 (all thirteen exited `0`):
+Observed output on 2026-09-16 (all sixteen exited `0`):
 
 - `PlayerModelTests: PASS (469 checks)`
 - `PlayerModelWorkshopTests: PASS (41 checks)`
@@ -679,12 +725,15 @@ Observed output on 2026-09-15 (all thirteen exited `0`):
 - `ReactiveCrystalParticleTests: PASS`
 - `BrewingReactionTests: PASS (30 checks)`
 - `BrewingCombatTests: PASS (37 checks)`
+- `EnemyBehaviourTests: PASS (42 checks)`
+- `EnemyProjectileTests: PASS (103 checks)`
+- `EnemyCombatTests: PASS (29 checks)`
 
-The ten counted player/potion/brewing suites report `933 checks` plus `18`
-domain tests; the two presentation suites report contract-level pass/fail.
+The thirteen counted player/potion/brewing/enemy suites report `1,107 checks`
+plus `18` domain tests; the two presentation suites report contract-level pass/fail.
 `PlayerModelTests` deliberately
 reports missing `HandSocket_L` and `HandSocket_R` from its dependency-failure
-fixtures. The other twelve suites ran without engine errors. These runs include
+fixtures. The other fifteen suites ran without engine errors. These runs include
 automated input and physics coverage but do not establish GUI appearance,
 audible music, or manual interaction quality.
 
@@ -699,8 +748,9 @@ failure cleanup are not covered by these retained suites.
 
 The stale-interface scan found no active `mix_requested`, `PotionMixer.mix()`,
 or instant-mixing references. Validation of quoted `res://` paths in active
-`.gd`, `.tscn`, `.tres`, `.godot`, and `.gdshader` files inspected `110` source
-files, `172` reference occurrences, and `104` unique paths: zero missing paths.
+`.gd`, `.tscn`, `.tres`, `.godot`, and `.gdshader` files inspected `122` unique
+references: zero missing literal paths. The intentional dynamic `%s.tscn`
+format string used by the enemy test was excluded.
 Archived `.superpowers` clean-head snapshots were excluded because they retain
 historical paths intentionally and are not loaded by Godot. Dynamic paths and
 serialized `uid://` identifiers remain outside the literal-path scan; editor
@@ -713,7 +763,7 @@ changes were created by the brewing implementation.
 
 ### Manual Godot Checklist
 
-Status on 2026-09-15: every item below is **pending**, not manually verified.
+Status on 2026-09-16: every item below is **pending**, not manually verified.
 
 1. Open `characters/player/PlayerModel.tscn`. Verify the 15 bones, geometric
    parts, both hand sockets, `AnimationPlayer`, and `AnimationTree` are
@@ -746,7 +796,7 @@ Status on 2026-09-15: every item below is **pending**, not manually verified.
 10. Use Right Mouse while Player is below maximum health. Confirm immediate
    healing, bottle removal, mixer closure, and no duplicate use on another press.
 11. Brew green, green, blue; use Left Mouse. Confirm the same bottle leaves the
-   hand, flies toward the cursor, and damages Friend or Foe.
+   hand, flies toward the cursor, and damages Friend or a spawned enemy.
 12. Throw into empty space and confirm expiry after `2.5` seconds. In a wall
    collision fixture, confirm consumption with no health reaction.
 13. Brew another potion; press Q. Confirm the same bottle is placed `64` pixels
@@ -763,7 +813,19 @@ Status on 2026-09-15: every item below is **pending**, not manually verified.
 18. Verify movement, camera following, actor collision, pause, settings, resume,
 	music playback, and Main Menu/New Game routing.
 19. Inspect at `1920 x 1080` and `1280 x 720`; verify all reaction geometry is
-	clipped to the flask and both progress markers remain distinguishable.
+   clipped to the flask and both progress markers remain distinguishable.
+20. Start combat. Confirm it contains Friend, no hostile enemies, and two visible
+	spawn rings: `H · Skirmisher` on the right and `J · Pursuer` on the left.
+21. Press H. Confirm the Skirmisher approaches from far away, retreats if approached,
+	then stops to show its telegraph and fire a dodgeable straight dart. Press H
+	again while its marker is occupied and confirm a short red marker flash.
+22. Press J. Confirm the Pursuer chases, stops, displays a sector telegraph, and
+	only damages the Player at the end of its windup when the Player remains in
+	front of it. Step aside during the windup to dodge.
+23. Damage each spawned enemy to zero with green-green-blue potions. Confirm it
+	cancels its action and disappears. Use red-red-blue on a damaged enemy before
+	it reaches zero and confirm it heals. Pause during either windup or dart flight
+	and confirm its timing freezes.
 
 ## Change Guidelines
 

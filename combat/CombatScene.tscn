@@ -15,6 +15,9 @@
 [ext_resource type="AudioStream" uid="uid://d3klg2jyuwpp0" path="res://music/CombatNew.mp3" id="12_x7jh1"]
 [ext_resource type="Script" uid="uid://hfdef3k7hirm" path="res://combat/potions/brewing/BrewingReaction.gd" id="13_brewing_reaction"]
 [ext_resource type="Resource" path="res://combat/potions/brewing/SmallFlaskBrewingProfile.tres" id="14_brewing_profile"]
+[ext_resource type="Script" path="res://combat/enemies/EnemyTestSpawner.gd" id="15_enemy_spawner"]
+[ext_resource type="PackedScene" path="res://combat/enemies/Skirmisher.tscn" id="16_skirmisher"]
+[ext_resource type="PackedScene" path="res://combat/enemies/Pursuer.tscn" id="17_pursuer"]
 
 [node name="CombatScene" type="Node2D" unique_id=1979150264]
 script = ExtResource("1_controller")
@@ -56,21 +59,57 @@ offset_right = 140.0
 offset_bottom = 48.0
 display_name = "Friend"
 
-[node name="Foe" parent="Arena" unique_id=1002567749 instance=ExtResource("3_target")]
+[node name="PotionEntities" type="Node2D" parent="Arena" unique_id=223784400]
+
+[node name="EnemyProjectiles" type="Node2D" parent="Arena"]
+
+[node name="Enemies" type="Node2D" parent="Arena"]
+
+[node name="SkirmisherSpawn" type="Node2D" parent="Arena"]
 position = Vector2(480, 140)
 
-[node name="Sprite2D" parent="Arena/Foe" index="0"]
-scale = Vector2(0.1, 0.1)
-texture = ExtResource("5_x7jh1")
+[node name="MarkerRing" type="Line2D" parent="Arena/SkirmisherSpawn"]
+points = PackedVector2Array(-34, 0, -24, -24, 0, -34, 24, -24, 34, 0, 24, 24, 0, 34, -24, 24, -34, 0)
+width = 2.0
+default_color = Color(1, 0.78, 0.35, 0.85)
 
-[node name="ActorHealthBar" parent="Arena/Foe" index="3"]
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 140.0
-offset_bottom = 48.0
-display_name = "Foe"
+[node name="Label" type="Label" parent="Arena/SkirmisherSpawn"]
+offset_left = -51.0
+offset_top = 44.0
+offset_right = 51.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "H · Skirmisher"
+horizontal_alignment = 1
 
-[node name="PotionEntities" type="Node2D" parent="Arena" unique_id=223784400]
+[node name="PursuerSpawn" type="Node2D" parent="Arena"]
+position = Vector2(-480, 140)
+
+[node name="MarkerRing" type="Line2D" parent="Arena/PursuerSpawn"]
+points = PackedVector2Array(-34, 0, -24, -24, 0, -34, 24, -24, 34, 0, 24, 24, 0, 34, -24, 24, -34, 0)
+width = 2.0
+default_color = Color(1, 0.78, 0.35, 0.85)
+
+[node name="Label" type="Label" parent="Arena/PursuerSpawn"]
+offset_left = -44.0
+offset_top = 44.0
+offset_right = 44.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(1, 0.72, 0.35, 1)
+theme_override_font_sizes/font_size = 16
+text = "J · Pursuer"
+horizontal_alignment = 1
+
+[node name="EnemyTestSpawner" type="Node" parent="Arena"]
+script = ExtResource("15_enemy_spawner")
+player_path = NodePath("../Player")
+enemies_parent_path = NodePath("../Enemies")
+projectiles_parent_path = NodePath("../EnemyProjectiles")
+skirmisher_spawn_path = NodePath("../SkirmisherSpawn")
+pursuer_spawn_path = NodePath("../PursuerSpawn")
+skirmisher_scene = ExtResource("16_skirmisher")
+pursuer_scene = ExtResource("17_pursuer")
 
 [node name="Systems" type="Node" parent="." unique_id=1554141428]
 
@@ -100,4 +139,3 @@ z_index = 100
 music = ExtResource("12_x7jh1")
 
 [editable path="Arena/Friend"]
-[editable path="Arena/Foe"]
