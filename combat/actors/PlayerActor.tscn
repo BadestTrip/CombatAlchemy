@@ -5,6 +5,8 @@
 [ext_resource type="Script" uid="uid://ceb28uu6sjyvt" path="res://combat/actors/HealthComponent.gd" id="3_health"]
 [ext_resource type="Script" uid="uid://lcffl22wfauv" path="res://combat/actors/ImpactHitbox.gd" id="4_hitbox"]
 [ext_resource type="PackedScene" uid="uid://doydsebyrlpr6" path="res://combat/actors/ActorHealthBar.tscn" id="5_health_bar"]
+[ext_resource type="Script" path="res://combat/actors/StatusEffectComponent.gd" id="6_status"]
+[ext_resource type="Script" path="res://combat/reagents/PlayerReagentCollector.gd" id="7_collector"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
 radius = 31.0
@@ -12,6 +14,8 @@ height = 120.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_target"]
 radius = 42.0
+[sub_resource type="CircleShape2D" id="CircleShape2D_collect"]
+radius = 96.0
 
 [node name="PlayerActor" type="CharacterBody2D" unique_id=1046958855]
 script = ExtResource("1_controller")
@@ -31,6 +35,9 @@ shape = SubResource("CapsuleShape2D_body")
 script = ExtResource("3_health")
 current_health = 70
 
+[node name="StatusEffects" type="Node" parent="."]
+script = ExtResource("6_status")
+
 [node name="ImpactHitbox" type="Area2D" parent="." unique_id=1609726918]
 collision_layer = 2
 collision_mask = 0
@@ -42,8 +49,18 @@ shape = SubResource("CircleShape2D_target")
 
 [node name="ActorHealthBar" parent="." unique_id=1975705846 instance=ExtResource("5_health_bar")]
 offset_left = -70.0
-offset_top = -166.0
+offset_top = -184.0
 offset_right = 70.0
 offset_bottom = -118.0
 display_name = "Player"
 health_component_path = NodePath("../HealthComponent")
+
+[node name="ReagentCollector" type="Node" parent="."]
+script = ExtResource("7_collector")
+
+[node name="CollectionArea" type="Area2D" parent="ReagentCollector"]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ReagentCollector/CollectionArea"]
+shape = SubResource("CircleShape2D_collect")

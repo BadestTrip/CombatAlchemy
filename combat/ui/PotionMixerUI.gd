@@ -12,10 +12,22 @@ signal reagent_selected(reagent: StringName)
 	$ReagentButtons/GreenButton,
 	$ReagentButtons/BlueButton,
 ]
+@onready var _count_labels: Array[Label] = [$RedCount, $GreenCount, $BlueCount]
+
+var _inventory: ReagentInventory
+var _buttons_editable := true
 
 
 func _ready() -> void:
 	reset_view()
+
+func configure_inventory(inventory: ReagentInventory) -> void:
+	if _inventory != null and _inventory.availability_changed.is_connected(_on_availability_changed):
+		_inventory.availability_changed.disconnect(_on_availability_changed)
+	_inventory = inventory
+	if _inventory != null:
+		_inventory.availability_changed.connect(_on_availability_changed)
+	_refresh_inventory()
 
 
 ## Opens or hides this bottom-center mixer control.
@@ -85,8 +97,25 @@ func _set_reagent_buttons_visible(should_show: bool) -> void:
 
 
 func _set_reagent_buttons_enabled(should_enable: bool) -> void:
-	for button in _reagent_buttons:
-		button.disabled = not should_enable
+	_buttons_editable = should_enable
+	_refresh_inventory()
+
+func _on_availability_changed(_reagent: StringName, _available: int) -> void:
+	_refresh_inventory()
+
+func _refresh_inventory() -> void:
+	var reagents: Array[StringName] = [PotionReagent.RED, PotionReagent.GREEN, PotionReagent.BLUE]
+	for index in _reagent_buttons.size():
+		var count := _inventory.get_available_count(reagents[index]) if _inventory != null else 0
+		_count_labels[index].text = _format_count(count)
+		_count_labels[index].tooltip_text = "%d available" % count
+		_reagent_buttons[index].tooltip_text = "%d available" % count
+		_reagent_buttons[index].disabled = not _buttons_editable or count <= 0
+
+func _format_count(count: int) -> String:
+	if count < 1000:
+		return str(count)
+	return "%.1fK" % (float(count) / 1000.0)
 
 
 func _on_red_button_pressed() -> void:

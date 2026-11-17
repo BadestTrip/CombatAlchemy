@@ -3,7 +3,7 @@ extends Control
 
 # Responsibility: Render scene-authored ingredient, reaction, recovery, and prepared-potion geometry.
 
-@onready var _glass_outline: Line2D = $GlassOutline
+@onready var _glass_outline: Sprite2D = $GlassOutline
 @onready var _mixed_liquid: Polygon2D = $MixedLiquid
 @onready var _layers: Array[Polygon2D] = [$Layer1, $Layer2, $Layer3]
 @onready var _success_window: Line2D = $SuccessWindow
@@ -21,8 +21,8 @@ var _visual_time := 0.0
 var _display_energy := 0.0
 var _brewing_state := BrewingReaction.State.IDLE
 
-const LIQUID_TOP_Y := 82.0
-const LIQUID_BOTTOM_Y := 180.0
+const LIQUID_TOP_Y := 55.0
+const LIQUID_BOTTOM_Y := 155.0
 
 
 func _ready() -> void:
@@ -92,6 +92,7 @@ func show_brewing(
 ## Animates the visible layers into a single liquid of the supplied color.
 func show_mixed(color: Color) -> void:
 	_stop_animation()
+	position = _rest_position
 	_hide_brewing_feedback()
 	_reset_moving_geometry()
 	var serial := _animation_serial
@@ -113,10 +114,6 @@ func show_mixed(color: Color) -> void:
 	_mixed_liquid.color = color
 	_mixed_liquid.visible = true
 	_mixed_liquid.scale = Vector2.ONE
-	var pulse := create_tween()
-	_active_tween = pulse
-	pulse.tween_property(_mixed_liquid, "scale", Vector2(1.04, 1.04), 0.08)
-	pulse.tween_property(_mixed_liquid, "scale", Vector2.ONE, 0.12)
 
 
 ## Plays a brief failed-mix shake without changing the displayed potion state.
@@ -127,11 +124,11 @@ func show_failure() -> void:
 	_hide_brewing_feedback()
 	var tween := create_tween()
 	_active_tween = tween
-	tween.tween_property(self, "position:x", _rest_position.x - 8.0, 0.05)
-	tween.tween_property(self, "position:x", _rest_position.x + 8.0, 0.08)
-	tween.tween_property(self, "position:x", _rest_position.x, 0.05)
-	tween.parallel().tween_property(_glass_outline, "modulate", Color(1.0, 0.3, 0.3), 0.08)
-	tween.tween_property(_glass_outline, "modulate", Color.WHITE, 0.12)
+	tween.tween_callback(func() -> void: position.x = _rest_position.x - 5.0)
+	tween.tween_interval(0.05)
+	tween.tween_callback(func() -> void: position.x = _rest_position.x + 5.0)
+	tween.tween_interval(0.08)
+	tween.tween_callback(func() -> void: position.x = _rest_position.x)
 
 
 ## Restores the empty neutral flask state.
@@ -178,21 +175,18 @@ func _set_success_window(min_progress: float, max_progress: float) -> void:
 
 
 func _progress_to_y(progress: float) -> float:
-	return lerpf(LIQUID_BOTTOM_Y, LIQUID_TOP_Y, clampf(progress, 0.0, 1.0))
+	return snappedf(lerpf(LIQUID_BOTTOM_Y, LIQUID_TOP_Y, clampf(progress, 0.0, 1.0)), 5.0)
 
 
 func _update_liquid_motion() -> void:
-	var amplitude := _display_energy * 3.0
 	for index in _layers.size():
 		var layer := _layers[index]
-		if not layer.visible:
-			continue
-		var phase := _visual_time * 15.0 + float(index) * 1.8
-		layer.position = _layer_rest_positions[index] + Vector2(
-			sin(phase) * amplitude,
-			cos(phase * 0.7) * amplitude * 0.25
-		)
-		layer.rotation = sin(phase * 0.8) * deg_to_rad(1.5) * _display_energy
+		var material := layer.material as ShaderMaterial
+		if material != null:
+			var step := roundf(sin(_visual_time * 15.0 + float(index)) * _display_energy)
+			material.set_shader_parameter("surface_step", step)
+			var bottom_step := roundf(sin(_visual_time * 15.0 + float(index - 1)) * _display_energy) if index > 0 else 0.0
+			material.set_shader_parameter("bottom_step", bottom_step)
 
 
 func _update_grain_motion() -> void:
@@ -203,11 +197,11 @@ func _update_grain_motion() -> void:
 			continue
 		var phase := _visual_time * (8.0 + float(index)) + float(index)
 		grain.position = _grain_rest_positions[index] + Vector2(
-			sin(phase) * 2.0 * _display_energy,
-			-cos(phase * 0.65) * 3.0 * _display_energy
+			snappedf(sin(phase) * 5.0 * _display_energy, 5.0),
+			snappedf(-cos(phase * 0.65) * 5.0 * _display_energy, 5.0)
 		)
 	if _foam.visible:
-		_foam.position.y = sin(_visual_time * 12.0) * 2.0
+		_foam.position.y = snappedf(sin(_visual_time * 12.0) * 5.0, 5.0)
 
 
 func _reset_moving_geometry() -> void:
@@ -215,6 +209,8 @@ func _reset_moving_geometry() -> void:
 		if index < _layer_rest_positions.size():
 			_layers[index].position = _layer_rest_positions[index]
 			_layers[index].rotation = 0.0
+			(_layers[index].material as ShaderMaterial).set_shader_parameter("surface_step", 0.0)
+			(_layers[index].material as ShaderMaterial).set_shader_parameter("bottom_step", 0.0)
 	var grains := _grains.get_children()
 	for index in mini(grains.size(), _grain_rest_positions.size()):
 		var grain := grains[index] as Node2D

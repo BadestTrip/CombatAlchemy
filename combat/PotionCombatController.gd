@@ -25,6 +25,8 @@ var _potion_mixer_ui: PotionMixerUI
 var _player_combat_controller: PlayerCombatController
 var _potion_entities_parent: Node2D
 var _mixer_open := false
+var _profile: PlayerProfile
+var _profile_error_dialog: AcceptDialog
 
 
 func _ready() -> void:
@@ -34,13 +36,26 @@ func _ready() -> void:
 	_potion_mixer_ui = get_node_or_null(potion_mixer_ui_path) as PotionMixerUI
 	_player_combat_controller = get_node_or_null(player_combat_controller_path) as PlayerCombatController
 	_potion_entities_parent = get_node_or_null(potion_entities_parent_path) as Node2D
+	_profile_error_dialog = get_node_or_null("UI/ProfileErrorDialog") as AcceptDialog
 	if not _has_valid_dependencies():
 		_disable_controller()
 		return
+	_profile = GameManager.get_player_profile()
+	if _profile == null:
+		push_error("Potion combat requires a loaded player profile.")
+		_disable_controller()
+		return
+	_potion_mixer.configure_inventory(_profile.inventory)
+	_potion_mixer_ui.configure_inventory(_profile.inventory)
+	var collector := _player_combat_controller.get_node_or_null("ReagentCollector") as PlayerReagentCollector
+	if collector != null:
+		collector.configure(_profile)
+		collector.collection_failed.connect(_show_profile_error)
 
 	_connect_signals()
 	_potion_mixer_ui.reset_view()
 	_potion_mixer_ui.set_open(false)
+	_restore_saved_potion()
 
 
 func _has_valid_dependencies() -> bool:
@@ -85,6 +100,7 @@ func _connect_signals() -> void:
 	_potion_input.clear_mixture_requested.connect(_on_clear_mixture_requested)
 	_potion_mixer_ui.reagent_selected.connect(_on_reagent_requested)
 	_potion_mixer.layers_changed.connect(_on_layers_changed)
+	_potion_mixer.preparation_requested.connect(_on_preparation_requested)
 	_potion_mixer.potion_prepared.connect(_on_potion_prepared)
 	_potion_mixer.mix_rejected.connect(_on_mix_rejected)
 	_potion_mixer.mixture_cleared.connect(_on_mixture_cleared)
@@ -124,6 +140,12 @@ func _on_potion_use_requested(delivery_method: StringName) -> void:
 	var entity := _held_potion_slot.get_entity()
 	if entity == null or not is_instance_valid(entity):
 		return
+	if delivery_method not in [PotionDelivery.DRINK, PotionDelivery.THROW, PotionDelivery.PLACE]:
+		return
+	var held_record := _profile.get_held_record()
+	if not _profile.clear_held_potion():
+		_show_profile_error(_profile.last_error)
+		return
 	var succeeded := false
 	match delivery_method:
 		PotionDelivery.DRINK:
@@ -144,6 +166,9 @@ func _on_potion_use_requested(delivery_method: StringName) -> void:
 	if succeeded:
 		_held_potion_slot.clear()
 		_close_mixer_after_use()
+	else:
+		if not _profile.restore_held_potion(held_record):
+			_show_profile_error(_profile.last_error)
 
 
 func _on_remove_reagent_requested() -> void:
@@ -155,6 +180,9 @@ func _on_remove_reagent_requested() -> void:
 func _on_clear_mixture_requested() -> void:
 	var should_open_mixer := _mixer_open or _held_potion_slot.has_potion()
 	if _held_potion_slot.has_potion():
+		if not _profile.clear_held_potion():
+			_show_profile_error(_profile.last_error)
+			return
 		var entity := _held_potion_slot.get_entity()
 		if entity != null and is_instance_valid(entity):
 			entity.discard()
@@ -170,15 +198,15 @@ func _on_layers_changed(layers: Array[StringName]) -> void:
 		_potion_mixer_ui.show_mixing(layers)
 
 
-func _on_potion_prepared(potion: PotionInstance) -> void:
+func _on_preparation_requested(potion: PotionInstance) -> void:
 	if potion == null or not potion.is_valid() or potion.is_consumed():
-		_reject_prepared_potion(potion, null, "Prepared potion instance was invalid.")
+		_potion_mixer.acknowledge_preparation(potion, false)
 		return
 	var candidate := potion_entity_scene.instantiate()
 	if not candidate is PotionEntity:
 		if candidate != null:
 			candidate.free()
-		_reject_prepared_potion(potion, null, "Prepared potion could not instantiate PotionEntity.")
+		_potion_mixer.acknowledge_preparation(potion, false)
 		return
 	var entity := candidate as PotionEntity
 	_potion_entities_parent.add_child(entity)
@@ -192,6 +220,42 @@ func _on_potion_prepared(potion: PotionInstance) -> void:
 	if not _held_potion_slot.hold(potion, entity):
 		_reject_prepared_potion(potion, entity, "Prepared PotionEntity could not enter HeldPotionSlot.")
 		return
+	if not _profile.commit_prepared_potion(potion.get_recipe().recipe_id, potion.get_created_layers()):
+		_reject_prepared_potion(potion, entity, _profile.last_error)
+		return
+	_potion_mixer.acknowledge_preparation(potion, true)
+
+func _restore_saved_potion() -> void:
+	if not _profile.has_held_potion():
+		return
+	var record := _profile.get_held_record()
+	var recipe := _potion_mixer.recipe_book.find_by_id(StringName(record.get("recipe_id", ""))) if _potion_mixer.recipe_book != null else null
+	var layers: Array[StringName] = []
+	for layer in record.get("layers", []):
+		layers.append(StringName(layer))
+	var potion := PotionInstance.create(recipe, layers)
+	if potion == null or not _create_and_hold_entity(potion):
+		push_warning("Saved held potion could not be restored.")
+		return
+
+func _create_and_hold_entity(potion: PotionInstance) -> bool:
+	var candidate := potion_entity_scene.instantiate()
+	if not candidate is PotionEntity:
+		if candidate != null:
+			candidate.free()
+		return false
+	var entity := candidate as PotionEntity
+	_potion_entities_parent.add_child(entity)
+	if not entity.initialize(potion, _player_combat_controller):
+		entity.queue_free()
+		return false
+	var holder := _player_combat_controller.get_potion_holder()
+	if holder == null or not entity.attach_to(holder) or not _held_potion_slot.hold(potion, entity):
+		entity.discard()
+		return false
+	return true
+
+func _on_potion_prepared(potion: PotionInstance) -> void:
 	_potion_mixer_ui.set_open(_mixer_open)
 	_potion_mixer_ui.show_ready(potion.get_color())
 
@@ -201,6 +265,8 @@ func _reject_prepared_potion(
 	entity: PotionEntity,
 	message: String
 ) -> void:
+	if _held_potion_slot.get_potion() == potion:
+		_held_potion_slot.clear()
 	if entity != null and is_instance_valid(entity):
 		if entity.get_potion() == potion and entity.get_state() == PotionEntity.State.HELD:
 			entity.discard()
@@ -208,10 +274,18 @@ func _reject_prepared_potion(
 			entity.queue_free()
 	if potion != null and not potion.is_consumed():
 		potion.discard()
-	push_warning(message)
+	_potion_mixer.acknowledge_preparation(potion, false)
+	_show_profile_error(message)
 	_mixer_open = true
 	_potion_mixer_ui.reset_view()
 	_potion_mixer_ui.set_open(true)
+
+func _show_profile_error(message: String) -> void:
+	if _profile_error_dialog != null:
+		_profile_error_dialog.dialog_text = message
+		_profile_error_dialog.popup_centered()
+	else:
+		push_error(message)
 
 
 func _on_mix_rejected(_layers: Array[StringName]) -> void:

@@ -1,5 +1,7 @@
 # CombatAlchemy Art Reference Index
 
+> Asset standard update (2026-11-17): [Production template](./ASSET_PRODUCTION_TEMPLATE.md). New character cells are 64 x 80 (384 x 320 sheet). Vessel 1 is delivered at 8 x 20 world / 16 x 32 UI; its PNG glass and masked contents replace the geometric bottle and mixer shell. Historical samples retain their original dimensions. Gameplay composition and camera conversion remain pending.
+
 > Status: Historical visual references with current pixel-art usage guidance
 > Pack version: 1.3
 > Created: 2026-07-17
@@ -14,7 +16,8 @@ public-domain works from the project's earlier ink-wash direction. They now
 guide mood, value grouping, silhouette, composition, and apparatus construction,
 **not the final production medium**. The approved game presentation is full
 2D pixel art on the permanent 1920 x 1080 project canvas. Compact-character
-proportions remain approved, while gameplay composition and exact asset sizes do not.
+proportions remain approved; new native asset sizes follow the production template,
+while full gameplay composition remains pending.
 
 Generated concepts are not production-ready sprite sheets or public-domain
 source records. The historical museum images have their own recorded source
@@ -105,7 +108,7 @@ separated in the [PlayerModel guide](../characters/player/README.md).
 - Use upper-left world lighting and let reactions add only short local light.
 - Use eight grayscale values for ordinary world/UI art; reserve saturated color
   for liquid, labeled reagent swatches, and meaningful reaction information.
-- Test compact silhouettes in the broader view before fixing production dimensions.
+- Test the standard 64 x 80 character silhouette in the broader view before bulk production.
 
 <details>
 <summary>Exact generation prompt</summary>
@@ -283,7 +286,7 @@ Avoid: photorealism, glossy 3D, anime, zombie gore, body-horror close-up, generi
 
 **Production observations**
 
-- Keep the flask compact with adjacent R/G/B swatches; approve its dimensions from gameplay composition.
+- Keep the flask compact with adjacent R/G/B swatches; use the vessel-specific UI dimensions and validate their display scale in gameplay.
 - Preserve stable dimensions and crisp horizontal layer boundaries in every state.
 - Translate painted flare/shake into brief pixel-step motion or an outline flash,
   not smooth scaling, blur, permanent cracks, or a combat log.
@@ -454,14 +457,14 @@ gameplay function and use the project's top-down three-quarter perspective.
 
 | Aspect | CombatAlchemy target | Primary references |
 | --- | --- | --- |
-| Medium/grid | Native 2D pixel art on the 1920 x 1080 project canvas with nearest sampling; gameplay grid remains undecided | Current style bible, approval pack, and saved plan |
+| Medium/grid | Native 2D pixel art on the 1920 x 1080 project canvas with nearest sampling; native sprite grids follow the asset standard; gameplay framing remains undecided | Current style bible, approval pack, and saved plan |
 | Camera | Fixed elevated three-quarter, broad readable view, no isometric tile grid | G01, G02, G03, G05 for perspective only |
 | Lighting | Upper-left stepped values; colored light only for small alchemical reactions | G01, G02, G04, G05 for hierarchy |
 | Base palette | Eight neutral grayscale values, not painted parchment or tinted mist | S01/S02/S04 for value grouping; style bible for the working ramp |
 | Active color | Saturated RGB or prepared-potion color in small mechanical areas | G01, G04, G05 |
-| Silhouette | Compact full-body character frames; hat/coat/hand read before detail; exact dimensions require gameplay approval | G02, G06, S04 |
+| Silhouette | Compact full-body character frames; hat/coat/hand read before detail; 64 x 80 cells; validate composition before bulk production | G02, G06, S04 |
 | Environment detail | Quiet routes framed by simple reusable terrain/prop clusters | G01, S02, S03 |
-| UI | One compact flask, stable outline, adjacent labeled reagent controls; exact dimensions remain open | G01/G04 for layout, not surface treatment |
+| UI | One compact flask, stable outline, adjacent labeled reagent controls; native vessel dimensions follow the asset standard; HUD composition remains open | G01/G04 for layout, not surface treatment |
 | Effects | Grayscale bottle, tinted liquid, compact travel, clear contact, brief pixel aftermath | G01, G05 |
 | Props | Functional construction, wear, repair, and process | G02, S05 |
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://combat/enemies/EnemyActor.gd" id="1"]
 [ext_resource type="Resource" path="res://combat/enemies/profiles/SkirmisherProfile.tres" id="2"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://combat/enemies/SkirmisherBrain.gd" id="9"]
 [ext_resource type="Script" path="res://combat/enemies/RangedEnemyAttack.gd" id="10"]
 [ext_resource type="PackedScene" path="res://combat/enemies/EnemyProjectile.tscn" id="11"]
+[ext_resource type="Script" path="res://combat/actors/StatusEffectComponent.gd" id="12"]
 
 [sub_resource type="CircleShape2D" id="body"]
 radius = 28.0
@@ -32,6 +33,9 @@ shape = SubResource("body")
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("4")
 
+[node name="StatusEffects" type="Node" parent="."]
+script = ExtResource("12")
+
 [node name="ImpactHitbox" type="Area2D" parent="."]
 collision_layer = 2
 collision_mask = 0
@@ -42,7 +46,7 @@ shape = SubResource("hitbox")
 
 [node name="ActorHealthBar" parent="." instance=ExtResource("6")]
 offset_left = -70.0
-offset_top = -108.0
+offset_top = -126.0
 offset_right = 70.0
 offset_bottom = -60.0
 display_name = "Skirmisher"

@@ -13,8 +13,8 @@ signal resolved(context: PotionImpactContext, applied_effect_count: int)
 @export_range(0.0, 2.0, 0.01) var arming_delay := 0.35
 @export_range(0.1, 120.0, 0.1) var placed_lifetime := 20.0
 
-@onready var _bottle_visual: Polygon2D = $BottleVisual
-@onready var _outline: Line2D = $Outline
+@onready var _bottle_visual: Sprite2D = $BottleVisual
+@onready var _outline: Sprite2D = $Outline
 @onready var _flight_area: Area2D = $FlightArea
 @onready var _sweep_cast: ShapeCast2D = $SweepCast
 @onready var _placement_trigger: Area2D = $PlacementTrigger
@@ -427,5 +427,5 @@ func _set_state(next_state: State) -> void:
 
 
 func _set_visual_color(color: Color) -> void:
-	_bottle_visual.color = color
-	_outline.default_color = color.lightened(0.25)
+	_bottle_visual.modulate = color
+	_outline.modulate = Color.WHITE

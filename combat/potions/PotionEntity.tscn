@@ -2,6 +2,9 @@
 
 [ext_resource type="Script" uid="uid://c5k4bmirwxcod" path="res://combat/potions/PotionEntity.gd" id="1_script"]
 
+[ext_resource type="Texture2D" path="res://sprites/potions/tube_01/tube_01_world_glass_v001.png" id="2_glass"]
+[ext_resource type="Texture2D" path="res://sprites/potions/tube_01/tube_01_world_mask_v001.png" id="3_mask"]
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_flight"]
 radius = 13.0
 
@@ -12,12 +15,15 @@ radius = 42.0
 script = ExtResource("1_script")
 placed_lifetime = 90.0
 
-[node name="BottleVisual" type="Polygon2D" parent="." unique_id=1960158586]
-polygon = PackedVector2Array(-12, -6, -4, -16, 9, -12, 14, 0, 8, 13, -7, 15, -15, 5)
+[node name="BottleVisual" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(2, 2)
+texture = ExtResource("3_mask")
 
-[node name="Outline" type="Line2D" parent="." unique_id=1946202858]
-points = PackedVector2Array(-12, -6, -4, -16, 9, -12, 14, 0, 8, 13, -7, 15, -15, 5, -12, -6)
-width = 2.0
+[node name="Outline" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(2, 2)
+texture = ExtResource("2_glass")
 
 [node name="FlightArea" type="Area2D" parent="." unique_id=954443722]
 collision_layer = 0

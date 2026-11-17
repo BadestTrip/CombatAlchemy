@@ -18,6 +18,7 @@ const IS_TRANSITION_BUSY_METHOD: StringName = &"is_busy"
 @onready var _quit_command: MainMenuCommandButton = get_node_or_null("CommandPanel/MainCommands/Quit") as MainMenuCommandButton
 @onready var _game_manager: Node = get_node_or_null("/root/GameManager")
 @onready var _scene_transition: Node = get_node_or_null("/root/SceneTransition")
+@onready var _profile_error_dialog: AcceptDialog = get_node_or_null("ProfileErrorDialog") as AcceptDialog
 
 var _transition_started: bool = false
 
@@ -29,6 +30,8 @@ func _ready() -> void:
 	_settings_command.activated.connect(_on_settings_pressed)
 	_quit_command.activated.connect(_on_quit_pressed)
 	_settings_view.close_requested.connect(_on_settings_closed)
+	if _game_manager.has_signal(&"player_profile_error"):
+		_game_manager.connect(&"player_profile_error", _on_profile_error)
 	_show_main_commands(false)
 	_new_game_command.grab_button_focus.call_deferred()
 
@@ -47,7 +50,17 @@ func _on_new_game_pressed() -> void:
 	_transition_started = true
 	set_interaction_enabled(false)
 	_scene_transition.call(SET_TRANSITION_DURATION_METHOD, transition_duration)
-	_game_manager.call(START_NEW_GAME_METHOD)
+	var started := bool(_game_manager.call(START_NEW_GAME_METHOD))
+	if not started:
+		_transition_started = false
+		set_interaction_enabled(true)
+		_new_game_command.grab_button_focus.call_deferred()
+
+func _on_profile_error(message: String) -> void:
+	if _profile_error_dialog == null:
+		return
+	_profile_error_dialog.dialog_text = message
+	_profile_error_dialog.popup_centered()
 
 
 func _on_settings_pressed() -> void:

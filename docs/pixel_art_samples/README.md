@@ -1,5 +1,7 @@
 # CombatAlchemy Pixel-Art Approval Pack
 
+> Asset standard update (2026-11-17): [Production template](../ASSET_PRODUCTION_TEMPLATE.md). New character cells are 64 x 80 (384 x 320 sheet). Vessel 1 is delivered at 8 x 20 world / 16 x 32 UI; its PNG glass and masked contents replace the geometric bottle and mixer shell. Historical samples retain their original dimensions. Gameplay composition and camera conversion remain pending.
+
 > Generated: 2026-09-12
 > Status: Researcher facings and main-menu composition approved on 2026-09-12.
 > Production status: Researcher samples remain concept references. The menu

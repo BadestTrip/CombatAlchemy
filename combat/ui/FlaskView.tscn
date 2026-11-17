@@ -1,41 +1,79 @@
 [gd_scene format=3 uid="uid://bw6vyc7jl8yjt"]
 
-[ext_resource type="Script" uid="uid://borpbwwfa2mut" path="res://combat/ui/FlaskView.gd" id="1_script"]
+[ext_resource type="Script" path="res://combat/ui/FlaskView.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://sprites/potions/tube_01/tube_01_ui_glass_v001.png" id="2_glass"]
+[ext_resource type="Texture2D" path="res://sprites/potions/tube_01/tube_01_ui_mask_v001.png" id="3_mask"]
+[ext_resource type="Shader" path="res://combat/ui/TubeLiquid.gdshader" id="4_shader"]
 
-[node name="FlaskView" type="Control" unique_id=189406457]
+[sub_resource type="ShaderMaterial" id="Liquid0"]
+resource_local_to_scene = true
+shader = ExtResource("4_shader")
+shader_parameter/band_top = 0.625
+shader_parameter/band_bottom = 1
+
+[sub_resource type="ShaderMaterial" id="Liquid1"]
+resource_local_to_scene = true
+shader = ExtResource("4_shader")
+shader_parameter/band_top = 0.40625
+shader_parameter/band_bottom = 0.625
+
+[sub_resource type="ShaderMaterial" id="Liquid2"]
+resource_local_to_scene = true
+shader = ExtResource("4_shader")
+shader_parameter/band_top = 0.21875
+shader_parameter/band_bottom = 0.40625
+
+[sub_resource type="ShaderMaterial" id="Liquid3"]
+resource_local_to_scene = true
+shader = ExtResource("4_shader")
+shader_parameter/band_top = 0
+shader_parameter/band_bottom = 1
+
+[node name="FlaskView" type="Control"]
 custom_minimum_size = Vector2(144, 190)
 layout_mode = 3
 anchors_preset = 0
 mouse_filter = 2
+texture_filter = 1
 script = ExtResource("1_script")
 
-[node name="GlassBody" type="Polygon2D" parent="." unique_id=1293048938]
-color = Color(0.72, 0.86, 0.95, 0.13)
-polygon = PackedVector2Array(55, 24, 89, 24, 89, 65, 121, 151, 121, 168, 112, 180, 32, 180, 23, 168, 23, 151, 55, 65)
+[node name="GlassBody" type="Sprite2D" parent="."]
+position = Vector2(32, 20)
+scale = Vector2(5, 5)
+centered = false
+texture = ExtResource("3_mask")
+modulate = Color(0.25098, 0.25098, 0.25098, 1)
 
-[node name="Layer3" type="Polygon2D" parent="." unique_id=2111410924]
-position = Vector2(11.368421, 0)
-scale = Vector2(0.8421053, 1)
-polygon = PackedVector2Array(44.687492, 82, 99.31249, 82, 110, 106, 34, 106)
+[node name="Layer1" type="Polygon2D" parent="."]
+material = SubResource("Liquid0")
+texture = ExtResource("3_mask")
+polygon = PackedVector2Array(32, 20, 112, 20, 112, 180, 32, 180)
+uv = PackedVector2Array(0, 0, 16, 0, 16, 32, 0, 32)
 
-[node name="Layer2" type="Polygon2D" parent="." unique_id=1699245760]
-position = Vector2(9, 1.5258789e-05)
-scale = Vector2(0.875, 1)
-polygon = PackedVector2Array(35.428574, 105.999985, 108.571434, 105.999985, 120, 132, 24, 132)
+[node name="Layer2" type="Polygon2D" parent="."]
+material = SubResource("Liquid1")
+texture = ExtResource("3_mask")
+polygon = PackedVector2Array(32, 20, 112, 20, 112, 180, 32, 180)
+uv = PackedVector2Array(0, 0, 16, 0, 16, 32, 0, 32)
 
-[node name="Layer1" type="Polygon2D" parent="." unique_id=721607369]
-polygon = PackedVector2Array(23, 152, 30.167767, 132.00002, 114, 132, 121, 152, 121, 168, 112, 180, 32, 180, 23, 168)
+[node name="Layer3" type="Polygon2D" parent="."]
+material = SubResource("Liquid2")
+texture = ExtResource("3_mask")
+polygon = PackedVector2Array(32, 20, 112, 20, 112, 180, 32, 180)
+uv = PackedVector2Array(0, 0, 16, 0, 16, 32, 0, 32)
 
-[node name="MixedLiquid" type="Polygon2D" parent="." unique_id=1188289192]
-polygon = PackedVector2Array(49, 82, 95, 82, 121, 151, 121, 168, 112, 180, 32, 180, 23, 168, 23, 151)
+[node name="MixedLiquid" type="Polygon2D" parent="."]
+material = SubResource("Liquid3")
+texture = ExtResource("3_mask")
+polygon = PackedVector2Array(32, 20, 112, 20, 112, 180, 32, 180)
+uv = PackedVector2Array(0, 0, 16, 0, 16, 32, 0, 32)
 
-[node name="GlassOutline" type="Line2D" parent="." unique_id=1616145902]
-points = PackedVector2Array(55, 24, 89, 24, 89, 65, 121, 151, 121, 168, 112, 180, 32, 180, 23, 168, 23, 151, 55, 65, 55, 24)
-width = 4.0
-default_color = Color(0.82, 0.94, 1, 1)
-joint_mode = 2
-begin_cap_mode = 2
-end_cap_mode = 2
+[node name="GlassOutline" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(32, 20)
+scale = Vector2(5, 5)
+centered = false
+texture = ExtResource("2_glass")
 
 [node name="SuccessWindow" type="Line2D" parent="."]
 visible = false
@@ -60,22 +98,22 @@ polygon = PackedVector2Array(0, -5, 5, 0, 0, 5, -5, 0)
 visible = false
 
 [node name="Grain1" type="Polygon2D" parent="Grains"]
-position = Vector2(52, 150)
+position = Vector2(65, 140)
 color = Color(1, 1, 1, 0.9)
 polygon = PackedVector2Array(0, -3, 3, 0, 0, 3, -3, 0)
 
 [node name="Grain2" type="Polygon2D" parent="Grains"]
-position = Vector2(75, 132)
+position = Vector2(75, 120)
 color = Color(1, 1, 1, 0.75)
 polygon = PackedVector2Array(-2, -2, 2, -2, 2, 2, -2, 2)
 
 [node name="Grain3" type="Polygon2D" parent="Grains"]
-position = Vector2(91, 158)
+position = Vector2(75, 150)
 color = Color(1, 1, 1, 0.85)
 polygon = PackedVector2Array(0, -3, 3, 2, -3, 2)
 
 [node name="Grain4" type="Polygon2D" parent="Grains"]
-position = Vector2(66, 104)
+position = Vector2(70, 85)
 color = Color(1, 1, 1, 0.7)
 polygon = PackedVector2Array(-2, 0, 0, -3, 2, 0, 0, 3)
 
@@ -83,16 +121,16 @@ polygon = PackedVector2Array(-2, 0, 0, -3, 2, 0, 0, 3)
 visible = false
 
 [node name="Bubble1" type="Polygon2D" parent="Foam"]
-position = Vector2(50, 91)
+position = Vector2(65, 60)
 color = Color(1, 1, 1, 0.9)
 polygon = PackedVector2Array(-5, -3, 0, -6, 5, -3, 5, 3, 0, 6, -5, 3)
 
 [node name="Bubble2" type="Polygon2D" parent="Foam"]
-position = Vector2(72, 86)
+position = Vector2(70, 55)
 color = Color(1, 1, 1, 0.8)
 polygon = PackedVector2Array(-6, -4, 0, -7, 6, -4, 6, 4, 0, 7, -6, 4)
 
 [node name="Bubble3" type="Polygon2D" parent="Foam"]
-position = Vector2(95, 92)
+position = Vector2(80, 60)
 color = Color(1, 1, 1, 0.85)
 polygon = PackedVector2Array(-5, -3, 0, -6, 5, -3, 5, 3, 0, 6, -5, 3)

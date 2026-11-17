@@ -25,6 +25,7 @@ func _ready() -> void:
 	_test_successful_mix_signals()
 	_test_repeated_mix_creates_unique_instances()
 	_test_brewing_locks_edits_and_settled_edits_reset_progress()
+	_test_mixer_teardown_releases_reservations()
 	_test_health_damage_and_healing_clamp_to_bounds()
 	_test_health_damaged_signal_reports_actual_damage_only()
 	_test_health_depleted_emits_only_when_crossing_to_zero()
@@ -33,13 +34,23 @@ func _ready() -> void:
 	_test_player_movement_lock_contract()
 	_free_owned_nodes()
 	if _failures.is_empty():
-		print("PotionDomainTests: PASS (18 tests)")
+		print("PotionDomainTests: PASS (19 tests)")
 		get_tree().quit(0)
 	else:
 		for failure in _failures:
 			push_error(failure)
 		print("PotionDomainTests: FAIL (%d failures)" % _failures.size())
 		get_tree().quit(1)
+
+func _test_mixer_teardown_releases_reservations() -> void:
+	var inventory := ReagentInventory.new({PotionReagent.RED: 3})
+	_expect(inventory.reserve(PotionReagent.RED), "fixture creates one reservation outside the mixer")
+	var mixer := _new_mixer(inventory)
+	_expect(mixer.add_reagent(PotionReagent.RED), "teardown fixture reserves a reagent")
+	_expect(inventory.get_reserved_count(PotionReagent.RED) == 2, "unfinished layer adds one mixer reservation")
+	_owned_nodes.erase(mixer)
+	mixer.free()
+	_expect(inventory.get_reserved_count(PotionReagent.RED) == 1, "mixer teardown releases only its unfinished reservation")
 
 
 func _test_reagent_validation_and_colors() -> void:
@@ -143,8 +154,8 @@ func _test_incomplete_and_unknown_mixtures_preserve_layers() -> void:
 	_expect(incomplete_mixer.get_layers() == incomplete_layers, "incomplete mixture preserves layers")
 	var unknown_mixer := _new_mixer()
 	unknown_mixer.add_reagent(PotionReagent.RED)
+	unknown_mixer.add_reagent(PotionReagent.RED)
 	unknown_mixer.add_reagent(PotionReagent.GREEN)
-	unknown_mixer.add_reagent(PotionReagent.BLUE)
 	var unknown_layers := unknown_mixer.get_layers()
 	_expect(not unknown_mixer.start_brewing(), "unknown mixture is rejected")
 	_expect(unknown_mixer.get_layers() == unknown_layers, "unknown mixture preserves layers")
@@ -397,7 +408,7 @@ func _test_player_movement_lock_contract() -> void:
 	_expect(not (player.call(&"is_movement_locked") as bool), "movement lock can be disabled")
 
 
-func _new_mixer() -> PotionMixer:
+func _new_mixer(inventory: ReagentInventory = null) -> PotionMixer:
 	var mixer := PotionMixer.new()
 	mixer.name = "PotionMixer"
 	mixer.recipe_book = DEFAULT_RECIPE_BOOK
@@ -407,6 +418,13 @@ func _new_mixer() -> PotionMixer:
 	mixer.add_child(reaction)
 	mixer.brewing_reaction_path = ^"BrewingReaction"
 	add_child(mixer)
+	if inventory == null:
+		inventory = ReagentInventory.new({PotionReagent.RED: 100, PotionReagent.GREEN: 100, PotionReagent.BLUE: 100})
+	mixer.configure_inventory(inventory)
+	mixer.preparation_requested.connect(func(potion: PotionInstance) -> void:
+		inventory.apply_totals(inventory.get_totals_copy())
+		mixer.acknowledge_preparation(potion, true)
+	)
 	_owned_nodes.append(mixer)
 	return mixer
 

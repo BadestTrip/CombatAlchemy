@@ -6,12 +6,19 @@ const COMBAT_SCENE_PATH := "res://combat/CombatScene.tscn"
 const HEALTH_POTION := preload("res://combat/potions/resources/HealthPotion.tres")
 const DAMAGE_POTION := preload("res://combat/potions/resources/DamagePotion.tres")
 
+class FailingProfileStore extends PlayerProfileStore:
+	func save_snapshot(_snapshot: Dictionary) -> bool:
+		last_error = "Forced profile write failure."
+		return false
+
 var _failures: Array[String] = []
 var _check_count := 0
 
 
 func _ready() -> void:
 	await _run_tests()
+	await _test_saved_bottle_restores_and_clears_after_drink()
+	await _test_failed_brew_save_refunds_and_clears_slot()
 	if _failures.is_empty():
 		print("PotionUseTests: PASS (%d checks)" % _check_count)
 		get_tree().quit(0)
@@ -24,6 +31,8 @@ func _ready() -> void:
 
 
 func _run_tests() -> void:
+	var profile := PlayerProfile.create_in_memory({PotionReagent.RED: 100, PotionReagent.GREEN: 100, PotionReagent.BLUE: 100})
+	GameManager.set_player_profile_for_testing(profile)
 	var combat_scene := load(COMBAT_SCENE_PATH) as PackedScene
 	_expect(combat_scene != null, "CombatScene exists and parses")
 	if combat_scene == null:
@@ -175,6 +184,54 @@ func _run_tests() -> void:
 		_expect(_reagent_buttons_visible(mixer_ui), "clear resets the open mixer to mixing state")
 
 	Input.action_release(&"move_right")
+	combat.queue_free()
+	await get_tree().process_frame
+
+
+func _test_saved_bottle_restores_and_clears_after_drink() -> void:
+	var profile := PlayerProfile.create_in_memory()
+	_expect(profile.restore_held_potion({"recipe_id": &"health_potion", "layers": [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE]}), "held restoration fixture stores a bottle")
+	GameManager.set_player_profile_for_testing(profile)
+	var combat := (load(COMBAT_SCENE_PATH) as PackedScene).instantiate()
+	var level_music := combat.get_node_or_null(^"LevelMusic")
+	if level_music != null:
+		level_music.free()
+	add_child(combat)
+	await get_tree().process_frame
+	var slot := combat.get_node(^"Systems/HeldPotionSlot") as HeldPotionSlot
+	var potion_input := combat.get_node(^"Systems/PotionInput") as PotionInput
+	var health := combat.get_node(^"Arena/Player/HealthComponent") as HealthComponent
+	_expect(slot.has_potion(), "saved held record restores one physical held potion")
+	_expect(_find_potion_entities(combat).size() == 1, "saved held record creates exactly one entity")
+	health.current_health = 40
+	potion_input.potion_use_requested.emit(PotionDelivery.DRINK)
+	_expect(health.current_health == 70, "restored bottle retains its recipe effect")
+	_expect(not profile.has_held_potion(), "drinking restored bottle clears persistent ownership")
+	combat.queue_free()
+	await get_tree().process_frame
+
+func _test_failed_brew_save_refunds_and_clears_slot() -> void:
+	var profile := PlayerProfile.new(FailingProfileStore.new())
+	profile.inventory.apply_totals({PotionReagent.RED: 2, PotionReagent.BLUE: 1})
+	GameManager.set_player_profile_for_testing(profile)
+	var combat := (load(COMBAT_SCENE_PATH) as PackedScene).instantiate()
+	var level_music := combat.get_node_or_null(^"LevelMusic")
+	if level_music != null: level_music.free()
+	add_child(combat)
+	await get_tree().process_frame
+	var potion_input := combat.get_node(^"Systems/PotionInput") as PotionInput
+	var reaction := combat.get_node(^"Systems/PotionMixer/BrewingReaction") as BrewingReaction
+	var slot := combat.get_node(^"Systems/HeldPotionSlot") as HeldPotionSlot
+	potion_input.mixer_toggle_requested.emit()
+	for reagent in [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE]: potion_input.reagent_requested.emit(reagent)
+	potion_input.agitation_started.emit()
+	reaction.advance(1.35)
+	potion_input.agitation_released.emit()
+	reaction.advance(0.45)
+	_expect(not slot.has_potion(), "failed brew save leaves no stale held-slot ownership")
+	_expect(profile.inventory.get_available_count(PotionReagent.RED) == 2, "failed brew save refunds red reservations")
+	_expect(profile.inventory.get_available_count(PotionReagent.BLUE) == 1, "failed brew save refunds blue reservation")
+	_expect(combat.get_node_or_null(^"UI/ProfileErrorDialog") is AcceptDialog, "combat authors a profile error dialog")
 	combat.queue_free()
 	await get_tree().process_frame
 

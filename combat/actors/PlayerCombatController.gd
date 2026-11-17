@@ -6,12 +6,14 @@ extends CharacterBody2D
 ## Emitted after each physics update with the velocity actually applied to the player.
 signal movement_changed(current_velocity: Vector2)
 
-## Movement speed in pixels per second.
+## Movement speed in pixels per second before timed status modifiers.
 @export_range(0.0, 1000.0, 1.0) var speed: float = 220.0
 @export var player_model_path: NodePath = ^"PlayerModel"
+@export var status_effects_path: NodePath = ^"StatusEffects"
 @export_range(0.0, 1000.0, 1.0) var place_distance: float = 64.0
 
 @onready var _player_model := get_node_or_null(player_model_path)
+@onready var _status_effects := get_node_or_null(status_effects_path)
 
 var _movement_locked := false
 
@@ -28,7 +30,7 @@ func _physics_process(_delta: float) -> void:
 		if _movement_locked
 		else Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	)
-	velocity = movement * speed
+	velocity = movement * speed * _get_speed_multiplier()
 	move_and_slide()
 	if _player_model != null:
 		_player_model.call(&"set_motion", velocity)
@@ -71,3 +73,9 @@ func get_throw_direction() -> Vector2:
 
 func get_place_position() -> Vector2:
 	return global_position + get_throw_direction() * place_distance
+
+
+func _get_speed_multiplier() -> float:
+	if _status_effects != null and _status_effects.has_method(&"get_speed_multiplier"):
+		return _status_effects.call(&"get_speed_multiplier") as float
+	return 1.0

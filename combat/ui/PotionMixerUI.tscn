@@ -95,6 +95,30 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_blue")
 text = "B"
 
+[node name="RedCount" type="Label" parent="."]
+offset_left = 286.0
+offset_top = 25.0
+offset_right = 350.0
+offset_bottom = 47.0
+mouse_filter = 1
+text = "0"
+
+[node name="GreenCount" type="Label" parent="."]
+offset_left = 286.0
+offset_top = 93.0
+offset_right = 350.0
+offset_bottom = 115.0
+mouse_filter = 1
+text = "0"
+
+[node name="BlueCount" type="Label" parent="."]
+offset_left = 286.0
+offset_top = 161.0
+offset_right = 350.0
+offset_bottom = 183.0
+mouse_filter = 1
+text = "0"
+
 [connection signal="pressed" from="ReagentButtons/RedButton" to="." method="_on_red_button_pressed"]
 [connection signal="pressed" from="ReagentButtons/GreenButton" to="." method="_on_green_button_pressed"]
 [connection signal="pressed" from="ReagentButtons/BlueButton" to="." method="_on_blue_button_pressed"]

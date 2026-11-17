@@ -1,5 +1,7 @@
 # PlayerModel
 
+> Asset standard update (2026-11-17): [Production template](../../docs/ASSET_PRODUCTION_TEMPLATE.md). New character cells are 64 x 80 (384 x 320 sheet). Vessel 1 is delivered at 8 x 20 world / 16 x 32 UI; its PNG glass and masked contents replace the geometric bottle and mixer shell. Historical samples retain their original dimensions. Gameplay composition and camera conversion remain pending.
+
 > Reviewed: 2026-09-12. Current runtime: compact 15-bone geometric model.
 > Approved replacement: full-body pixel sprite sheets, not implemented yet.
 > [Architecture](../../docs/PROJECT_ARCHITECTURE.md) |
@@ -93,10 +95,10 @@ approved pixel direction.
 1. Approve four neutral researcher facings at native size and integer enlargement,
    together with gameplay and main-menu compositions. Old G06 approval is not
    approval of these new pixel samples.
-2. Clean art to **32 x 40** cells using the agreed eight-value grayscale ramp.
+2. Clean art to **64 x 80** cells using the agreed eight-value grayscale ramp.
    Keep the broad hat, obscured face, compact coat, equipment silhouette, and
    both hands empty. The live potion entity provides the bottle.
-3. Produce a **192 x 160** full-body sheet with four rows and six cells per row.
+3. Produce a **384 x 320** full-body sheet with four rows and six cells per row.
    Use front, back, side-left, side-right rows; each has two idle frames followed
    by four alternating contact/passing walk frames. Keep the feet at one stable
    per-cell pivot and preserve anatomical left/right through all rows.
@@ -110,10 +112,9 @@ approved pixel direction.
    update structure-specific tests. Retain the same movement room and public
    motion/facing contract.
 
-Rendering uses the planned 640 x 360 viewport, nearest integer scaling, 3 world
-units per source pixel, and camera zoom 1/3. Keep world movement and collisions
-unchanged and align sprite feet with the existing ground position. The active
-camera/viewport configuration has not yet been converted.
+Rendering retains the 1920 x 1080 canvas and nearest sampling. Review the new
+64 x 80 cells at 2x before gameplay conversion. This does not prescribe camera
+zoom or world units. Preserve physics and existing ground alignment.
 
 No action clips, delays, bone animation, IK, or new gameplay mechanics belong to
 this sheet pass. Approve readable native-scale animation before adding frames.

@@ -97,6 +97,10 @@ func _test_hidden_settling_creates_one_held_potion() -> void:
 	var reaction := combat.get_node(^"Systems/PotionMixer/BrewingReaction") as BrewingReaction
 	var slot := combat.get_node(^"Systems/HeldPotionSlot")
 	var mixer_ui := combat.get_node(^"UI/PotionMixerUI") as PotionMixerUI
+	_expect(mixer_ui.get_node_or_null(^"RedCount") is Label, "mixer authors a red availability label")
+	_expect(mixer_ui.get_node_or_null(^"GreenCount") is Label, "mixer authors a green availability label")
+	_expect(mixer_ui.get_node_or_null(^"BlueCount") is Label, "mixer authors a blue availability label")
+	_expect((mixer_ui.get_node(^"RedCount") as Label).text == "100", "mixer shows available red stock")
 	_expect(reaction != null, "CombatScene authors a BrewingReaction under PotionMixer")
 	if reaction == null:
 		combat.queue_free()
@@ -176,6 +180,7 @@ func _test_pause_freezes_and_resume_requires_fresh_press() -> void:
 
 
 func _new_combat() -> Node:
+	GameManager.set_player_profile_for_testing(_new_stocked_profile())
 	var combat := COMBAT_SCENE.instantiate()
 	var level_music := combat.get_node_or_null(^"LevelMusic")
 	if level_music != null:
@@ -183,6 +188,9 @@ func _new_combat() -> Node:
 	add_child(combat)
 	await get_tree().process_frame
 	return combat
+
+func _new_stocked_profile() -> PlayerProfile:
+	return PlayerProfile.create_in_memory({PotionReagent.RED: 100, PotionReagent.GREEN: 100, PotionReagent.BLUE: 100})
 
 
 func _send_action(potion_input: PotionInput, action: StringName, pressed: bool) -> void:

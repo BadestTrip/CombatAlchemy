@@ -84,9 +84,11 @@ func _run_tests() -> void:
 	_expect(
 		health_bar != null
 		and is_equal_approx(health_bar.offset_left, -70.0)
-		and is_equal_approx(health_bar.offset_top, -166.0)
+		and is_equal_approx(health_bar.offset_top, -184.0)
 		and is_equal_approx(health_bar.offset_right, 70.0)
 		and is_equal_approx(health_bar.offset_bottom, -118.0)
+		and health_bar.get_node_or_null(^"StatusBar") != null
+		and player.get_node_or_null(^"StatusEffects") != null
 		and health_bar.get(&"display_name") == "Player"
 		and health_bar.get(&"health_component_path") == ^"../HealthComponent",
 		"health-bar offsets and bindings are retained"
@@ -99,6 +101,7 @@ func _run_tests() -> void:
 	add_child(player)
 	await get_tree().process_frame
 	await _test_movement(player, model)
+	await _test_status_speed(player)
 	_test_throw_origin(player, model)
 	_test_place_position(player)
 	_test_throw_origin_fallback()
@@ -144,6 +147,21 @@ func _test_movement(player: PlayerCombatController, model: Node) -> void:
 	)
 	await get_tree().physics_frame
 
+
+func _test_status_speed(player: PlayerCombatController) -> void:
+	var statuses := player.get_node_or_null(^"StatusEffects")
+	_expect(statuses != null and statuses.has_method(&"apply_slow"), "player exposes status-driven movement speed")
+	if statuses == null:
+		return
+	_release_movement_actions()
+	statuses.call(&"apply_slow", 0.45, 5.0)
+	Input.action_press(&"move_right")
+	await get_tree().physics_frame
+	_expect(player.velocity.x > 120.0 and player.velocity.x < 123.0, "slow reduces player speed by 45 percent")
+	statuses.call(&"advance", 5.0)
+	await get_tree().physics_frame
+	_expect(player.velocity.x > 218.0 and player.velocity.x <= 220.0, "expired slow restores player speed")
+	_release_movement_actions()
 
 func _test_throw_origin(player: PlayerCombatController, model: Node) -> void:
 	player.global_position = Vector2(320.0, 180.0)

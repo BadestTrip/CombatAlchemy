@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "vessel": 1,
+  "palette": [
+    "#101010",
+    "#282828",
+    "#404040",
+    "#606060",
+    "#888888",
+    "#B0B0B0",
+    "#D8D8D8",
+    "#F0F0F0"
+  ],
+  "variants": {
+    "world": {
+      "size": [
+        8,
+        20
+      ],
+      "pivot": [
+        4.0,
+        10.0
+      ],
+      "display_scale": 2,
+      "glass": "tube_01_world_glass_v001.png",
+      "mask": "tube_01_world_mask_v001.png"
+    },
+    "ui": {
+      "size": [
+        16,
+        32
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "display_scale": 5,
+      "glass": "tube_01_ui_glass_v001.png",
+      "mask": "tube_01_ui_mask_v001.png"
+    }
+  }
+}

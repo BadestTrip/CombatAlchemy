@@ -3,12 +3,13 @@ extends CharacterBody2D
 
 # Responsibility: Wire an enemy's local capabilities, order physics work, and remove it at zero HP.
 
-## Single source of tuning for this actor. Runtime health/timers never mutate this resource.
+## Single source of tuning for this actor. Runtime health and status timers never mutate this resource.
 @export var profile: EnemyProfileData
 ## Optional world container injected by the spawner; projectiles must outlive their caster.
 var projectiles_parent: Node
 
 @onready var _health := get_node_or_null(^"HealthComponent") as HealthComponent
+@onready var _status_effects := get_node_or_null(^"StatusEffects")
 @onready var _hitbox := get_node_or_null(^"ImpactHitbox") as ImpactHitbox
 @onready var _movement := get_node_or_null(^"Movement") as EnemyMovement
 @onready var _senses := get_node_or_null(^"Senses") as EnemySenses
@@ -22,12 +23,12 @@ var _dying := false
 
 func _ready() -> void:
 	if (
-		profile == null or not profile.is_valid() or _health == null
+		profile == null or not profile.is_valid() or _health == null or _status_effects == null
 		or _hitbox == null or _movement == null or _senses == null
 		or _brain == null or _attack == null
 		or get_node_or_null(^"CollisionShape2D") == null
 	):
-		push_error("EnemyActor requires a valid profile, body shape, HealthComponent, ImpactHitbox, Movement, Senses, Brain, and Attack.")
+		push_error("EnemyActor requires profile, body shape, HealthComponent, StatusEffects, ImpactHitbox, Movement, Senses, Brain, and Attack.")
 		set_physics_process(false)
 		return
 	if not _attack.configure(self, profile):
@@ -35,7 +36,7 @@ func _ready() -> void:
 		return
 	if _attack is RangedEnemyAttack:
 		(_attack as RangedEnemyAttack).projectiles_parent = projectiles_parent
-	_movement.configure(self, profile.movement_speed)
+	_movement.configure(self, profile.movement_speed, _status_effects)
 	_brain.configure(_senses, _movement, _attack, profile)
 	_health.reset_health(profile.max_health)
 	_health.depleted.connect(_on_depleted)
@@ -62,7 +63,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		_attack.advance(delta)
 		_brain.tick()
-	_movement.advance()
+		_movement.advance()
 
 
 func _on_depleted() -> void:

@@ -13,3 +13,14 @@ func find_match(layers: Array[StringName]) -> PotionRecipeData:
 		if recipe != null and recipe.matches_layers(layers):
 			return recipe
 	return null
+
+## Resolves one stable saved recipe ID, rejecting missing and ambiguous IDs.
+func find_by_id(recipe_id: StringName) -> PotionRecipeData:
+	var matched: PotionRecipeData
+	for recipe in recipes:
+		if recipe != null and recipe.recipe_id == recipe_id:
+			if matched != null:
+				push_error("PotionRecipeBookData has duplicate recipe ID %s." % recipe_id)
+				return null
+			matched = recipe
+	return matched

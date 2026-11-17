@@ -1,0 +1,15 @@
+[gd_resource type="Resource" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://combat/potions/PotionRecipeData.gd" id="1_recipe"]
+[ext_resource type="Resource" path="res://combat/potions/resources/effects/Slow45_5s.tres" id="2_effect"]
+[ext_resource type="Script" path="res://combat/potions/effects/PotionEffectData.gd" id="3_effect_type"]
+
+[resource]
+script = ExtResource("1_recipe")
+recipe_id = "slow_potion"
+display_name = "Slow Potion"
+red_count = 1
+green_count = 1
+blue_count = 1
+effects = Array[ExtResource("3_effect_type")]([ExtResource("2_effect")])
+mixed_color = Color(0.658824, 0.333333, 0.968627, 1)

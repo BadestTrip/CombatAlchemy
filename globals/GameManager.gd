@@ -11,11 +11,34 @@ const DEFAULT_SCENE_REGISTRY_PATH: String = "res://globals/resources/SceneRegist
 @export var scene_registry: SceneRegistryData
 
 var _loaded_scene_registry: SceneRegistryData
+var _player_profile: PlayerProfile
+var _player_profile_path_override := ""
+
+signal player_profile_error(message: String)
 
 
 ## Starts a new game by loading the registered combat scene.
-func start_new_game() -> void:
+func start_new_game() -> bool:
+	if get_player_profile() == null:
+		return false
 	_route_to_scene(_get_combat_scene(), "combat")
+	return true
+
+func get_player_profile() -> PlayerProfile:
+	if _player_profile != null:
+		return _player_profile
+	var store := PlayerProfileStore.new(_player_profile_path_override if not _player_profile_path_override.is_empty() else PlayerProfileStore.DEFAULT_PATH)
+	_player_profile = PlayerProfile.load(store)
+	if _player_profile == null:
+		player_profile_error.emit(store.last_error)
+	return _player_profile
+
+func set_player_profile_for_testing(profile: PlayerProfile) -> void:
+	_player_profile = profile
+
+func set_player_profile_path_override(path: String) -> void:
+	_player_profile_path_override = path
+	_player_profile = null
 
 
 ## Returns to the registered main menu scene.

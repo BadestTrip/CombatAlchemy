@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://combat/actors/ActorStatusBar.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://combat/actors/ActorStatusIcon.tscn" id="2_icon"]
+
+[node name="ActorStatusBar" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="StatusSlot1" parent="." instance=ExtResource("2_icon")]
+position = Vector2(-27, 0)
+
+[node name="StatusSlot2" parent="." instance=ExtResource("2_icon")]
+position = Vector2(-9, 0)
+
+[node name="StatusSlot3" parent="." instance=ExtResource("2_icon")]
+position = Vector2(9, 0)
+
+[node name="StatusSlot4" parent="." instance=ExtResource("2_icon")]
+position = Vector2(27, 0)

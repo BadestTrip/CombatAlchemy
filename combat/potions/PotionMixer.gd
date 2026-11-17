@@ -7,6 +7,7 @@ extends Node
 signal layers_changed(layers: Array[StringName])
 ## Emitted after a valid mixture creates a unique runtime potion.
 signal potion_prepared(potion: PotionInstance)
+signal preparation_requested(potion: PotionInstance)
 ## Emitted when mixing cannot produce a valid recipe, with preserved layers.
 signal mix_rejected(layers: Array[StringName])
 ## Emitted after the active layer mixture is cleared.
@@ -35,6 +36,16 @@ signal brewing_recovered
 var _layers: Array[StringName] = []
 var _active_recipe: PotionRecipeData
 var _brewing_reaction: BrewingReaction
+var _inventory: ReagentInventory
+var _pending_potion: PotionInstance
+
+func configure_inventory(inventory: ReagentInventory) -> void:
+	_inventory = inventory
+
+func _exit_tree() -> void:
+	_release_layer_reservations()
+	_layers.clear()
+	_pending_potion = null
 
 
 func _ready() -> void:
@@ -53,9 +64,12 @@ func _ready() -> void:
 func add_reagent(reagent: StringName) -> bool:
 	if (
 		not _can_edit_layers()
+		or _inventory == null
 		or not PotionReagent.is_valid(reagent)
 		or _layers.size() >= max_layers
 	):
+		return false
+	if not _inventory.reserve(reagent):
 		return false
 	_reset_reaction_for_edit()
 	_layers.append(reagent)
@@ -68,7 +82,9 @@ func remove_last() -> bool:
 	if not _can_edit_layers() or _layers.is_empty():
 		return false
 	_reset_reaction_for_edit()
-	_layers.pop_back()
+	var reagent: StringName = _layers.pop_back()
+	if _inventory != null:
+		_inventory.release(reagent)
 	layers_changed.emit(get_layers())
 	return true
 
@@ -77,6 +93,7 @@ func remove_last() -> bool:
 func clear() -> void:
 	var had_layers := not _layers.is_empty()
 	_active_recipe = null
+	_release_layer_reservations()
 	if _brewing_reaction != null:
 		_brewing_reaction.cancel()
 	_layers.clear()
@@ -147,12 +164,24 @@ func _on_reaction_completed() -> void:
 	if potion == null:
 		mix_rejected.emit(creation_layers)
 		return
+	_pending_potion = potion
+	preparation_requested.emit(potion)
+
+func acknowledge_preparation(potion: PotionInstance, committed: bool) -> bool:
+	if potion == null or potion != _pending_potion:
+		return false
+	_pending_potion = null
 	_active_recipe = null
-	_brewing_reaction.cancel()
+	if _brewing_reaction != null:
+		_brewing_reaction.cancel()
+	if not committed:
+		_release_layer_reservations()
 	_layers.clear()
 	layers_changed.emit(get_layers())
 	mixture_cleared.emit()
-	potion_prepared.emit(potion)
+	if committed:
+		potion_prepared.emit(potion)
+	return true
 
 
 func _on_reaction_changed(
@@ -190,3 +219,10 @@ func _reset_reaction_for_edit() -> void:
 	_active_recipe = null
 	if _brewing_reaction != null and _brewing_reaction.get_progress() > 0.0:
 		_brewing_reaction.cancel()
+
+
+func _release_layer_reservations() -> void:
+	if _inventory == null:
+		return
+	for reagent in _layers:
+		_inventory.release(reagent)

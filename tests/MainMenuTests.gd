@@ -202,6 +202,15 @@ func _test_backdrop_art_and_animation() -> void:
 
 
 func _test_main_menu_navigation() -> void:
+	const FAILED_PROFILE_PATH := "user://main_menu_failed_profile_test.cfg"
+	PlayerProfileStore.delete_test_files(FAILED_PROFILE_PATH)
+	var corrupt := FileAccess.open(FAILED_PROFILE_PATH, FileAccess.WRITE)
+	corrupt.store_string("corrupt")
+	corrupt = null
+	corrupt = FileAccess.open(FAILED_PROFILE_PATH + ".bak", FileAccess.WRITE)
+	corrupt.store_string("corrupt")
+	corrupt = null
+	GameManager.set_player_profile_path_override(FAILED_PROFILE_PATH)
 	var start_menu := _instantiate_scene(START_MENU_SCENE_PATH)
 	if start_menu == null:
 		return
@@ -222,6 +231,8 @@ func _test_main_menu_navigation() -> void:
 	var quit := menu.get_node_or_null("CommandPanel/MainCommands/Quit/Button") as Button
 	_expect(commands != null and settings_view != null, "menu authors replaceable command and settings views")
 	_expect(new_game != null and settings != null and quit != null, "menu authors three text commands")
+	_expect(new_game != null and new_game.text == "Play", "persistent-profile command is displayed as Play")
+	_expect(menu.get_node_or_null(^"ProfileErrorDialog") is AcceptDialog, "main menu authors a profile error dialog")
 	_expect(_count_nodes_of_type(menu, "TextureButton") == 0, "main menu no longer uses painted TextureButtons")
 	if new_game == null or settings == null or quit == null or commands == null or settings_view == null:
 		return
@@ -256,6 +267,14 @@ func _test_main_menu_navigation() -> void:
 		_expect(new_game.disabled and settings.disabled and quit.disabled, "transition lock disables every command")
 		menu.call(&"set_interaction_enabled", true)
 		_expect(not new_game.disabled and not settings.disabled and not quit.disabled, "interaction can be restored")
+
+	menu.call(&"_on_new_game_pressed")
+	await get_tree().process_frame
+	var error_dialog := menu.get_node(^"ProfileErrorDialog") as AcceptDialog
+	_expect(error_dialog.visible, "profile load failure opens the error dialog")
+	_expect(not new_game.disabled and not settings.disabled and not quit.disabled, "profile load failure restores menu interaction")
+	PlayerProfileStore.delete_test_files(FAILED_PROFILE_PATH)
+	GameManager.set_player_profile_path_override("")
 
 
 func _instantiate_scene(path: String) -> Node:

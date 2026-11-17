@@ -18,6 +18,7 @@
 [ext_resource type="Script" path="res://combat/enemies/EnemyTestSpawner.gd" id="15_enemy_spawner"]
 [ext_resource type="PackedScene" path="res://combat/enemies/Skirmisher.tscn" id="16_skirmisher"]
 [ext_resource type="PackedScene" path="res://combat/enemies/Pursuer.tscn" id="17_pursuer"]
+[ext_resource type="PackedScene" path="res://combat/reagents/ReagentSource.tscn" id="18_reagent"]
 
 [node name="CombatScene" type="Node2D" unique_id=1979150264]
 script = ExtResource("1_controller")
@@ -58,6 +59,24 @@ offset_top = 0.0
 offset_right = 140.0
 offset_bottom = 48.0
 display_name = "Friend"
+
+[node name="RedSource" parent="Arena" instance=ExtResource("18_reagent")]
+position = Vector2(-240, -160)
+reagent = &"red"
+[node name="Deposit" parent="Arena/RedSource" index="1"]
+color_id = &"red"
+
+[node name="GreenSource" parent="Arena" instance=ExtResource("18_reagent")]
+position = Vector2(0, -240)
+reagent = &"green"
+[node name="Deposit" parent="Arena/GreenSource" index="1"]
+color_id = &"green"
+
+[node name="BlueSource" parent="Arena" instance=ExtResource("18_reagent")]
+position = Vector2(240, -160)
+reagent = &"blue"
+[node name="Deposit" parent="Arena/BlueSource" index="1"]
+color_id = &"blue"
 
 [node name="PotionEntities" type="Node2D" parent="Arena" unique_id=223784400]
 
@@ -135,7 +154,16 @@ grow_horizontal = 2
 [node name="PauseMenu" parent="UI" unique_id=1041878019 instance=ExtResource("8_pause_menu")]
 z_index = 100
 
+[node name="ProfileErrorDialog" type="AcceptDialog" parent="UI"]
+title = "Profile unavailable"
+dialog_text = "Progress could not be saved."
+process_mode = 3
+z_index = 110
+
 [node name="LevelMusic" parent="." unique_id=1050860962 instance=ExtResource("9_level_music")]
 music = ExtResource("12_x7jh1")
 
 [editable path="Arena/Friend"]
+[editable path="Arena/RedSource"]
+[editable path="Arena/GreenSource"]
+[editable path="Arena/BlueSource"]
