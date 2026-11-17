@@ -55,7 +55,7 @@ offset_bottom = -118.0
 display_name = "Player"
 health_component_path = NodePath("../HealthComponent")
 
-[node name="ReagentCollector" type="Node" parent="."]
+[node name="ReagentCollector" type="Node2D" parent="."]
 script = ExtResource("7_collector")
 
 [node name="CollectionArea" type="Area2D" parent="ReagentCollector"]

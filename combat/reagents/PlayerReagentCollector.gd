@@ -1,5 +1,7 @@
 class_name PlayerReagentCollector
-extends Node
+extends Node2D
+
+# Keep CollectionArea in the player transform chain as the player moves.
 
 signal collection_failed(message: String)
 
