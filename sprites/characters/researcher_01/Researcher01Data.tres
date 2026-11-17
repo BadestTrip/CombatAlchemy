@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PlayerSpriteData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://characters/player/PlayerSpriteData.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://sprites/characters/researcher_01/Researcher01Frames.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+sprite_frames = ExtResource("2")
+pivot = Vector2(32,74)
+frame_sockets = {
+&"idle_front": [ {"hand_left": Vector2(44,50), "hand_right": Vector2(19,50), "left_z": 1, "right_z": 1}, {"hand_left": Vector2(44,49), "hand_right": Vector2(19,49), "left_z": 1, "right_z": 1} ],
+&"walk_front": [ {"hand_left": Vector2(44,49), "hand_right": Vector2(19,51), "left_z": 1, "right_z": 1}, {"hand_left": Vector2(44,49), "hand_right": Vector2(19,49), "left_z": 1, "right_z": 1}, {"hand_left": Vector2(44,51), "hand_right": Vector2(19,49), "left_z": 1, "right_z": 1}, {"hand_left": Vector2(44,49), "hand_right": Vector2(19,49), "left_z": 1, "right_z": 1} ],
+&"idle_back": [ {"hand_left": Vector2(19,49), "hand_right": Vector2(44,49), "left_z": -1, "right_z": -1}, {"hand_left": Vector2(19,48), "hand_right": Vector2(44,48), "left_z": -1, "right_z": -1} ],
+&"walk_back": [ {"hand_left": Vector2(19,51), "hand_right": Vector2(44,49), "left_z": -1, "right_z": -1}, {"hand_left": Vector2(19,49), "hand_right": Vector2(44,49), "left_z": -1, "right_z": -1}, {"hand_left": Vector2(19,49), "hand_right": Vector2(44,51), "left_z": -1, "right_z": -1}, {"hand_left": Vector2(19,49), "hand_right": Vector2(44,49), "left_z": -1, "right_z": -1} ],
+&"idle_side_left": [ {"hand_left": Vector2(32,51), "hand_right": Vector2(25,48), "left_z": 1, "right_z": -1}, {"hand_left": Vector2(32,50), "hand_right": Vector2(25,47), "left_z": 1, "right_z": -1} ],
+&"walk_side_left": [ {"hand_left": Vector2(34,51), "hand_right": Vector2(25,48), "left_z": 1, "right_z": -1}, {"hand_left": Vector2(31,50), "hand_right": Vector2(25,47), "left_z": 1, "right_z": -1}, {"hand_left": Vector2(28,51), "hand_right": Vector2(25,48), "left_z": 1, "right_z": -1}, {"hand_left": Vector2(31,50), "hand_right": Vector2(25,47), "left_z": 1, "right_z": -1} ],
+&"idle_side_right": [ {"hand_left": Vector2(39,48), "hand_right": Vector2(32,51), "left_z": -1, "right_z": 1}, {"hand_left": Vector2(39,47), "hand_right": Vector2(32,50), "left_z": -1, "right_z": 1} ],
+&"walk_side_right": [ {"hand_left": Vector2(39,48), "hand_right": Vector2(28,51), "left_z": -1, "right_z": 1}, {"hand_left": Vector2(39,47), "hand_right": Vector2(31,50), "left_z": -1, "right_z": 1}, {"hand_left": Vector2(39,48), "hand_right": Vector2(34,51), "left_z": -1, "right_z": 1}, {"hand_left": Vector2(39,47), "hand_right": Vector2(31,50), "left_z": -1, "right_z": 1} ]
+}

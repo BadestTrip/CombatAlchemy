@@ -9,8 +9,8 @@ extends Node2D
 @onready var _locomotion_value: Label = get_node_or_null(
 	^"HUD/StatusPanel/StatusRow/LocomotionValue"
 ) as Label
-@onready var _bones_toggle: CheckButton = get_node_or_null(
-	^"HUD/StatusPanel/StatusRow/BonesToggle"
+@onready var _guides_toggle: CheckButton = get_node_or_null(
+	^"HUD/StatusPanel/StatusRow/GuidesToggle"
 ) as CheckButton
 
 
@@ -21,10 +21,10 @@ func _ready() -> void:
 
 	_player_model.connect(&"facing_changed", _on_facing_changed)
 	_player_model.connect(&"locomotion_changed", _on_locomotion_changed)
-	_bones_toggle.toggled.connect(_on_bones_toggled)
+	_guides_toggle.toggled.connect(_on_guides_toggled)
 	_on_facing_changed(_player_model.call(&"get_facing") as StringName)
 	_on_locomotion_changed(_player_model.call(&"get_locomotion_state") as StringName)
-	_on_bones_toggled(_bones_toggle.button_pressed)
+	_on_guides_toggled(_guides_toggle.button_pressed)
 
 
 func _has_required_nodes_and_interface() -> bool:
@@ -32,12 +32,12 @@ func _has_required_nodes_and_interface() -> bool:
 		_player_model != null
 		and _player_model.has_method(&"get_facing")
 		and _player_model.has_method(&"get_locomotion_state")
-		and _player_model.has_method(&"set_debug_bones_visible")
+		and _player_model.has_method(&"set_debug_guides_visible")
 		and _player_model.has_signal(&"facing_changed")
 		and _player_model.has_signal(&"locomotion_changed")
 		and _facing_value != null
 		and _locomotion_value != null
-		and _bones_toggle != null
+		and _guides_toggle != null
 	)
 
 
@@ -49,5 +49,5 @@ func _on_locomotion_changed(state: StringName) -> void:
 	_locomotion_value.text = String(state).to_upper()
 
 
-func _on_bones_toggled(is_pressed: bool) -> void:
-	_player_model.call(&"set_debug_bones_visible", is_pressed)
+func _on_guides_toggled(is_pressed: bool) -> void:
+	_player_model.call(&"set_debug_guides_visible", is_pressed)

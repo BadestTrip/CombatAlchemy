@@ -1,0 +1,738 @@
+{
+  "version": 1,
+  "asset": "researcher_01",
+  "status": "active character sprite asset; used by characters/player/PlayerModel.tscn",
+  "cell_size": [
+    64,
+    80
+  ],
+  "sheet_size": [
+    384,
+    320
+  ],
+  "sheet": "researcher_01_v001.png",
+  "row_order": [
+    "front",
+    "back",
+    "side_left",
+    "side_right"
+  ],
+  "columns": [
+    "idle_0",
+    "idle_1",
+    "walk_0",
+    "walk_1",
+    "walk_2",
+    "walk_3"
+  ],
+  "display_scale_hint": 2,
+  "palette": [
+    "#101010",
+    "#282828",
+    "#404040",
+    "#606060",
+    "#888888",
+    "#B0B0B0",
+    "#D8D8D8",
+    "#F0F0F0"
+  ],
+  "coordinate_system": "native cell pixels, origin top-left; subtract pivot then multiply by sprite scale for local sockets",
+  "frames": [
+    {
+      "name": "idle_front_00",
+      "facing": "front",
+      "animation": "idle",
+      "index": 0,
+      "sheet_rect": [
+        0,
+        0,
+        64,
+        80
+      ],
+      "duration_seconds": 0.8,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        44,
+        50
+      ],
+      "hand_right": [
+        19,
+        50
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "idle_front_01",
+      "facing": "front",
+      "animation": "idle",
+      "index": 1,
+      "sheet_rect": [
+        64,
+        0,
+        64,
+        80
+      ],
+      "duration_seconds": 0.8,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        44,
+        49
+      ],
+      "hand_right": [
+        19,
+        49
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "walk_front_00",
+      "facing": "front",
+      "animation": "walk",
+      "index": 0,
+      "sheet_rect": [
+        128,
+        0,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        44,
+        49
+      ],
+      "hand_right": [
+        19,
+        51
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "walk_front_01",
+      "facing": "front",
+      "animation": "walk",
+      "index": 1,
+      "sheet_rect": [
+        192,
+        0,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        44,
+        49
+      ],
+      "hand_right": [
+        19,
+        49
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "walk_front_02",
+      "facing": "front",
+      "animation": "walk",
+      "index": 2,
+      "sheet_rect": [
+        256,
+        0,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        44,
+        51
+      ],
+      "hand_right": [
+        19,
+        49
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "walk_front_03",
+      "facing": "front",
+      "animation": "walk",
+      "index": 3,
+      "sheet_rect": [
+        320,
+        0,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        44,
+        49
+      ],
+      "hand_right": [
+        19,
+        49
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "idle_back_00",
+      "facing": "back",
+      "animation": "idle",
+      "index": 0,
+      "sheet_rect": [
+        0,
+        80,
+        64,
+        80
+      ],
+      "duration_seconds": 0.8,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        19,
+        49
+      ],
+      "hand_right": [
+        44,
+        49
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "idle_back_01",
+      "facing": "back",
+      "animation": "idle",
+      "index": 1,
+      "sheet_rect": [
+        64,
+        80,
+        64,
+        80
+      ],
+      "duration_seconds": 0.8,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        19,
+        48
+      ],
+      "hand_right": [
+        44,
+        48
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "walk_back_00",
+      "facing": "back",
+      "animation": "walk",
+      "index": 0,
+      "sheet_rect": [
+        128,
+        80,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        19,
+        51
+      ],
+      "hand_right": [
+        44,
+        49
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "walk_back_01",
+      "facing": "back",
+      "animation": "walk",
+      "index": 1,
+      "sheet_rect": [
+        192,
+        80,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        19,
+        49
+      ],
+      "hand_right": [
+        44,
+        49
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "walk_back_02",
+      "facing": "back",
+      "animation": "walk",
+      "index": 2,
+      "sheet_rect": [
+        256,
+        80,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        19,
+        49
+      ],
+      "hand_right": [
+        44,
+        51
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "walk_back_03",
+      "facing": "back",
+      "animation": "walk",
+      "index": 3,
+      "sheet_rect": [
+        320,
+        80,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        19,
+        49
+      ],
+      "hand_right": [
+        44,
+        49
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "idle_side_left_00",
+      "facing": "side_left",
+      "animation": "idle",
+      "index": 0,
+      "sheet_rect": [
+        0,
+        160,
+        64,
+        80
+      ],
+      "duration_seconds": 0.8,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        32,
+        51
+      ],
+      "hand_right": [
+        25,
+        48
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "idle_side_left_01",
+      "facing": "side_left",
+      "animation": "idle",
+      "index": 1,
+      "sheet_rect": [
+        64,
+        160,
+        64,
+        80
+      ],
+      "duration_seconds": 0.8,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        32,
+        50
+      ],
+      "hand_right": [
+        25,
+        47
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "walk_side_left_00",
+      "facing": "side_left",
+      "animation": "walk",
+      "index": 0,
+      "sheet_rect": [
+        128,
+        160,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        34,
+        51
+      ],
+      "hand_right": [
+        25,
+        48
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "walk_side_left_01",
+      "facing": "side_left",
+      "animation": "walk",
+      "index": 1,
+      "sheet_rect": [
+        192,
+        160,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        31,
+        50
+      ],
+      "hand_right": [
+        25,
+        47
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "walk_side_left_02",
+      "facing": "side_left",
+      "animation": "walk",
+      "index": 2,
+      "sheet_rect": [
+        256,
+        160,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        28,
+        51
+      ],
+      "hand_right": [
+        25,
+        48
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "walk_side_left_03",
+      "facing": "side_left",
+      "animation": "walk",
+      "index": 3,
+      "sheet_rect": [
+        320,
+        160,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        31,
+        50
+      ],
+      "hand_right": [
+        25,
+        47
+      ],
+      "hand_draw_order": {
+        "hand_left": 1,
+        "hand_right": -1
+      }
+    },
+    {
+      "name": "idle_side_right_00",
+      "facing": "side_right",
+      "animation": "idle",
+      "index": 0,
+      "sheet_rect": [
+        0,
+        240,
+        64,
+        80
+      ],
+      "duration_seconds": 0.8,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        39,
+        48
+      ],
+      "hand_right": [
+        32,
+        51
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "idle_side_right_01",
+      "facing": "side_right",
+      "animation": "idle",
+      "index": 1,
+      "sheet_rect": [
+        64,
+        240,
+        64,
+        80
+      ],
+      "duration_seconds": 0.8,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        39,
+        47
+      ],
+      "hand_right": [
+        32,
+        50
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "walk_side_right_00",
+      "facing": "side_right",
+      "animation": "walk",
+      "index": 0,
+      "sheet_rect": [
+        128,
+        240,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        39,
+        48
+      ],
+      "hand_right": [
+        28,
+        51
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "walk_side_right_01",
+      "facing": "side_right",
+      "animation": "walk",
+      "index": 1,
+      "sheet_rect": [
+        192,
+        240,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        39,
+        47
+      ],
+      "hand_right": [
+        31,
+        50
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "walk_side_right_02",
+      "facing": "side_right",
+      "animation": "walk",
+      "index": 2,
+      "sheet_rect": [
+        256,
+        240,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        39,
+        48
+      ],
+      "hand_right": [
+        34,
+        51
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": 1
+      }
+    },
+    {
+      "name": "walk_side_right_03",
+      "facing": "side_right",
+      "animation": "walk",
+      "index": 3,
+      "sheet_rect": [
+        320,
+        240,
+        64,
+        80
+      ],
+      "duration_seconds": 0.18,
+      "pivot": [
+        32,
+        74
+      ],
+      "hand_left": [
+        39,
+        47
+      ],
+      "hand_right": [
+        31,
+        50
+      ],
+      "hand_draw_order": {
+        "hand_left": -1,
+        "hand_right": 1
+      }
+    }
+  ]
+}

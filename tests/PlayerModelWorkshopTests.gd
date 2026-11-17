@@ -45,7 +45,7 @@ func _run_tests() -> void:
 	var collision := workshop.get_node_or_null(^"WorkshopActor/CollisionShape2D") as CollisionShape2D
 	var facing_label := workshop.get_node_or_null(^"HUD/StatusPanel/StatusRow/FacingValue") as Label
 	var locomotion_label := workshop.get_node_or_null(^"HUD/StatusPanel/StatusRow/LocomotionValue") as Label
-	var bones_toggle := workshop.get_node_or_null(^"HUD/StatusPanel/StatusRow/BonesToggle") as CheckButton
+	var guides_toggle := workshop.get_node_or_null(^"HUD/StatusPanel/StatusRow/GuidesToggle") as CheckButton
 
 	_expect(actor != null, "workshop has one movement owner")
 	var expected_actor_script := load(ACTOR_SCRIPT_PATH) as Script
@@ -68,7 +68,7 @@ func _run_tests() -> void:
 	_expect(camera != null and not camera.position_smoothing_enabled, "workshop camera follows without smoothing")
 	_expect(collision != null, "workshop actor has one gameplay-sized collision")
 	_expect(
-		facing_label != null and locomotion_label != null and bones_toggle != null,
+		facing_label != null and locomotion_label != null and guides_toggle != null,
 		"workshop exposes only compact state controls"
 	)
 
@@ -83,7 +83,7 @@ func _run_tests() -> void:
 
 	add_child(workshop)
 	await get_tree().process_frame
-	_test_state_controls(model, facing_label, locomotion_label, bones_toggle)
+	_test_state_controls(model, facing_label, locomotion_label, guides_toggle)
 	_release_movement_actions()
 	await _test_actor_movement(actor, model, facing_label, locomotion_label)
 	_release_movement_actions()
@@ -132,21 +132,21 @@ func _test_state_controls(
 	model: Node,
 	facing_label: Label,
 	locomotion_label: Label,
-	bones_toggle: CheckButton
+	guides_toggle: CheckButton
 ) -> void:
-	if model == null or facing_label == null or locomotion_label == null or bones_toggle == null:
+	if model == null or facing_label == null or locomotion_label == null or guides_toggle == null:
 		return
-	_expect(not bones_toggle.button_pressed, "bone indicators start disabled")
-	_expect(_bone_lines_have_visibility(model, false), "bone indicators start hidden")
+	_expect(not guides_toggle.button_pressed, "sprite guides start disabled")
+	_expect(_guide_lines_have_visibility(model, false), "sprite guides start hidden")
 	_expect(facing_label.text == "FRONT", "facing label initializes from the model")
 	_expect(locomotion_label.text == "IDLE", "locomotion label initializes from the model")
 
-	bones_toggle.set_pressed_no_signal(true)
-	bones_toggle.toggled.emit(true)
-	_expect(_bone_lines_have_visibility(model, true), "the CheckButton shows bone indicators")
-	bones_toggle.set_pressed_no_signal(false)
-	bones_toggle.toggled.emit(false)
-	_expect(_bone_lines_have_visibility(model, false), "the CheckButton hides bone indicators")
+	guides_toggle.set_pressed_no_signal(true)
+	guides_toggle.toggled.emit(true)
+	_expect(_guide_lines_have_visibility(model, true), "the CheckButton shows sprite guides")
+	guides_toggle.set_pressed_no_signal(false)
+	guides_toggle.toggled.emit(false)
+	_expect(_guide_lines_have_visibility(model, false), "the CheckButton hides sprite guides")
 
 
 func _test_actor_movement(
@@ -187,12 +187,12 @@ func _release_movement_actions() -> void:
 		Input.action_release(action)
 
 
-func _bone_lines_have_visibility(model: Node, expected: bool) -> bool:
+func _guide_lines_have_visibility(model: Node, expected: bool) -> bool:
 	var indicators := model.find_children("*", "Line2D", true, false)
 	if indicators.is_empty():
 		return false
 	for indicator in indicators:
-		if (indicator as Line2D).visible != expected:
+		if (indicator as Line2D).is_visible_in_tree() != expected:
 			return false
 	return true
 

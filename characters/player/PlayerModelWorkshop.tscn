@@ -123,7 +123,7 @@ layout_mode = 2
 text = "FRONT"
 label_settings = SubResource("LabelSettings_hud")
 
-[node name="BonesToggle" type="CheckButton" parent="HUD/StatusPanel/StatusRow"]
+[node name="GuidesToggle" type="CheckButton" parent="HUD/StatusPanel/StatusRow"]
 layout_mode = 2
 button_pressed = false
-text = "BONES"
+text = "GUIDES"

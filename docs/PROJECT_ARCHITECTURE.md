@@ -68,17 +68,18 @@ now implemented through the separate
 The `640 x 360` approval sample remains a composition reference only. The active
 menu uses a native `1920 x 1080` redraw and scene-authored controls and layers.
 Gameplay composition remains open; native dimensions follow the asset standard.
-Tube 01 is implemented in PotionEntity and FlaskView.
+Tube 01 is implemented in PotionEntity and FlaskView. Researcher 01 is now the
+active sprite model in combat and workshop; retired files are under `deprecated/`.
 
 | Boundary | Current implementation | Approved replacement |
 | --- | --- | --- |
 | Display | Native `1920 x 1080` project canvas with nearest texture filtering | Keep `1920 x 1080` as the permanent project canvas; validate responsive layout at other 16:9 and wider windows |
 | Camera and art scale | Player camera at default zoom `(1, 1)` with smoothing; existing world units | Undecided until gameplay composition is approved; do not infer world scale from the menu |
-| Player visual | 15-bone skeleton, geometric parts, AnimationPlayer/AnimationTree | Pixel-art replacement remains planned, but cells are 64 x 80 and sheets 384 x 320 |
-| Animation | Four authored idle/walk families and skeletal interpolation | Four authored facings and low-frame playback remain preferred; two idle and four walk frames per facing are specified |
+| Player visual | Researcher 01 AnimatedSprite2D, 64 x 80 cells at 2x; 384 x 320 sheet | Full character conversion implemented; preserve the established API |
+| Animation | Four independently authored directions; two idle and four walk frames, 1.6/0.72-second loops | Discrete playback with phase-preserving turns |
 | Direction | Positive-scale front/back/side-left/side-right, phase-aware turns and 0.10 hysteresis | Preserve facing rules, gait phase, idle retention, and anatomical hands; no mirroring or image crossfades |
-| Sockets | Markers beneath hand bones; a held entity follows `hand_right` | Stable `hand_left`/`hand_right` lookup with per-frame marker positions; the bottle remains separate from character art |
-| Workshop | Same model, movement room, readouts, bone overlay | Same model/workflow with frame bounds and socket guides; no separate production rig |
+| Sockets | Stable sibling markers updated from per-frame resource data; held entity follows `hand_right` | Stable `hand_left`/`hand_right` lookup with per-frame marker positions; the bottle remains separate from character art |
+| Workshop | Same sprite model, movement room, readouts, frame/socket guides | Same model/workflow with frame bounds and socket guides; no separate production rig |
 | Sandbox and UI | Passive Friend, H/J-spawned Pursuer/Skirmisher, plain arena, pixel-art tube-01 bottle/mixer, rebuilt animated main menu, existing pause/settings | Gameplay composition remains open; asset sizes follow the production template; retain flask-first interaction and hybrid detail |
 | Transitions | Snapshot-based ink reveal | Pixel-grid reveal with unchanged duration/input-blocking/completion contract |
 
@@ -87,9 +88,8 @@ Tube 01 is implemented in PotionEntity and FlaskView.
 - Keep `PlayerModel.set_motion()`, `set_facing_direction()`, `reset_to_idle()`,
   `set_playback_speed()`, `get_facing()`, `get_locomotion_state()`, `get_socket()`,
   and its facing/locomotion signals. Callers must not rely on bone paths.
-- Plan to add `set_debug_guides_visible()` and retain
-  `set_debug_bones_visible()` as a compatibility wrapper. The new method does
-  **not** exist yet and is therefore absent from the current API tables.
+- `set_debug_guides_visible()` is implemented; `set_debug_bones_visible()` remains
+  a compatibility wrapper.
 - Keep physics coordinates, collision shapes, movement speed, health, recipes,
   projectile trajectories, placement rules, and current immediate potion use.
   Render quantization must not quantize physics or continuous mouse aim.
@@ -102,9 +102,8 @@ Tube 01 is implemented in PotionEntity and FlaskView.
 
 The produced researcher and menu samples remain approved references. The menu
 sample now guides composition only; it is not the runtime background. Gameplay
-composition remains undecided and must be designed separately before any
-gameplay-art conversion. Character and vessel dimensions are defined by the production template; terrain
-scale remains open. Bone-specific tests will need frame/socket replacements;
+composition beyond the delivered hero and vessel remains open. Character and vessel dimensions are defined by the production template; terrain
+scale remains open. Bone-specific tests have been replaced by frame/socket checks;
 the existing gameplay suites retain their contracts.
 
 ## Current Runtime Flow
@@ -295,25 +294,25 @@ inventory or changes to the Godot serialization `owner` property.
 
 ### PlayerModel
 
-`characters/player/PlayerModel.tscn` owns presentation only. Its authored
-15-bone `Skeleton2D`, geometric body parts, two hand sockets,
-`AnimationPlayer`, and `AnimationTree` are directly editable. Four separate
-facings (`front`, `back`, `side_left`, `side_right`) each provide idle and walk
-clips through `characters/player/PlayerLocomotionLibrary.tres`. Horizontal
-facings use authored positive-scale states; they are not mirrored at runtime.
+`characters/player/PlayerModel.tscn` owns presentation only. Its AnimatedSprite2D
+uses Researcher01Frames and the exportable PlayerSpriteData resource. Eight named
+idle/walk animations preserve four positive-scale facings and gait phase on turns.
+64 x 80 cells display at 2x; FacingRoot y=38 retains the original ground alignment.
+No runtime raw JSON loading, physics changes, action clips or animation delays.
 
-Stable socket IDs are `hand_left` and `hand_right`. Consumers call
-`get_socket()` instead of depending on internal bone paths. The complete bone
-tree and separate planned sprite-sheet workflow are in the
-[PlayerModel guide](../characters/player/README.md). The 15-bone hierarchy
-describes current internals, not a restriction on the approved visual conversion.
+Stable `hand_left` and `hand_right` markers are siblings of the sprite; metadata
+updates position and draw order synchronously on frame/facing changes. Held potion
+scale stays independent of the hero's display scale. Public motion, facing, reset,
+speed and signal methods are unchanged; the new guide API retains the old bone
+method as an alias. See the [PlayerModel guide](../characters/player/README.md).
+Old rig resources, tests and unused hero art are in the ignored `deprecated/` folder.
 
 ### PlayerModelWorkshop
 
 `characters/player/PlayerModelWorkshop.tscn` is the isolated Play Current
 Scene workshop. `PlayerModelWorkshopActor.gd` owns movement and collision;
 `PlayerModel.gd` remains presentation-only; `PlayerModelWorkshop.gd` keeps the
-facing, locomotion, and debug-bone controls synchronized. The workshop is not
+facing, locomotion, and frame/socket-guide controls synchronized. The workshop is not
 registered in `project.godot` and is not a runtime dependency of combat.
 
 ## Retained Script Reference
@@ -328,7 +327,7 @@ remove methods from this reference until it is implemented.
 
 | Script | Responsibility | Dependencies | Signals | Exports | Public methods |
 | --- | --- | --- | --- | --- | --- |
-| `characters/player/PlayerModel.gd` | Own compact visual facing, locomotion blending, sockets, and debug bones. | Authored model nodes, required clips, and `AnimationTree` state machines. | `facing_changed`, `locomotion_changed` | None | `set_motion()`, `set_facing_direction()`, `reset_to_idle()`, `set_playback_speed()`, `set_debug_bones_visible()`, `get_facing()`, `get_locomotion_state()`, `get_socket()` |
+| `characters/player/PlayerModel.gd` | Own sprite facing, discrete locomotion, frame-aligned sockets, and debug guides. | AnimatedSprite2D, Researcher01Frames and PlayerSpriteData. | `facing_changed`, `locomotion_changed` | `sprite_data` (`PlayerSpriteData`) | `set_motion()`, `set_facing_direction()`, `reset_to_idle()`, `set_playback_speed()`, `set_debug_guides_visible()`, `set_debug_bones_visible()`, `get_facing()`, `get_locomotion_state()`, `get_socket()` |
 | `characters/player/PlayerModelWorkshop.gd` | Synchronize workshop status controls with the canonical model. | Workshop `PlayerModel`, labels, and bones toggle. | None | None | None |
 | `characters/player/PlayerModelWorkshopActor.gd` | Move and collide the workshop actor while forwarding velocity to the model. | Input Map movement actions and a model exposing `set_motion()`. | None | `movement_speed`, `player_model_path` | None |
 | `combat/PotionCombatController.gd` | Coordinate input, reserved mixing, durable held ownership, restoration, UI, and entity delivery. | `GameManager` profile, `PotionInput`, `PotionMixer`, `HeldPotionSlot`, `PotionMixerUI`, `PlayerCombatController`, optional collector, error dialog, entity parent and scene. | None | `potion_input_path`, `potion_mixer_path`, `held_potion_slot_path`, `potion_mixer_ui_path`, `player_combat_controller_path`, `potion_entities_parent_path`, `potion_entity_scene` | None |
@@ -482,16 +481,16 @@ and pausing the tree freezes progression.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> HELD: successful mix / attach / hold
-    HELD --> CONSUMED: drink target / apply instance
-    HELD --> CONSUMED: C / discard
-    HELD --> FLYING: Left Mouse / reparent same entity
-    HELD --> PLACED: Q / reparent same entity
-    FLYING --> CONSUMED: first non-source collision / apply
-    FLYING --> CONSUMED: 2.5 s expiry / discard
-    PLACED --> CONSUMED: armed eligible overlap / apply
-    PLACED --> CONSUMED: 20 s expiry / discard
-    CONSUMED --> [*]: queue_free entity
+	[*] --> HELD: successful mix / attach / hold
+	HELD --> CONSUMED: drink target / apply instance
+	HELD --> CONSUMED: C / discard
+	HELD --> FLYING: Left Mouse / reparent same entity
+	HELD --> PLACED: Q / reparent same entity
+	FLYING --> CONSUMED: first non-source collision / apply
+	FLYING --> CONSUMED: 2.5 s expiry / discard
+	PLACED --> CONSUMED: armed eligible overlap / apply
+	PLACED --> CONSUMED: 20 s expiry / discard
+	CONSUMED --> [*]: queue_free entity
 ```
 
 The PNG companion `PROJECT_ARCHITECTURE_DIAGRAM.png` was not updated or

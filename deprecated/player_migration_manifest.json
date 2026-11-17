@@ -1,0 +1,97 @@
+[
+  {
+    "original": "characters/player/PlayerModel.gd",
+    "archived": "deprecated/characters/player/PlayerModel.gd",
+    "sha256_before_move": "D8B4D4CD03D0725E3E285F33AA1EB205100CE97C5BF4EFCC0F99E2A0CF9040CA",
+    "sha256_archived": "d8b4d4cd03d0725e3e285f33aa1eb205100ce97c5bf4efcc0f99e2a0cf9040ca"
+  },
+  {
+    "original": "characters/player/PlayerModel.gd.uid",
+    "archived": "deprecated/characters/player/PlayerModel.gd.uid",
+    "sha256_before_move": "0BDC7B8178BA14BF1BB40030FBBA9893295ABFD471AC3E33CD639154AC569EE3",
+    "sha256_archived": "0bdc7b8178ba14bf1bb40030fbba9893295abfd471ac3e33cd639154ac569ee3"
+  },
+  {
+    "original": "characters/player/PlayerModel.tscn",
+    "archived": "deprecated/characters/player/PlayerModel.tscn",
+    "sha256_before_move": "D6E618F64249FAD7036B3D83DAA4B787A204465843869C716FBE36D0CB722BC4",
+    "sha256_archived": "f39fe53eed1602bd8bb73bc488845727e9a2b722489a23f6629b0a1bd0fb1f57"
+  },
+  {
+    "original": "characters/player/PlayerLocomotionLibrary.tres",
+    "archived": "deprecated/characters/player/PlayerLocomotionLibrary.tres",
+    "sha256_before_move": "656C2C82A1BA1FF1F4AF1BA55A880E6FAE16D7DF802F4ACEAB5DCED22939765B",
+    "sha256_archived": "656c2c82a1ba1ff1f4af1ba55a880e6fae16d7df802f4aceab5dced22939765b"
+  },
+  {
+    "original": "characters/player/README.md",
+    "archived": "deprecated/characters/player/README.md",
+    "sha256_before_move": "50C246BA82984A0ED572B341F9B5635E2C0D94F552CAC33F13EE6E1635B604BA",
+    "sha256_archived": "50c246ba82984a0ed572b341f9b5635e2c0d94f552cac33f13ee6e1635b604ba"
+  },
+  {
+    "original": "sprites/characters/placeholder_mage_spritey.png",
+    "archived": "deprecated/sprites/characters/placeholder_mage_spritey.png",
+    "sha256_before_move": "F82393EF32E49FE7A506C341ACD19F0D8F823CD74D00BC33489C76FA6D429A67",
+    "sha256_archived": "f82393ef32e49fe7a506c341acd19f0d8f823cd74d00bc33489c76fa6d429a67"
+  },
+  {
+    "original": "sprites/characters/placeholder_mage_spritey.png.import",
+    "archived": "deprecated/sprites/characters/placeholder_mage_spritey.png.import",
+    "sha256_before_move": "844DF340A28D4D4437117CB7F7D908090F7ADEE09C7D82A57423FDD58EAE9738",
+    "sha256_archived": "844df340a28d4d4437117cb7f7d908090f7adee09c7d82a57423fdd58eae9738"
+  },
+  {
+    "original": "characters/player/CombatAlchemy_Player_32x48_direct_preview.png",
+    "archived": "deprecated/characters/player/CombatAlchemy_Player_32x48_direct_preview.png",
+    "sha256_before_move": "979F21EA5A5FB0CCFFFA85F809BF4DB8FB0508B804E58A28A1D37C36F545AF63",
+    "sha256_archived": "979f21ea5a5fb0ccfffa85f809bf4db8fb0508b804e58a28a1d37c36f545af63"
+  },
+  {
+    "original": "characters/player/CombatAlchemy_Player_32x48_direct_preview.png.import",
+    "archived": "deprecated/characters/player/CombatAlchemy_Player_32x48_direct_preview.png.import",
+    "sha256_before_move": "F0A830A82EF0DFE340CC733546E5C9404C05AD05B5402690D7EF265D6ED320EF",
+    "sha256_archived": "f0a830a82ef0dfe340cc733546e5c9404c05ad05b5402690d7ef265d6ed320ef"
+  },
+  {
+    "original": "characters/player/CombatAlchemy_Player_32x48_direct.png",
+    "archived": "deprecated/characters/player/CombatAlchemy_Player_32x48_direct.png",
+    "sha256_before_move": "58AAB6CEA846D694C92301FCCABD863445312F468085D5792AB986DB29746760",
+    "sha256_archived": "58aab6cea846d694c92301fccabd863445312f468085d5792ab986db29746760"
+  },
+  {
+    "original": "characters/player/CombatAlchemy_Player_32x48_direct.png.import",
+    "archived": "deprecated/characters/player/CombatAlchemy_Player_32x48_direct.png.import",
+    "sha256_before_move": "02C4B4AAF9AFC567539B0C66AEEEE68F3337DF88E2E2BC0828CCCEBF3BB85B38",
+    "sha256_archived": "02c4b4aaf9afc567539b0c66aeeee68f3337df88e2e2bc0828cccebf3bb85b38"
+  },
+  {
+    "original": "characters/player/CombatAlchemy_Player_32x48_fullwidth_preview.png",
+    "archived": "deprecated/characters/player/CombatAlchemy_Player_32x48_fullwidth_preview.png",
+    "sha256_before_move": "FA5799E45BD3B87C26A17BFE991E83285C950284990CFC5165F993EC2DC949CC",
+    "sha256_archived": "fa5799e45bd3b87c26a17bfe991e83285c950284990cfc5165f993ec2dc949cc"
+  },
+  {
+    "original": "characters/player/CombatAlchemy_Player_32x48_fullwidth_preview.png.import",
+    "archived": "deprecated/characters/player/CombatAlchemy_Player_32x48_fullwidth_preview.png.import",
+    "sha256_before_move": "C1F075017E86E0E29255D92B81A03563065BE2BADF525E87C05D4E24A452C0C4",
+    "sha256_archived": "c1f075017e86e0e29255d92b81a03563065be2badf525e87c05d4e24a452c0c4"
+  },
+  {
+    "original": "characters/player/CombatAlchemy_Player_32x48_fullwidth.png",
+    "archived": "deprecated/characters/player/CombatAlchemy_Player_32x48_fullwidth.png",
+    "sha256_before_move": "EB8BA633EA88541A5E40BE13AC56C06AC025843BF0449B0599A721CDFCE77311",
+    "sha256_archived": "eb8ba633ea88541a5e40be13ac56c06ac025843bf0449b0599a721cdfce77311"
+  },
+  {
+    "original": "characters/player/CombatAlchemy_Player_32x48_fullwidth.png.import",
+    "archived": "deprecated/characters/player/CombatAlchemy_Player_32x48_fullwidth.png.import",
+    "sha256_before_move": "34C770590D6FE0A978925518B69815E826E2121D4A8C67843761C8A92881BEBD",
+    "sha256_archived": "34c770590d6fe0a978925518b69815e826e2121d4a8c67843761c8a92881bebd"
+  },
+  {
+    "original": "tests/PlayerModelTests.gd",
+    "archived": "deprecated/tests/PlayerModelTests.gd",
+    "sha256_archived": "e5c0b5030834bfec4d59888a33a50d4682ed81a8076a1a823fa93c1da3f70d68"
+  }
+]

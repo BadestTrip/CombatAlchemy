@@ -75,12 +75,10 @@ The following images were generated specifically as CombatAlchemy concept
 references. They are not production-ready assets. Rebuild final UI, sprites,
 effects, and environments for their actual in-engine requirements.
 
-The active Player still uses the 15-bone geometric `PlayerModel` and four authored
-facings. Its approved replacement is one full-body pixel sheet, not separate
-joint parts. Preserve the public movement/facing/socket contract while replacing
-the visual internals. Keep hands empty in the frames so the separate physical
-potion remains visible only when held. The current and planned workflows are
-separated in the [PlayerModel guide](../characters/player/README.md).
+The active Player and workshop now use the [Researcher 01 pixel model](../characters/player/README.md),
+with independently authored facings and per-frame hand sockets. The held bottle
+remains separate. The historical images below remain references, not active atlases.
+The old skeletal model is retained under `deprecated/`.
 
 ### G01: Gameplay North Star
 
@@ -198,7 +196,7 @@ Avoid: photorealism, glossy 3D, anime, cel shading, heroic power pose, wizard st
 **Production observations**
 
 - G06 is a costume/mood reference, not a new pixel approval or active atlas brief.
-- The current compact workshop remains skeletal pending sprite-sheet conversion.
+- The workshop now displays the same Researcher 01 sprite model used by combat.
 - Prioritize the gameplay-scale silhouette over painted texture or equipment density.
 - Preserve four separate facings, positive scale, phase, and socket lookup as
   documented in the [PlayerModel guide](../characters/player/README.md), not the

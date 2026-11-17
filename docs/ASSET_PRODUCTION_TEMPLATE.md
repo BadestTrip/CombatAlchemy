@@ -3,6 +3,7 @@
 > Approved in conversation; saved 2026-11-17. Source of truth for new sprite requests.
 > Creative companion: [Style and Vision](./STYLE_AND_VISION.md).
 > First delivered asset: [Tube 01](../sprites/potions/tube_01/README.md).
+> Hero sprite reference: [Researcher 01](../sprites/characters/researcher_01/README.md) — hood, gas mask, white headlamp, backpack; replaces broad-brimmed-hat guidance for new hero art.
 
 ## Reusable request
 
@@ -40,8 +41,8 @@ Project canvas: **1920 x 1080**, nearest filtering. Character cell: **64 x 80**;
 full character sheet: **384 x 320**. Four rows: front, back, side_left, side_right;
 six columns: two idle then four walk frames. Idle loop 1.6 s, walk loop 0.72 s.
 Stable feet and per-frame left/right hand markers. No mirroring, baked held bottle,
-frame interpolation or changes to gameplay timing. Review the character at 2x;
-this is a display proposal, not an approved physics/camera conversion.
+frame interpolation or changes to gameplay timing. The active character displays at 2x with the previous ground alignment.
+Physics and camera coordinates are unchanged.
 
 Small world props default to 32 x 32; medium props 64 x 64; UI icons 32 x 32.
 Large props and VFX use explicit player-relative dimensions. Fullscreen menu

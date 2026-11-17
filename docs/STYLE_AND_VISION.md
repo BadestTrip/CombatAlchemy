@@ -41,7 +41,7 @@ composition and world pixel scale remain open; the asset standard now fixes
 
 This is an approved direction under staged implementation. The active main menu
 now uses a native `1920 x 1080` animated pixel-art laboratory with scene-authored
-text and inline settings. Combat still uses the compact skeletal PlayerModel and mostly geometric assets,
+text and inline settings. Combat now uses the Researcher 01 pixel sprite model alongside mostly geometric environment assets,
 with tube-01 PNG visuals for the physical potion and mixer. The four researcher facings and `640 x 360` main-menu sample in the
 [pixel-art approval pack](./pixel_art_samples/README.md) were explicitly approved
 on 2026-09-12. The menu sample is now composition reference only, not a runtime
@@ -262,7 +262,7 @@ The distinction in this table is mandatory in planning and communication.
 | Area | Current prototype | Intended direction |
 | --- | --- | --- |
 | Entry flow | Main Menu Play loads one persistent profile and opens a potion combat sandbox | Main Menu leads to a refuge and expedition cycle |
-| Player | Movable 15-bone geometric-placeholder `PlayerModel`, following camera, four positive-scale facings, and hand sockets used by the held potion | Compact full-body pixel frames with the same motion/facing/socket API; broad hat, obscured face, and practical equipment; 64 x 80 cells under the asset standard; composition review remains pending |
+| Player | Movable Researcher 01 pixel `PlayerModel`, following camera, four positive-scale facings, and hand sockets used by the held potion | Compact full-body pixel frames with the same motion/facing/socket API; hood, gas mask, white headlamp and practical equipment; 64 x 80 cells under the asset standard; composition review remains pending |
 | Encounters | Pursuer and Skirmisher enemy archetypes alongside health-bearing test actors; see the technical companion for current behavior | Expand readable perception, hazard awareness, and alchemical responses after the current behaviors are proven |
 | Mixing | Three owned RGB layers and count-based health, damage, and slow recipes; additions reserve stock, successful preparation spends it, and hold/release controls the reaction | Learnable dust properties and authored reactions; tune short field brewing before staged laboratory procedures. The candidate RGB table below is not implemented |
 | Vessels | One mixer limited to three ingredient units | Small, larger, and eventually advanced brewing apparatus gates capacity and recipe complexity; sizes and yields are not fixed |
@@ -601,12 +601,18 @@ document update does not change runtime resources.
 
 ### The Researcher
 
+The new [Researcher 01 sprite asset](../sprites/characters/researcher_01/README.md)
+uses the user-supplied hood, gas mask, white headlamp and backpack reference.
+This supersedes the broad-hat identity for new hero sprites; historical reference
+records remain unchanged. The 24-frame asset is active in combat and workshop, using the same gameplay
+interface and per-frame hand markers.
+
 The researcher should read as a practical occult scholar before reading as a
 warrior:
 
 - a strong asymmetrical silhouette;
 - a compact weathered coat, apron, or traveling mantle with a readable hem;
-- a broad hat, hood, or raised collar that partially obscures the face;
+- a stitched hood/cap and two-lens gas mask, with a restrained grayscale headlamp;
 - a few readable equipment clusters suggesting glassware, a satchel, and gloves;
 - a visible hand marker for the separate held potion, with no bottle baked into
   the character frames;
@@ -617,7 +623,7 @@ Avoid staffs, glowing hands, ornate armor, oversized weapons, and generic wizard
 stars. The researcher manipulates substances and apparatus, not free-floating
 magic.
 
-At gameplay scale, the hat or shoulder line, coat hem, and flask arm should form
+At gameplay scale, the hood/mask/headlamp silhouette, coat hem, and flask arm should form
 the three fastest recognition points.
 
 Readability at the approved gameplay scale takes precedence over copying every
@@ -1034,11 +1040,11 @@ Friend or Foe.
 
 ### Animation
 
-**Current:** the compact 15-bone `PlayerModel` uses authored idle/walk facings at
-positive scale. The physical held flask follows the animated right-hand socket.
+**Current:** the Researcher 01 `PlayerModel` uses discrete idle/walk sprite facings
+at positive 2x scale, with phase-preserving turns. The physical held flask follows the animated right-hand socket.
 There are no drink/throw/hit clips or animation-delayed potion effects.
 
-**Intended replacement:** one full-body sprite sheet, not a new body-part atlas.
+**Implemented presentation:** one full-body sprite sheet, with exportable socket data.
 The earlier approval sheet remains a proportion/facing reference; its exact cell
 and sheet sizes are no longer production requirements.
 
@@ -1055,8 +1061,8 @@ and sheet sizes are no longer production requirements.
 
 Keep the model's public motion, facing, speed, reset, socket, and signal contract
 so gameplay does not depend on whether its internals are bones or sprite frames.
-The workshop will show frame bounds/socket guides instead of bones. Keep a
-compatibility wrapper for the current debug method during the migration.
+The workshop shows frame bounds/socket guides. The former bone-debug method
+remains available as a compatibility wrapper.
 
 Sparse frames reduce drawing cost, but bad contacts, shifting feet, and inconsistent
 anatomy are not acceptable tradeoffs. Review the complete loop at native size.
@@ -1585,16 +1591,16 @@ Use each reference only for the qualities named below.
 | `mainmenu/MainMenuBackdrop.tscn` and `sprites/main_menu/animated/` | Active menu composition, grayscale value hierarchy, integer ambient motion, and focused reagent color | Gameplay camera, character scale, terrain density, or flask dimensions |
 | `combat/ui/FlaskView.tscn` and `combat/ui/PotionMixerUI.tscn` | Flask-first interaction, liquid layers, and bottom-center composition | Current dimensions, polygons, tweens, or button style as immutable presentation |
 | `docs/ART_REF_G06_RESEARCHER_CUTOUT_TARGET.png` | Historically approved hat, obscured face, coat, and practical equipment | Approval of a new pixel sample, detailed cutout atlases, texture, or exact anatomy |
-| `characters/player/PlayerModel.tscn` | Current four-facing motion/socket contract and shared combat/workshop boundary | Its 15-bone internals as a requirement of the new sprite-sheet model |
-| `characters/player/README.md` | Current implementation, planned frame workflow, API, and workshop checks | A claim that planned pixel APIs or assets are already present |
+| `characters/player/PlayerModel.tscn` | Current four-facing motion/socket contract and shared combat/workshop boundary | Archived skeletal internals as requirements for the active sprite model |
+| `characters/player/README.md` | Current sprite implementation, frame/socket workflow, API, and workshop checks | A claim that planned pixel APIs or assets are already present |
 | `extra/ink_wash_shader_done.gdshader` | Current reveal timing and scene-change language | Smooth full-resolution treatment as a final pixel effect or permanent gameplay overlay |
 | `docs/PROJECT_ARCHITECTURE.md` | Current technical ownership and implemented behavior | Creative or visual direction beyond its factual description |
 
 The current target sprites, placeholders, arena, UI, logo files, and legacy assets
 are not automatic style targets because they remain in the repository. Retain
 existing source art and music, but use the new pixel sample approval to establish
-production appearance. The active PlayerModel still uses geometric skeletal
-placeholders pending the approved full-body sprite-sheet conversion.
+production appearance. The active PlayerModel now uses the Researcher 01 sprite
+sheet; the former skeletal model is archived in `deprecated/`.
 When an existing asset conflicts with this document, retain only the explicitly
 approved quality until a replacement is produced.
 

@@ -1,146 +1,62 @@
 # PlayerModel
 
-> Asset standard update (2026-11-17): [Production template](../../docs/ASSET_PRODUCTION_TEMPLATE.md). New character cells are 64 x 80 (384 x 320 sheet). Vessel 1 is delivered at 8 x 20 world / 16 x 32 UI; its PNG glass and masked contents replace the geometric bottle and mixer shell. Historical samples retain their original dimensions. Gameplay composition and camera conversion remain pending.
+> Updated: 2026-11-17. Current runtime: Researcher 01 pixel sprite model.
+> [Asset package](../../sprites/characters/researcher_01/README.md) |
+> [Production standard](../../docs/ASSET_PRODUCTION_TEMPLATE.md) |
+> [Archived model](../../deprecated/README.md)
 
-> Reviewed: 2026-09-12. Current runtime: compact 15-bone geometric model.
-> Approved replacement: full-body pixel sprite sheets, not implemented yet.
-> [Architecture](../../docs/PROJECT_ARCHITECTURE.md) |
-> [Style and Vision](../../docs/STYLE_AND_VISION.md) |
-> [Pixel-Art Conversion Plan](../../docs/superpowers/plans/2026-09-12-pixel-art-conversion.md)
+`PlayerModel.tscn` is the shared presentation scene used by CombatScene's PlayerActor
+and the model workshop. AnimatedSprite2D plays the eight animations in
+`Researcher01Frames.tres`; the exportable `Researcher01Data.tres` supplies the pivot
+and per-frame anatomical hand positions. Runtime loading does not depend on JSON.
 
-`PlayerModel.tscn` is the shared player presentation scene used by combat and the
-workshop. It does not own gameplay: callers supply world velocity, read facing
-and locomotion state, and resolve stable hand sockets. The current physical
-potion attaches to `hand_right` and follows that animated marker.
+## Stable public interface
 
-`PlayerModelWorkshop.tscn` is an isolated Play Current Scene workshop. Its
-`WorkshopActor` owns movement, collision, and camera; the model remains
-presentation-only. The workshop is not registered in `project.godot` and must
-not become a gameplay dependency. It will continue to use the same model after
-the approved visual conversion, not a second experimental rig.
+- `set_motion(velocity: Vector2)`: idle/walk and velocity-derived facing.
+- `set_facing_direction(direction: Vector2) -> bool`: explicit facing, rejects zero.
+- `reset_to_idle()`: front idle at frame zero, preserving playback speed.
+- `set_playback_speed(multiplier: float)`: clamp 0.25 through 2.0.
+- `get_facing()`, `get_locomotion_state()`: current facing and idle/walk state.
+- `get_socket(socket_id: StringName) -> Marker2D`: `hand_left` / `hand_right` or null.
+- `set_debug_guides_visible(bool)`: frame bounds, ground pivot and hand crosshairs.
+- `set_debug_bones_visible(bool)`: compatibility alias for the guides method.
+- Signals `facing_changed` and `locomotion_changed` fire only on actual changes.
 
-## Stable Public Interface
+## Animation and alignment
 
-| Current method or signal | Responsibility |
-| --- | --- |
-| `set_motion(velocity: Vector2)` | Select locomotion and facing from actual movement. |
-| `set_facing_direction(direction: Vector2) -> bool` | Request facing; reject near-zero direction without changing it. |
-| `reset_to_idle()` | Restore the model's idle state. |
-| `set_playback_speed(multiplier: float)` | Clamp playback to 0.25-2.0. |
-| `set_debug_bones_visible(is_visible: bool)` | Toggle the current bone overlay. |
-| `get_facing() -> StringName` | Return front, back, side_left, or side_right. |
-| `get_locomotion_state() -> StringName` | Return idle or walk. |
-| `get_socket(socket_id: StringName) -> Marker2D` | Resolve hand_left or hand_right without exposing bone paths. |
-| `facing_changed(facing: StringName)` | Report an actual facing change. |
-| `locomotion_changed(state: StringName)` | Report an actual idle/walk change. |
+Four separately drawn facings: front, back, side_left, side_right. No negative scale,
+flipping, blending, bone animation or action delays. Direction selection uses the
+previous dominant-axis family with 0.10 hysteresis; stopping retains facing.
+Turns preserve the current frame and fractional frame progress. Changing between
+idle and walk resets to the first frame of the new cycle. Idle is two frames over
+1.6 seconds; walk is four frames over 0.72 seconds.
 
-The conversion preserves these interfaces. It plans a new
-`set_debug_guides_visible()` method, with `set_debug_bones_visible()` retained as
-a compatibility wrapper. The new guide method does not exist yet.
+Source cells are 64 x 80, displayed at 2x. Sprite offset is (-32,-74), centered=false.
+`FacingRoot.position.y = 38` preserves the old rig's ground level and alignment with
+the existing collision capsule. The camera, movement, collisions, health and aim
+coordinates are unchanged.
 
-## Current Bone Tree
+`HandSocket_L` and `HandSocket_R` are stable siblings of the sprite under FacingRoot,
+not children of the scaled sprite. Their positions are `(native_hand - pivot) * 2`.
+This prevents held bottles from inheriting the character's 2x display scaling.
+Metadata controls hand z-order: rear/occluded hands behind the sprite, visible
+hands in front. Frame and animation changes synchronously update both markers.
+Consumers use `get_socket()`; no internal node paths are part of the gameplay API.
 
-The authored skeleton contains exactly 15 bones:
+## Workshop and verification
 
-```text
-Root
-|- Torso
-|  |- Head
-|  |- UpperArm_L
-|  |  `- Forearm_L
-|  |     `- Hand_L
-|  `- UpperArm_R
-|     `- Forearm_R
-|        `- Hand_R
-|- Thigh_L
-|  `- Shin_L
-|     `- Foot_L
-`- Thigh_R
-   `- Shin_R
-      `- Foot_R
-```
+Run `PlayerModelWorkshop.tscn` with Play Current Scene. It uses this same model,
+one movement owner, unchanged room/walls/collision and a following camera. The
+`GUIDES` checkbox toggles bounds and hand markers; no production-only rig exists.
 
-The stable socket IDs are:
+`PlayerModelTests` checks sprite resources, every frame/socket, held-bottle scale,
+depth, phase preservation, hysteresis, speed clamps and signal/debug compatibility.
+Workshop, player actor, potion use and collection tests preserve gameplay coverage.
 
-- `hand_left` -> `Hand_L/HandSocket_L`
-- `hand_right` -> `Hand_R/HandSocket_R`
+## Retired files
 
-Consumers must resolve sockets with `get_socket()` rather than depending on the internal node paths.
-
-## Current Facing Clips
-
-The four authored facings are `front`, `back`, `side_left`, and `side_right`. Each has an idle and walk clip:
-
-- `idle_front`, `idle_back`, `idle_side_left`, `idle_side_right`
-- `walk_front`, `walk_back`, `walk_side_left`, `walk_side_right`
-
-Left and right are separately authored. Do not mirror `FacingRoot` or any sprite replacement with negative scale.
-
-The current clips live in `PlayerLocomotionLibrary.tres` and are driven by the
-scene's `AnimationPlayer` and `AnimationTree`. Direction uses dominant-axis
-selection with 0.10 hysteresis. Zero motion retains facing. Potion drinking,
-throwing, and placing are immediate; the model has no action-timing clips.
-
-## Current-Rig Maintenance Only
-
-Until conversion, bone/rest paths remain current test dependencies. A temporary
-body-part replacement must keep its pivot at the controlling joint and overlap
-shoulders, elbows, wrists, hips, knees, and ankles through the motion range.
-This explains how to maintain the existing rig; it is **not** the new art
-production brief. Do not commission more articulated cutout atlases for the
-approved pixel direction.
-
-## Planned Pixel-Sheet Workflow
-
-1. Approve four neutral researcher facings at native size and integer enlargement,
-   together with gameplay and main-menu compositions. Old G06 approval is not
-   approval of these new pixel samples.
-2. Clean art to **64 x 80** cells using the agreed eight-value grayscale ramp.
-   Keep the broad hat, obscured face, compact coat, equipment silhouette, and
-   both hands empty. The live potion entity provides the bottle.
-3. Produce a **384 x 320** full-body sheet with four rows and six cells per row.
-   Use front, back, side-left, side-right rows; each has two idle frames followed
-   by four alternating contact/passing walk frames. Keep the feet at one stable
-   per-cell pivot and preserve anatomical left/right through all rows.
-4. Replace model internals with `Sprite2D` and native `AnimationPlayer` tracks.
-   Idle is 1.6 seconds; walk is 0.72 seconds. Select discrete frames, preserve
-   gait phase on turns, and do not mirror, interpolate, or stretch drawings.
-5. Author left/right hand marker positions per frame. Continue resolving them
-   through `get_socket()`. The same `PotionEntity` must follow the correct hand
-   without duplicating a bottle in the art.
-6. Convert the workshop's bone overlay into frame bounds/socket guides and
-   update structure-specific tests. Retain the same movement room and public
-   motion/facing contract.
-
-Rendering retains the 1920 x 1080 canvas and nearest sampling. Review the new
-64 x 80 cells at 2x before gameplay conversion. This does not prescribe camera
-zoom or world units. Preserve physics and existing ground alignment.
-
-No action clips, delays, bone animation, IK, or new gameplay mechanics belong to
-this sheet pass. Approve readable native-scale animation before adding frames.
-
-## Current Workshop Checks
-
-Play `PlayerModelWorkshop.tscn` with Play Current Scene. Bone indicators start
-off and respond to the `BONES` CheckButton. Exercise all eight movement directions:
-
-- up, down, left, and right
-- up-left, up-right, down-left, and down-right
-
-Verify that the actor stays inside all four walls, the camera follows without
-smoothing, idle resumes on stopping, and each diagonal selects the expected
-authored facing without mirroring. These describe the current skeletal lab.
-
-## Conversion Acceptance Checks
-
-These checks are planned, not reported as passed by this documentation update:
-
-- Native and enlarged frames use one pixel grid, clean alpha, and stable feet.
-- Idle/walk turns retain phase, side changes never mirror, and speed clamps hold.
-- Frame/socket guides toggle; hand-left/right IDs remain stable.
-- The held bottle tracks every facing/frame in combat, with immediate potion use.
-- Movement speed, body collision, camera following, and target health are unchanged.
-- Gameplay and workshop fit 1280 x 720, 1920 x 1080, 2560 x 1440, and 1366 x 768
-  windows with integer scaling and letterboxing rather than resampled pixels.
-- Run model, workshop, actor, and all potion suites listed in the architecture
-  guide. Replace bone-only assertions, not gameplay safety checks.
+The old 15-bone scene/script, locomotion AnimationLibrary, two 32x48 prototype
+images with their previews/import metadata, old unused mage placeholder and former
+bone-specific test script are under `deprecated/`. `.gdignore` excludes that archive
+from Godot imports and exports. See its manifest for original and archived paths.
+The shared overworld image used by Friend and Pursuer remains an active asset.

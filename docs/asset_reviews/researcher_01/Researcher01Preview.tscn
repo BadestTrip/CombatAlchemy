@@ -1,0 +1,157 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://sprites/characters/researcher_01/Researcher01Frames.tres" id="1"]
+
+[node name="Researcher01Preview" type="Node2D"]
+
+[node name="Backdrop" type="ColorRect" parent="."]
+z_index = -10
+offset_right = 2400.0
+offset_bottom = 1400.0
+mouse_filter = 2
+color = Color(0.156863, 0.156863, 0.156863, 1)
+
+[node name="idle_front" type="AnimatedSprite2D" parent="."]
+position = Vector2(170, 270)
+scale = Vector2(3, 3)
+texture_filter = 1
+sprite_frames = ExtResource("1")
+animation = &"idle_front"
+autoplay = "idle_front"
+centered = false
+offset = Vector2(-32, -74)
+
+[node name="idle_front_label" type="Label" parent="."]
+offset_left = 70.0
+offset_right = 270.0
+offset_top = 290.0
+offset_bottom = 320.0
+text = "idle_front"
+horizontal_alignment = 1
+
+[node name="idle_back" type="AnimatedSprite2D" parent="."]
+position = Vector2(470, 270)
+scale = Vector2(3, 3)
+texture_filter = 1
+sprite_frames = ExtResource("1")
+animation = &"idle_back"
+autoplay = "idle_back"
+centered = false
+offset = Vector2(-32, -74)
+
+[node name="idle_back_label" type="Label" parent="."]
+offset_left = 370.0
+offset_right = 570.0
+offset_top = 290.0
+offset_bottom = 320.0
+text = "idle_back"
+horizontal_alignment = 1
+
+[node name="idle_side_left" type="AnimatedSprite2D" parent="."]
+position = Vector2(770, 270)
+scale = Vector2(3, 3)
+texture_filter = 1
+sprite_frames = ExtResource("1")
+animation = &"idle_side_left"
+autoplay = "idle_side_left"
+centered = false
+offset = Vector2(-32, -74)
+
+[node name="idle_side_left_label" type="Label" parent="."]
+offset_left = 670.0
+offset_right = 870.0
+offset_top = 290.0
+offset_bottom = 320.0
+text = "idle_side_left"
+horizontal_alignment = 1
+
+[node name="idle_side_right" type="AnimatedSprite2D" parent="."]
+position = Vector2(1070, 270)
+scale = Vector2(3, 3)
+texture_filter = 1
+sprite_frames = ExtResource("1")
+animation = &"idle_side_right"
+autoplay = "idle_side_right"
+centered = false
+offset = Vector2(-32, -74)
+
+[node name="idle_side_right_label" type="Label" parent="."]
+offset_left = 970.0
+offset_right = 1170.0
+offset_top = 290.0
+offset_bottom = 320.0
+text = "idle_side_right"
+horizontal_alignment = 1
+
+[node name="walk_front" type="AnimatedSprite2D" parent="."]
+position = Vector2(170, 590)
+scale = Vector2(3, 3)
+texture_filter = 1
+sprite_frames = ExtResource("1")
+animation = &"walk_front"
+autoplay = "walk_front"
+centered = false
+offset = Vector2(-32, -74)
+
+[node name="walk_front_label" type="Label" parent="."]
+offset_left = 70.0
+offset_right = 270.0
+offset_top = 610.0
+offset_bottom = 640.0
+text = "walk_front"
+horizontal_alignment = 1
+
+[node name="walk_back" type="AnimatedSprite2D" parent="."]
+position = Vector2(470, 590)
+scale = Vector2(3, 3)
+texture_filter = 1
+sprite_frames = ExtResource("1")
+animation = &"walk_back"
+autoplay = "walk_back"
+centered = false
+offset = Vector2(-32, -74)
+
+[node name="walk_back_label" type="Label" parent="."]
+offset_left = 370.0
+offset_right = 570.0
+offset_top = 610.0
+offset_bottom = 640.0
+text = "walk_back"
+horizontal_alignment = 1
+
+[node name="walk_side_left" type="AnimatedSprite2D" parent="."]
+position = Vector2(770, 590)
+scale = Vector2(3, 3)
+texture_filter = 1
+sprite_frames = ExtResource("1")
+animation = &"walk_side_left"
+autoplay = "walk_side_left"
+centered = false
+offset = Vector2(-32, -74)
+
+[node name="walk_side_left_label" type="Label" parent="."]
+offset_left = 670.0
+offset_right = 870.0
+offset_top = 610.0
+offset_bottom = 640.0
+text = "walk_side_left"
+horizontal_alignment = 1
+
+[node name="walk_side_right" type="AnimatedSprite2D" parent="."]
+position = Vector2(1070, 590)
+scale = Vector2(3, 3)
+texture_filter = 1
+sprite_frames = ExtResource("1")
+animation = &"walk_side_right"
+autoplay = "walk_side_right"
+centered = false
+offset = Vector2(-32, -74)
+
+[node name="walk_side_right_label" type="Label" parent="."]
+offset_left = 970.0
+offset_right = 1170.0
+offset_top = 610.0
+offset_bottom = 640.0
+text = "walk_side_right"
+horizontal_alignment = 1
+
