@@ -1,0 +1,42 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://combat/ui/BrewingAudioFeedback.gd" id="1"]
+[ext_resource type="AudioStream" path="res://audio/sfx/brewing/fire_loop.wav" id="2"]
+[ext_resource type="AudioStream" path="res://audio/sfx/brewing/boil_loop.wav" id="3"]
+[ext_resource type="AudioStream" path="res://audio/sfx/brewing/release_bad.wav" id="4"]
+[ext_resource type="AudioStream" path="res://audio/sfx/brewing/release_normal.wav" id="5"]
+[ext_resource type="AudioStream" path="res://audio/sfx/brewing/release_perfect.wav" id="6"]
+[ext_resource type="AudioStream" path="res://audio/sfx/brewing/perfect_brew.wav" id="7"]
+
+[node name="BrewingAudioFeedback" type="Node"]
+script = ExtResource("1")
+
+[node name="FireLoop" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2")
+volume_db = -16.0
+bus = &"SFX"
+
+[node name="BoilLoop" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3")
+volume_db = -16.0
+bus = &"SFX"
+
+[node name="ReleaseBad" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4")
+volume_db = -8.0
+bus = &"SFX"
+
+[node name="ReleaseNormal" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5")
+volume_db = -7.0
+bus = &"SFX"
+
+[node name="ReleasePerfect" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6")
+volume_db = -5.0
+bus = &"SFX"
+
+[node name="PerfectBrew" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7")
+volume_db = -4.0
+bus = &"SFX"

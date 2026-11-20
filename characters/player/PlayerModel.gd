@@ -71,12 +71,12 @@ func set_playback_speed(multiplier: float) -> void:
 	if _sprite != null:
 		_sprite.speed_scale = clampf(multiplier, MIN_PLAYBACK_SPEED, MAX_PLAYBACK_SPEED)
 
-func set_debug_guides_visible(is_visible: bool) -> void:
-	if _guides != null: _guides.visible = is_visible
+func set_debug_guides_visible(show_guides: bool) -> void:
+	if _guides != null: _guides.visible = show_guides
 
 ## Compatibility alias for existing callers.
-func set_debug_bones_visible(is_visible: bool) -> void:
-	set_debug_guides_visible(is_visible)
+func set_debug_bones_visible(show_bones: bool) -> void:
+	set_debug_guides_visible(show_bones)
 
 func get_facing() -> StringName:
 	return _facing

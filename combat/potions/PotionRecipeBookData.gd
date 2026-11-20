@@ -16,7 +16,7 @@ func find_match(layers: Array[StringName]) -> PotionRecipeData:
 
 ## Resolves one stable saved recipe ID, rejecting missing and ambiguous IDs.
 func find_by_id(recipe_id: StringName) -> PotionRecipeData:
-	var matched: PotionRecipeData
+	var matched: PotionRecipeData = null
 	for recipe in recipes:
 		if recipe != null and recipe.recipe_id == recipe_id:
 			if matched != null:

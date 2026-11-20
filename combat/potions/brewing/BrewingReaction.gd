@@ -1,25 +1,34 @@
 class_name BrewingReaction
 extends Node
 
-# Responsibility: Simulate small-flask reaction progress and energy without recipe or UI knowledge.
+# Responsibility: Simulate two boiling checks independently of recipes, input and UI.
 
-enum State { IDLE, AGITATING, SETTLING, COOLDOWN, COMPLETED }
+enum State { IDLE, HEATING, RESETTING, COMPLETED }
 
 signal state_changed(state: State)
-signal reaction_changed(progress: float, energy: float, predicted_settled_progress: float)
-signal completed
-signal overreacted
-signal recovered
+signal reaction_changed(height: float, power: float, blend: float)
+signal check_completed(index: int, score: int)
+signal completed(score: int)
 
-## Timing and threshold values for this vessel.
 @export var profile: BrewingProfileData
 
-const COMPARISON_EPSILON := 0.00001
+const CHECK_COUNT := 2
+const TIME_EPSILON := 0.000000000001
+const BLEND_HEIGHT := 0.7
+const UNFINISHED_BLEND_MAX := 0.999999
 
 var _state := State.IDLE
 var _progress := 0.0
-var _energy := 0.0
-var _cooldown_remaining := 0.0
+var _heat_power := 0.5
+var _heat_enabled := true
+var _suspended := false
+var _cycle_index := 0
+var _quality_score := 0
+var _blend_progress := 0.0
+var _results: Array[int] = []
+var _reset_elapsed := 0.0
+var _reset_start_height := 0.0
+var _reset_start_blend := 0.0
 
 
 func _ready() -> void:
@@ -32,61 +41,95 @@ func _process(delta: float) -> void:
 	advance(delta)
 
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		release_agitation()
-
-
-## Starts or resumes agitation from an idle or settling reaction.
-func start_agitation() -> bool:
-	if not _has_valid_profile() or _state not in [State.IDLE, State.SETTLING]:
+func start() -> bool:
+	if _suspended or _state != State.IDLE or not _has_valid_profile():
 		return false
-	_set_state(State.AGITATING)
+	_set_state(State.HEATING)
 	_emit_reaction_changed()
 	return true
 
 
-## Stops adding energy while preserving the reaction's residual motion.
-func release_agitation() -> void:
-	if _state != State.AGITATING:
+func release_pressure() -> bool:
+	if _suspended or _state != State.HEATING or not _has_valid_profile():
+		return false
+	_finish_check(_score_height())
+	return true
+
+
+func set_heat_power(power: float) -> void:
+	if not is_finite(power):
 		return
-	if _energy <= COMPARISON_EPSILON:
-		_energy = 0.0
-		_set_state(State.IDLE)
-	else:
-		_set_state(State.SETTLING)
+	var normalized := clampf(power, 0.0, 1.0)
+	if _heat_power == normalized:
+		return
+	_heat_power = normalized
 	_emit_reaction_changed()
 
 
-## Advances simulation using exact linear integration for energy changes.
+func set_heat_enabled(enabled: bool) -> void:
+	if _heat_enabled == enabled:
+		return
+	_heat_enabled = enabled
+	_emit_reaction_changed()
+
+
+func is_heat_enabled() -> bool:
+	return _heat_enabled
+
+
+func set_suspended(suspended: bool) -> void:
+	_suspended = suspended
+
+
+## Consume time up to each transition, then carry the remainder into the next state.
 func advance(delta: float) -> void:
-	if delta <= 0.0 or not _has_valid_profile():
+	if _suspended or not is_finite(delta) or delta <= 0.0 or not _has_valid_profile():
 		return
 	var remaining := delta
-	var transition_guard := 0
-	while remaining > COMPARISON_EPSILON and transition_guard < 8:
-		var previous_state := _state
-		var consumed := 0.0
+	while remaining > 0.0 and not _suspended:
 		match _state:
-			State.AGITATING:
-				consumed = _advance_agitation(remaining)
-			State.SETTLING:
-				consumed = _advance_settling(remaining)
-			State.COOLDOWN:
-				consumed = _advance_cooldown(remaining)
+			State.HEATING:
+				if not _heat_enabled or _heat_power == 0.0:
+					break
+				var rate := profile.rise_rate * _heat_power
+				var until_overflow := (1.0 - _progress) / rate
+				var consumed := minf(remaining, until_overflow)
+				_progress = minf(1.0, _progress + rate * consumed)
+				remaining = maxf(0.0, remaining - consumed)
+				_update_heating_blend()
+				if consumed + TIME_EPSILON >= until_overflow:
+					_progress = 1.0
+					_finish_check(-1)
+				else:
+					_emit_reaction_changed()
+			State.RESETTING:
+				var until_reset := maxf(0.0, profile.reset_duration - _reset_elapsed)
+				var consumed := minf(remaining, until_reset)
+				_reset_elapsed += consumed
+				remaining = maxf(0.0, remaining - consumed)
+				if consumed + TIME_EPSILON >= until_reset:
+					_finish_reset()
+				else:
+					var fraction := _reset_elapsed / profile.reset_duration
+					var eased := fraction * fraction * (3.0 - 2.0 * fraction)
+					_progress = _reset_start_height * (1.0 - eased)
+					var target_blend := float(_cycle_index + 1) / CHECK_COUNT
+					_raise_blend(lerpf(_reset_start_blend, target_blend, eased))
+					_emit_reaction_changed()
 			_:
 				break
-		remaining -= consumed
-		transition_guard += 1
-		if consumed <= COMPARISON_EPSILON and _state == previous_state:
-			break
 
 
-## Clears all unfinished reaction state.
+## Clear this brew, retaining the user's power setting and external suspension state.
 func cancel() -> void:
 	_progress = 0.0
-	_energy = 0.0
-	_cooldown_remaining = 0.0
+	_cycle_index = 0
+	_quality_score = 0
+	_blend_progress = 0.0
+	_results.clear()
+	_reset_elapsed = 0.0
+	_reset_start_height = 0.0
+	_reset_start_blend = 0.0
 	_set_state(State.IDLE)
 	_emit_reaction_changed()
 
@@ -99,162 +142,69 @@ func get_progress() -> float:
 	return _progress
 
 
-func get_energy() -> float:
-	return _energy
+func get_heat_power() -> float:
+	return _heat_power
 
 
-## Predicts the settled progress from current energy using the same linear model as advance().
-func get_predicted_settled_progress() -> float:
-	if not _has_valid_profile():
-		return _progress
-	var remaining_progress := (
-		profile.progress_rate
-		* _energy
-		* _energy
-		* profile.energy_dissipation_time
-		* 0.5
-	)
-	return _progress + remaining_progress
+func get_cycle_index() -> int:
+	return _cycle_index
+
+
+func get_quality_score() -> int:
+	return _quality_score
+
+
+func get_blend_progress() -> float:
+	return _blend_progress
+
+
+func get_results() -> Array[int]:
+	return _results.duplicate()
 
 
 func is_editable() -> bool:
 	return _state == State.IDLE
 
 
-func _advance_agitation(delta: float) -> float:
-	var remaining := delta
-	var consumed := 0.0
-	if _energy < 1.0:
-		var ramp_duration := minf(remaining, (1.0 - _energy) * profile.energy_ramp_time)
-		var ramp_gain := _get_ramp_up_progress(ramp_duration)
-		if _would_overreact(ramp_gain):
-			var crossing_time := _get_ramp_up_time_to_progress(_overreaction_progress_remaining())
-			_progress += _get_ramp_up_progress(crossing_time)
-			_energy = minf(1.0, _energy + crossing_time / profile.energy_ramp_time)
-			_begin_overreaction()
-			return crossing_time
-		_progress += ramp_gain
-		_energy = minf(1.0, _energy + ramp_duration / profile.energy_ramp_time)
-		remaining -= ramp_duration
-		consumed += ramp_duration
-	if remaining > 0.0:
-		var steady_gain := profile.progress_rate * _energy * remaining
-		if _would_overreact(steady_gain):
-			var crossing_time := _overreaction_progress_remaining() / (profile.progress_rate * _energy)
-			_progress += profile.progress_rate * _energy * crossing_time
-			_begin_overreaction()
-			return consumed + crossing_time
-		_progress += steady_gain
-		consumed += remaining
+func _score_height() -> int:
+	return profile.score_height(_progress)
+
+
+func _finish_check(score: int) -> void:
+	var index := _cycle_index
+	_results.append(score)
+	_quality_score += score
+	_reset_elapsed = 0.0
+	_reset_start_height = _progress
+	_reset_start_blend = _blend_progress
+	_set_state(State.RESETTING)
 	_emit_reaction_changed()
-	return consumed
+	check_completed.emit(index, score)
+	if _state == State.RESETTING and profile.reset_duration == 0.0:
+		_finish_reset()
 
 
-func _advance_settling(delta: float) -> float:
-	var active_duration := minf(delta, _energy * profile.energy_dissipation_time)
-	if active_duration <= COMPARISON_EPSILON:
-		_energy = 0.0
-		_finish_settling()
-		return 0.0
-	var settling_gain := _get_settling_progress(active_duration)
-	if _would_overreact(settling_gain):
-		var crossing_time := _get_settling_time_to_progress(_overreaction_progress_remaining())
-		_progress += _get_settling_progress(crossing_time)
-		_energy = maxf(0.0, _energy - crossing_time / profile.energy_dissipation_time)
-		_begin_overreaction()
-		return crossing_time
-	_progress += settling_gain
-	_energy = maxf(0.0, _energy - active_duration / profile.energy_dissipation_time)
-	if _energy <= COMPARISON_EPSILON:
-		_energy = 0.0
-		_finish_settling()
-	else:
-		_emit_reaction_changed()
-	return active_duration
-
-
-func _finish_settling() -> void:
-	if (
-		_progress >= profile.success_min_progress - COMPARISON_EPSILON
-		and _progress <= profile.success_max_progress + COMPARISON_EPSILON
-	):
+func _finish_reset() -> void:
+	_progress = 0.0
+	_reset_elapsed = 0.0
+	_cycle_index += 1
+	if _cycle_index == CHECK_COUNT:
+		_blend_progress = 1.0
 		_set_state(State.COMPLETED)
 		_emit_reaction_changed()
-		completed.emit()
-		return
-	_set_state(State.IDLE)
-	_emit_reaction_changed()
-
-
-func _begin_overreaction() -> void:
-	_energy = 0.0
-	_cooldown_remaining = profile.overreaction_cooldown
-	_set_state(State.COOLDOWN)
-	_emit_reaction_changed()
-	overreacted.emit()
-	if _cooldown_remaining <= COMPARISON_EPSILON:
-		_finish_recovery()
-
-
-func _advance_cooldown(delta: float) -> float:
-	var consumed := minf(delta, _cooldown_remaining)
-	_cooldown_remaining = maxf(0.0, _cooldown_remaining - consumed)
-	if _cooldown_remaining <= COMPARISON_EPSILON:
-		_finish_recovery()
+		completed.emit(_quality_score)
 	else:
+		_raise_blend(float(_cycle_index) / CHECK_COUNT)
+		_set_state(State.HEATING)
 		_emit_reaction_changed()
-	return consumed
 
 
-func _would_overreact(progress_gain: float) -> bool:
-	return _progress + progress_gain > profile.success_max_progress + COMPARISON_EPSILON
+func _update_heating_blend() -> void:
+	_raise_blend((float(_cycle_index) + minf(_progress / BLEND_HEIGHT, 1.0)) / CHECK_COUNT)
 
 
-func _overreaction_progress_remaining() -> float:
-	return maxf(0.0, profile.success_max_progress + COMPARISON_EPSILON - _progress)
-
-
-func _get_ramp_up_progress(duration: float) -> float:
-	return profile.progress_rate * (
-		_energy * duration
-		+ duration * duration / (2.0 * profile.energy_ramp_time)
-	)
-
-
-func _get_ramp_up_time_to_progress(progress_gain: float) -> float:
-	var ramp_time := profile.energy_ramp_time
-	var square_root := sqrt(
-		_energy * _energy * ramp_time * ramp_time
-		+ 2.0 * ramp_time * progress_gain / profile.progress_rate
-	)
-	return maxf(0.0, square_root - _energy * ramp_time)
-
-
-func _get_settling_progress(duration: float) -> float:
-	return profile.progress_rate * (
-		_energy * duration
-		- duration * duration / (2.0 * profile.energy_dissipation_time)
-	)
-
-
-func _get_settling_time_to_progress(progress_gain: float) -> float:
-	var dissipation_time := profile.energy_dissipation_time
-	var energy_time := _energy * dissipation_time
-	var discriminant := maxf(
-		0.0,
-		energy_time * energy_time
-		- 2.0 * dissipation_time * progress_gain / profile.progress_rate
-	)
-	return maxf(0.0, energy_time - sqrt(discriminant))
-
-
-func _finish_recovery() -> void:
-	_progress = profile.recovery_progress
-	_energy = 0.0
-	_cooldown_remaining = 0.0
-	_set_state(State.IDLE)
-	_emit_reaction_changed()
-	recovered.emit()
+func _raise_blend(value: float) -> void:
+	_blend_progress = maxf(_blend_progress, minf(value, UNFINISHED_BLEND_MAX))
 
 
 func _set_state(next_state: State) -> void:
@@ -265,7 +215,7 @@ func _set_state(next_state: State) -> void:
 
 
 func _emit_reaction_changed() -> void:
-	reaction_changed.emit(_progress, _energy, get_predicted_settled_progress())
+	reaction_changed.emit(_progress, _heat_power, _blend_progress)
 
 
 func _has_valid_profile() -> bool:

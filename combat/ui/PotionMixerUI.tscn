@@ -1,7 +1,10 @@
-[gd_scene format=3 uid="uid://cir4qvynhpykg"]
+[gd_scene load_steps=6 format=3 uid="uid://cir4qvynhpykg"]
 
 [ext_resource type="Script" uid="uid://de4h1cbs7x01e" path="res://combat/ui/PotionMixerUI.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://bw6vyc7jl8yjt" path="res://combat/ui/FlaskView.tscn" id="2_flask"]
+[ext_resource type="PackedScene" path="res://combat/ui/HeatControl.tscn" id="3_heat"]
+[ext_resource type="PackedScene" path="res://combat/ui/AlchemicalBurner.tscn" id="4_burner"]
+[ext_resource type="PackedScene" path="res://combat/ui/BrewingAudioFeedback.tscn" id="5_audio"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_red"]
 bg_color = Color(0.9, 0.16, 0.2, 1)
@@ -41,7 +44,7 @@ corner_radius_bottom_left = 4
 
 [node name="PotionMixerUI" type="Control" unique_id=683349040]
 visible = false
-custom_minimum_size = Vector2(360, 210)
+custom_minimum_size = Vector2(360, 290)
 layout_mode = 3
 anchors_preset = 7
 anchor_left = 0.5
@@ -49,11 +52,11 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -180.0
-offset_top = -230.0
+offset_top = -310.0
 offset_right = 180.0
 offset_bottom = -20.0
 grow_vertical = 0
-mouse_filter = 2
+mouse_filter = 0
 script = ExtResource("1_script")
 
 [node name="FlaskView" parent="." unique_id=785342854 instance=ExtResource("2_flask")]
@@ -119,6 +122,55 @@ offset_bottom = 183.0
 mouse_filter = 1
 text = "0"
 
+[node name="AlchemicalBurner" parent="." instance=ExtResource("4_burner")]
+position = Vector2(92, 228)
+
+[node name="HeatControl" parent="." instance=ExtResource("3_heat")]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 240.0
+offset_right = 164.0
+offset_bottom = 285.0
+
+[node name="BrewingAudioFeedback" parent="." instance=ExtResource("5_audio")]
+
+[node name="CheckResult1" type="Label" parent="."]
+visible = false
+offset_left = 212.0
+offset_top = 222.0
+offset_right = 264.0
+offset_bottom = 244.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+text = "1: +1"
+
+[node name="CheckResult2" type="Label" parent="."]
+visible = false
+offset_left = 282.0
+offset_top = 222.0
+offset_right = 338.0
+offset_bottom = 244.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+text = "2: +1"
+
+[node name="CheckFeedback" type="Label" parent="."]
+visible = false
+offset_left = 164.0
+offset_top = 116.0
+offset_right = 208.0
+offset_bottom = 144.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+text = "+1"
+horizontal_alignment = 1
+
 [connection signal="pressed" from="ReagentButtons/RedButton" to="." method="_on_red_button_pressed"]
 [connection signal="pressed" from="ReagentButtons/GreenButton" to="." method="_on_green_button_pressed"]
 [connection signal="pressed" from="ReagentButtons/BlueButton" to="." method="_on_blue_button_pressed"]
+[connection signal="heat_power_changed" from="HeatControl" to="." method="_on_heat_power_changed"]
+[connection signal="fire_toggle_requested" from="HeatControl" to="." method="_on_fire_toggle_requested"]
+
+[editable path="FlaskView"]
+[editable path="AlchemicalBurner"]
+[editable path="HeatControl"]

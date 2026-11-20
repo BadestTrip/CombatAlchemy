@@ -21,4 +21,4 @@ func apply(context: PotionImpactContext) -> ApplyResult:
 	var statuses := context.find_component(STATUS_EFFECT_COMPONENT_SCRIPT)
 	if statuses == null:
 		return ApplyResult.UNSUPPORTED
-	return ApplyResult.APPLIED if statuses.call(&"apply_slow", reduction, duration) else ApplyResult.FAILED
+	return ApplyResult.APPLIED if statuses.call(&"apply_slow", reduction * context.potency_multiplier, duration) else ApplyResult.FAILED

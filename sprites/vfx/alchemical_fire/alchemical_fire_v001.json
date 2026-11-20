@@ -1,0 +1,32 @@
+{
+  "frame_size": [
+    16,
+    16
+  ],
+  "sheet_size": [
+    64,
+    16
+  ],
+  "frame_count": 4,
+  "pivot": [
+    8,
+    14
+  ],
+  "frame_order": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "loop": true,
+  "fps_range": [
+    4,
+    10
+  ],
+  "display_scale": 3,
+  "palette": [
+    "#005E74",
+    "#29D9FF",
+    "#F0F0F0"
+  ]
+}

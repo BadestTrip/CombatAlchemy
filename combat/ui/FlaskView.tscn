@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" path="res://sprites/potions/tube_01/tube_01_ui_glass_v001.png" id="2_glass"]
 [ext_resource type="Texture2D" path="res://sprites/potions/tube_01/tube_01_ui_mask_v001.png" id="3_mask"]
 [ext_resource type="Shader" path="res://combat/ui/TubeLiquid.gdshader" id="4_shader"]
+[ext_resource type="PackedScene" path="res://vfx/gold_sparks/GoldSparkEmitter.tscn" id="5_sparks"]
 
 [sub_resource type="ShaderMaterial" id="Liquid0"]
 resource_local_to_scene = true
@@ -75,62 +76,55 @@ scale = Vector2(5, 5)
 centered = false
 texture = ExtResource("2_glass")
 
+[node name="IdealOutlineGlow" type="Sprite2D" parent="."]
+visible = false
+z_index = 3
+position = Vector2(32, 20)
+scale = Vector2(5.08, 5.08)
+centered = false
+texture = ExtResource("2_glass")
+modulate = Color(1, 0.815686, 0.392157, 0.92)
+
+[node name="PerfectSparks" parent="." instance=ExtResource("5_sparks")]
+position = Vector2(72, 108)
+scale = Vector2(0.7, 0.7)
+
 [node name="SuccessWindow" type="Line2D" parent="."]
 visible = false
-points = PackedVector2Array(138, 92, 130, 92, 130, 112, 138, 112)
+z_index = 4
+points = PackedVector2Array(109, 92, 109, 112)
 width = 3.0
-default_color = Color(0.9, 0.95, 0.82, 0.95)
+default_color = Color(1, 0.815686, 0.392157, 1)
 joint_mode = 2
 
-[node name="CurrentProgressMarker" type="Polygon2D" parent="."]
+[node name="IdealLowerMark" type="Line2D" parent="."]
 visible = false
-position = Vector2(16, 180)
-color = Color(1, 1, 1, 1)
-polygon = PackedVector2Array(0, 0, 8, -5, 8, 5)
+z_index = 4
+points = PackedVector2Array(100, 112, 112, 112)
+width = 3.0
+default_color = Color(0.76, 0.78, 0.72, 0.9)
 
-[node name="PredictedSettleMarker" type="Polygon2D" parent="."]
+[node name="IdealUpperMark" type="Line2D" parent="."]
 visible = false
-position = Vector2(125, 180)
-color = Color(0.72, 0.94, 1, 0.9)
-polygon = PackedVector2Array(0, -5, 5, 0, 0, 5, -5, 0)
+z_index = 4
+points = PackedVector2Array(100, 92, 112, 92)
+width = 3.0
+default_color = Color(0.76, 0.78, 0.72, 0.9)
 
-[node name="Grains" type="Node2D" parent="."]
+[node name="CheckPulse" type="Line2D" parent="."]
 visible = false
+z_index = 3
+position = Vector2(72, 100)
+points = PackedVector2Array(-43, -84, 43, -84, 43, 80, -43, 80, -43, -84)
+width = 3.0
+default_color = Color(1, 0.878431, 0.603922, 1)
+joint_mode = 2
 
-[node name="Grain1" type="Polygon2D" parent="Grains"]
-position = Vector2(65, 140)
-color = Color(1, 1, 1, 0.9)
-polygon = PackedVector2Array(0, -3, 3, 0, 0, 3, -3, 0)
-
-[node name="Grain2" type="Polygon2D" parent="Grains"]
-position = Vector2(75, 120)
-color = Color(1, 1, 1, 0.75)
-polygon = PackedVector2Array(-2, -2, 2, -2, 2, 2, -2, 2)
-
-[node name="Grain3" type="Polygon2D" parent="Grains"]
-position = Vector2(75, 150)
-color = Color(1, 1, 1, 0.85)
-polygon = PackedVector2Array(0, -3, 3, 2, -3, 2)
-
-[node name="Grain4" type="Polygon2D" parent="Grains"]
-position = Vector2(70, 85)
-color = Color(1, 1, 1, 0.7)
-polygon = PackedVector2Array(-2, 0, 0, -3, 2, 0, 0, 3)
-
-[node name="Foam" type="Node2D" parent="."]
+[node name="BadTurbulence" type="Line2D" parent="."]
 visible = false
-
-[node name="Bubble1" type="Polygon2D" parent="Foam"]
-position = Vector2(65, 60)
-color = Color(1, 1, 1, 0.9)
-polygon = PackedVector2Array(-5, -3, 0, -6, 5, -3, 5, 3, 0, 6, -5, 3)
-
-[node name="Bubble2" type="Polygon2D" parent="Foam"]
-position = Vector2(70, 55)
-color = Color(1, 1, 1, 0.8)
-polygon = PackedVector2Array(-6, -4, 0, -7, 6, -4, 6, 4, 0, 7, -6, 4)
-
-[node name="Bubble3" type="Polygon2D" parent="Foam"]
-position = Vector2(80, 60)
-color = Color(1, 1, 1, 0.85)
-polygon = PackedVector2Array(-5, -3, 0, -6, 5, -3, 5, 3, 0, 6, -5, 3)
+z_index = 3
+position = Vector2(72, 108)
+points = PackedVector2Array(-25, -9, -12, 2, 0, -7, 12, 3, 25, -8)
+width = 3.0
+default_color = Color(1, 0.180392, 0.313726, 1)
+joint_mode = 2

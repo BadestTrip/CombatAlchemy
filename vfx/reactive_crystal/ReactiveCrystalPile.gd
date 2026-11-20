@@ -90,10 +90,10 @@ func _apply_visuals() -> void:
 		reflection.color = Color(crystal_color.lerp(Color.WHITE, 0.25), 0.18 * glow_strength)
 	var motes := get_node_or_null("DriftMotes") as GPUParticles2D
 	if motes != null:
-		var material := motes.material as ShaderMaterial
-		if material != null:
-			material.set_shader_parameter(&"crystal_color", crystal_color)
-			material.set_shader_parameter(&"glow_strength", glow_strength)
+		var shader_material := motes.material as ShaderMaterial
+		if shader_material != null:
+			shader_material.set_shader_parameter(&"crystal_color", crystal_color)
+			shader_material.set_shader_parameter(&"glow_strength", glow_strength)
 
 
 func _apply_particle_motion() -> void:

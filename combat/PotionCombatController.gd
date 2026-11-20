@@ -27,6 +27,12 @@ var _potion_entities_parent: Node2D
 var _mixer_open := false
 var _profile: PlayerProfile
 var _profile_error_dialog: AcceptDialog
+var _application_focused := true
+var _heat_power_setting := 0.5
+var _fire_active := false
+var _brew_fire_restore_state := false
+var _brew_fire_policy_active := false
+var _brew_fire_manually_overridden := false
 
 
 func _ready() -> void:
@@ -55,6 +61,10 @@ func _ready() -> void:
 	_connect_signals()
 	_potion_mixer_ui.reset_view()
 	_potion_mixer_ui.set_open(false)
+	_heat_power_setting = _potion_input.presentation_profile.default_heat_power
+	_potion_mixer.set_heat_power(_heat_power_setting)
+	_set_fire_active(false, false)
+	_update_brewing_suspension()
 	_restore_saved_potion()
 
 
@@ -93,12 +103,16 @@ func _disable_controller() -> void:
 func _connect_signals() -> void:
 	_potion_input.mixer_toggle_requested.connect(_on_mixer_toggle_requested)
 	_potion_input.reagent_requested.connect(_on_reagent_requested)
-	_potion_input.agitation_started.connect(_on_agitation_started)
-	_potion_input.agitation_released.connect(_on_agitation_released)
+	_potion_input.mix_pressed.connect(_on_mix_pressed)
+	_potion_input.heat_adjust_requested.connect(_on_heat_adjust_requested)
+	_potion_input.focus_changed.connect(_on_focus_changed)
 	_potion_input.potion_use_requested.connect(_on_potion_use_requested)
 	_potion_input.remove_reagent_requested.connect(_on_remove_reagent_requested)
 	_potion_input.clear_mixture_requested.connect(_on_clear_mixture_requested)
 	_potion_mixer_ui.reagent_selected.connect(_on_reagent_requested)
+	_potion_mixer_ui.heat_power_changed.connect(_on_heat_power_changed)
+	_potion_mixer_ui.fire_toggle_requested.connect(_on_fire_toggle_requested)
+	_potion_mixer.check_completed.connect(_potion_mixer_ui.show_check_result)
 	_potion_mixer.layers_changed.connect(_on_layers_changed)
 	_potion_mixer.preparation_requested.connect(_on_preparation_requested)
 	_potion_mixer.potion_prepared.connect(_on_potion_prepared)
@@ -110,10 +124,9 @@ func _connect_signals() -> void:
 func _on_mixer_toggle_requested() -> void:
 	if _held_potion_slot.has_potion():
 		return
-	if _mixer_open:
-		_potion_mixer.release_brewing()
 	_mixer_open = not _mixer_open
 	_potion_mixer_ui.set_open(_mixer_open)
+	_update_brewing_suspension()
 	if _mixer_open:
 		_show_current_mixer_state()
 
@@ -124,14 +137,69 @@ func _on_reagent_requested(reagent: StringName) -> void:
 	_potion_mixer.add_reagent(reagent)
 
 
-func _on_agitation_started() -> void:
+func _on_mix_pressed() -> void:
 	if not _mixer_open or _held_potion_slot.has_potion():
 		return
-	_potion_mixer.start_brewing()
+	if _potion_mixer.get_brewing_state() == BrewingReaction.State.IDLE:
+		if _potion_mixer.start_brewing():
+			_begin_brew_fire_policy()
+	else:
+		_potion_mixer.release_brewing()
 
 
-func _on_agitation_released() -> void:
-	_potion_mixer.release_brewing()
+func _on_heat_adjust_requested(direction: int) -> void:
+	_on_heat_power_changed(_heat_power_setting + direction * _potion_input.presentation_profile.heat_step)
+
+
+func _on_heat_power_changed(power: float) -> void:
+	if not _mixer_open or _held_potion_slot.has_potion() or not _application_focused or get_tree().paused:
+		return
+	_heat_power_setting = clampf(power, 0.0, 1.0)
+	_potion_mixer.set_heat_power(_heat_power_setting)
+	_potion_mixer_ui.set_heat_power(_heat_power_setting)
+
+
+func _on_fire_toggle_requested() -> void:
+	if not _mixer_open or not _application_focused or get_tree().paused:
+		return
+	_set_fire_active(not _fire_active, true)
+
+
+func _set_fire_active(active: bool, manual_change: bool) -> void:
+	_fire_active = active
+	if manual_change and _brew_fire_policy_active:
+		_brew_fire_manually_overridden = true
+	_potion_mixer.set_heat_enabled(active)
+	_potion_mixer_ui.set_fire_active(active)
+	_potion_mixer_ui.set_heat_power(_heat_power_setting)
+
+
+func _begin_brew_fire_policy() -> void:
+	_brew_fire_restore_state = _fire_active
+	_brew_fire_policy_active = true
+	_brew_fire_manually_overridden = false
+	if not _fire_active:
+		_set_fire_active(true, false)
+
+
+func _finish_brew_fire_policy() -> void:
+	if not _brew_fire_policy_active:
+		return
+	if not _brew_fire_manually_overridden:
+		_set_fire_active(_brew_fire_restore_state, false)
+	_brew_fire_policy_active = false
+	_brew_fire_manually_overridden = false
+
+
+func _on_focus_changed(focused: bool) -> void:
+	_application_focused = focused
+	_update_brewing_suspension()
+
+
+func _update_brewing_suspension() -> void:
+	var suspended := not _mixer_open or not _application_focused
+	_potion_mixer.set_suspended(suspended)
+	_potion_mixer_ui.set_animation_suspended(suspended)
 
 
 func _on_potion_use_requested(delivery_method: StringName) -> void:
@@ -188,9 +256,11 @@ func _on_clear_mixture_requested() -> void:
 			entity.discard()
 		_held_potion_slot.clear()
 	_potion_mixer.clear()
+	_finish_brew_fire_policy()
 	_mixer_open = should_open_mixer
 	_potion_mixer_ui.reset_view()
 	_potion_mixer_ui.set_open(_mixer_open)
+	_update_brewing_suspension()
 
 
 func _on_layers_changed(layers: Array[StringName]) -> void:
@@ -199,6 +269,7 @@ func _on_layers_changed(layers: Array[StringName]) -> void:
 
 
 func _on_preparation_requested(potion: PotionInstance) -> void:
+	_finish_brew_fire_policy()
 	if potion == null or not potion.is_valid() or potion.is_consumed():
 		_potion_mixer.acknowledge_preparation(potion, false)
 		return
@@ -220,7 +291,7 @@ func _on_preparation_requested(potion: PotionInstance) -> void:
 	if not _held_potion_slot.hold(potion, entity):
 		_reject_prepared_potion(potion, entity, "Prepared PotionEntity could not enter HeldPotionSlot.")
 		return
-	if not _profile.commit_prepared_potion(potion.get_recipe().recipe_id, potion.get_created_layers()):
+	if not _profile.commit_prepared_potion(potion.get_recipe().recipe_id, potion.get_created_layers(), potion.get_quality_score(), potion.get_potency_multiplier()):
 		_reject_prepared_potion(potion, entity, _profile.last_error)
 		return
 	_potion_mixer.acknowledge_preparation(potion, true)
@@ -233,7 +304,7 @@ func _restore_saved_potion() -> void:
 	var layers: Array[StringName] = []
 	for layer in record.get("layers", []):
 		layers.append(StringName(layer))
-	var potion := PotionInstance.create(recipe, layers)
+	var potion := PotionInstance.create(recipe, layers, int(record.get("quality_score", 0)), float(record.get("potency_multiplier", 1.0)))
 	if potion == null or not _create_and_hold_entity(potion):
 		push_warning("Saved held potion could not be restored.")
 		return
@@ -257,7 +328,7 @@ func _create_and_hold_entity(potion: PotionInstance) -> bool:
 
 func _on_potion_prepared(potion: PotionInstance) -> void:
 	_potion_mixer_ui.set_open(_mixer_open)
-	_potion_mixer_ui.show_ready(potion.get_color())
+	_potion_mixer_ui.show_ready(potion.get_color(), potion.get_quality_score())
 
 
 func _reject_prepared_potion(
@@ -279,6 +350,7 @@ func _reject_prepared_potion(
 	_mixer_open = true
 	_potion_mixer_ui.reset_view()
 	_potion_mixer_ui.set_open(true)
+	_update_brewing_suspension()
 
 func _show_profile_error(message: String) -> void:
 	if _profile_error_dialog != null:
@@ -301,8 +373,8 @@ func _on_mixture_cleared() -> void:
 func _on_brewing_changed(
 	state: BrewingReaction.State,
 	progress: float,
-	energy: float,
-	predicted_settled_progress: float
+	_power: float,
+	blend: float
 ) -> void:
 	if not _mixer_open or _held_potion_slot.has_potion():
 		return
@@ -310,9 +382,10 @@ func _on_brewing_changed(
 		_potion_mixer.get_layers(),
 		state,
 		progress,
-		energy,
-		predicted_settled_progress,
-		_potion_mixer.get_brewing_profile()
+		_heat_power_setting,
+		blend,
+		_potion_mixer.get_brewing_profile(),
+		_potion_mixer.get_mixed_color()
 	)
 
 
@@ -324,8 +397,8 @@ func _show_current_mixer_state() -> void:
 	_on_brewing_changed(
 		state,
 		_potion_mixer.get_brewing_progress(),
-		_potion_mixer.get_brewing_energy(),
-		_potion_mixer.get_predicted_settled_progress()
+		_potion_mixer.get_brewing_power(),
+		_potion_mixer.get_blend_progress()
 	)
 
 
@@ -333,3 +406,4 @@ func _close_mixer_after_use() -> void:
 	_mixer_open = false
 	_potion_mixer_ui.reset_view()
 	_potion_mixer_ui.set_open(false)
+	_update_brewing_suspension()

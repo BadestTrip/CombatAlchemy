@@ -1,45 +1,77 @@
 class_name PotionInput
 extends Node
 
-# Responsibility: Translate named Input Map actions into potion-combat requests.
-
-## Emitted when the mixer visibility should toggle.
+## Converts physical input into intents; no recipe, inventory or reaction rules.
 signal mixer_toggle_requested
-## Emitted when a configured reagent should be added to the mixture.
 signal reagent_requested(reagent: StringName)
-## Emitted once when the mix action begins being held.
-signal agitation_started
-## Emitted once when held agitation is released or forcibly interrupted.
-signal agitation_released
-## Emitted when the held potion should use one delivery method.
+signal mix_pressed
+signal heat_adjust_requested(direction: int)
+signal focus_changed(focused: bool)
 signal potion_use_requested(delivery_method: StringName)
-## Emitted when the newest reagent layer should be removed.
 signal remove_reagent_requested
-## Emitted when the active mixture or prepared potion should be cleared.
 signal clear_mixture_requested
 
-var _agitation_held := false
+@export var presentation_profile: BrewingPresentationProfileData = preload("res://combat/potions/brewing/BrewingPresentationProfile_Default.tres")
+var _decrease_held := false
+var _increase_held := false
+var _repeat_remaining := 0.0
+var _focused := true
+var _mix_held := false
 
+func _ready() -> void:
+	if presentation_profile == null or not presentation_profile.is_valid():
+		push_error("PotionInput requires a valid BrewingPresentationProfileData.")
+		set_process(false)
+		set_process_unhandled_input(false)
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		_release_agitation()
+	if what == NOTIFICATION_PAUSED:
+		clear_held_controls()
+	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_focused = false
+		clear_held_controls()
+		focus_changed.emit(false)
+	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		_focused = true
+		clear_held_controls()
+		focus_changed.emit(true)
 
+func clear_held_controls() -> void:
+	_mix_held = false
+	_decrease_held = false
+	_increase_held = false
+	_repeat_remaining = presentation_profile.repeat_delay if presentation_profile != null else 0.3
+
+func _process(delta: float) -> void:
+	if not _focused or get_tree().paused or _decrease_held == _increase_held:
+		return
+	_repeat_remaining -= delta
+	while _repeat_remaining <= 0.0:
+		heat_adjust_requested.emit(1 if _increase_held else -1)
+		_repeat_remaining += presentation_profile.repeat_interval
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.echo:
+	if not _focused or get_tree().paused or (event is InputEventKey and event.echo):
 		return
 	if event.is_action_pressed(&"ui_cancel"):
-		_release_agitation()
+		clear_held_controls()
 		return
-	if event.is_action(&"mix_potion"):
-		if event.is_pressed():
-			_start_agitation()
+	if event.is_action(&"decrease_brewing_heat") or event.is_action(&"increase_brewing_heat"):
+		if event.is_action(&"decrease_brewing_heat"):
+			_decrease_held = event.is_pressed()
 		else:
-			_release_agitation()
-		get_viewport().set_input_as_handled()
-		return
-	if event.is_action_pressed(&"toggle_mixer"):
+			_increase_held = event.is_pressed()
+		_repeat_remaining = presentation_profile.repeat_delay
+		if event.is_pressed() and _decrease_held != _increase_held:
+			heat_adjust_requested.emit(1 if _increase_held else -1)
+	elif event.is_action(&"mix_potion"):
+		if event.is_pressed() and not _mix_held:
+			_mix_held = true
+			mix_pressed.emit()
+		elif not event.is_pressed():
+			_mix_held = false
+	elif event.is_action_pressed(&"toggle_mixer"):
+		clear_held_controls()
 		mixer_toggle_requested.emit()
 	elif event.is_action_pressed(&"add_red_reagent"):
 		reagent_requested.emit(PotionReagent.RED)
@@ -56,21 +88,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed(&"remove_reagent"):
 		remove_reagent_requested.emit()
 	elif event.is_action_pressed(&"clear_mixture"):
+		clear_held_controls()
 		clear_mixture_requested.emit()
 	else:
 		return
 	get_viewport().set_input_as_handled()
-
-
-func _start_agitation() -> void:
-	if _agitation_held:
-		return
-	_agitation_held = true
-	agitation_started.emit()
-
-
-func _release_agitation() -> void:
-	if not _agitation_held:
-		return
-	_agitation_held = false
-	agitation_released.emit()

@@ -1,34 +1,49 @@
 class_name BrewingProfileData
 extends Resource
 
-# Responsibility: Store editable timing and threshold values for one brewing vessel.
+# Responsibility: Store boiling speed, scoring windows and pressure-reset timing.
 
-## Seconds required to raise reaction energy from zero to one.
-@export_range(0.01, 5.0, 0.01) var energy_ramp_time := 0.25
-## Progress gained per second at maximum energy.
-@export_range(0.01, 5.0, 0.01) var progress_rate := 0.55
-## Seconds required for maximum energy to dissipate after release.
-@export_range(0.01, 5.0, 0.01) var energy_dissipation_time := 0.45
-## Inclusive lower bound for a successful settled reaction.
-@export_range(0.0, 1.0, 0.01) var success_min_progress := 0.70
-## Inclusive upper bound; exceeding it causes overreaction.
-@export_range(0.0, 1.0, 0.01) var success_max_progress := 0.90
-## Seconds before an overreacted mixture can be agitated again.
-@export_range(0.0, 5.0, 0.01) var overreaction_cooldown := 0.60
-## Progress retained after overreaction recovery.
-@export_range(0.0, 1.0, 0.01) var recovery_progress := 0.40
+## Height gained per second at full heat power.
+@export_range(0.01, 5.0, 0.01) var rise_rate := 0.75
+## Inclusive perfect window scores +1; the surrounding normal window scores 0.
+@export_range(0.0, 1.0, 0.01) var perfect_min := 0.65
+@export_range(0.0, 1.0, 0.01) var perfect_max := 0.75
+@export_range(0.0, 1.0, 0.01) var normal_min := 0.5
+@export_range(0.0, 1.0, 0.01) var normal_max := 0.9
+## Seconds to lower the boiling height after each check.
+@export_range(0.0, 5.0, 0.01) var reset_duration := 0.22
+
+const COMPARISON_EPSILON := 0.00001
 
 
-## Returns whether the profile can drive a stable reaction simulation.
 func is_valid() -> bool:
 	return (
-		energy_ramp_time > 0.0
-		and progress_rate > 0.0
-		and energy_dissipation_time > 0.0
-		and success_min_progress >= 0.0
-		and success_min_progress <= success_max_progress
-		and success_max_progress <= 1.0
-		and overreaction_cooldown >= 0.0
-		and recovery_progress >= 0.0
-		and recovery_progress < success_min_progress
+		is_finite(rise_rate) and rise_rate > 0.0
+		and is_finite(reset_duration) and reset_duration >= 0.0
+		and is_finite(normal_min) and is_finite(normal_max)
+		and is_finite(perfect_min) and is_finite(perfect_max)
+		and normal_min >= 0.0
+		and normal_min <= perfect_min
+		and perfect_min <= perfect_max
+		and perfect_max <= normal_max
+		and normal_max <= 1.0
 	)
+
+
+## Returns the same -1/0/+1 result used by the reaction and its presentation.
+func score_height(height: float) -> int:
+	if not is_finite(height) or height >= 1.0:
+		return -1
+	if _in_window(height, perfect_min, perfect_max):
+		return 1
+	if _in_window(height, normal_min, normal_max):
+		return 0
+	return -1
+
+
+func is_perfect_height(height: float) -> bool:
+	return score_height(height) == 1
+
+
+func _in_window(value: float, lower: float, upper: float) -> bool:
+	return value >= lower - COMPARISON_EPSILON and value <= upper + COMPARISON_EPSILON

@@ -25,7 +25,7 @@ func _process(_delta: float) -> void:
 		if _current != null: _current.set_prompt_visible(true)
 
 func select_nearest_source(sources: Array[ReagentSource]) -> ReagentSource:
-	var best: ReagentSource
+	var best: ReagentSource = null
 	var origin := _area.global_position if _area != null else Vector2.ZERO
 	var best_distance := INF
 	for source in sources:

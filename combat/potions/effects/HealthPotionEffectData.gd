@@ -23,11 +23,12 @@ func apply(context: PotionImpactContext) -> ApplyResult:
 	var health := context.find_component(HEALTH_COMPONENT_SCRIPT) as HealthComponent
 	if health == null:
 		return ApplyResult.UNSUPPORTED
+	var scaled_amount := roundi(amount * context.potency_multiplier)
 	match operation:
 		Operation.HEAL:
-			health.heal(amount)
+			health.heal(scaled_amount)
 		Operation.DAMAGE:
-			health.take_damage(amount)
+			health.take_damage(scaled_amount)
 		_:
 			return ApplyResult.FAILED
 	return ApplyResult.APPLIED

@@ -3,8 +3,9 @@
 > Asset standard update (2026-11-17): [Production template](./ASSET_PRODUCTION_TEMPLATE.md). New character cells are 64 x 80 (384 x 320 sheet). Vessel 1 is delivered at 8 x 20 world / 16 x 32 UI; its PNG glass and masked contents replace the geometric bottle and mixer shell. Historical samples retain their original dimensions. Gameplay composition and camera conversion remain pending.
 
 > Status: Technical source of truth
-> Documentation review: 2026-09-23; persistent RGB inventory and collection implemented
-> Automated verification: current results are recorded below
+> Documentation update: 2026-11-18; two-release small-flask brewing implemented
+> Automated verification: historical results below do not verify this change; main integration verification and manual tests are pending
+> Current brewing plan: [Two-Release Brewing](./superpowers/plans/2026-11-17-two-release-brewing.md)
 > Creative companion: [Style and Vision](./STYLE_AND_VISION.md)
 > Player model guide: [PlayerModel](../characters/player/README.md)
 > Visual reference pack: [Art Reference Index](./ART_REFERENCE_INDEX.md)
@@ -18,7 +19,7 @@ real-time potion combat sandbox reached from the main menu. The current slice
 has player movement and collision, actors with reusable health components,
 capability-based potion effects, one held physical potion, immediate drinking,
 throwing and proximity placement,
-hold/release/settle small-flask brewing, mixer UI, scene transitions, music,
+two-release heat-controlled small-flask brewing, mixer UI, scene transitions, music,
 settings, pause navigation, two disposable enemy archetypes for combat testing,
 reusable timed status effects with an RGB slow potion, persistent RGB reagent
 quantities, three refill-on-load reagent sources, and persistence for the one
@@ -31,7 +32,7 @@ Health, position, enemies, unfinished brewing, source depletion, and flying or
 placed bottles reset with the scene. The next technical goals, in order, are:
 
 1. Manually verify and tune collection, inventory feedback, held-bottle restore,
-   and the small-flask hold/release/settle interaction together.
+   and the small-flask two-release interaction together.
 2. Decide gameplay composition before converting remaining gameplay presentation; use the approved native asset sizes.
 3. Tune the Pursuer and Skirmisher behaviours, then add obstacle-aware
    navigation only when arena geometry makes it useful.
@@ -124,14 +125,14 @@ CombatScene
   -> ReagentSources: red/green/blue, five doses each per scene load
   -> PotionCombatController
 	  -> GameManager PlayerProfile + ReagentInventory
-	  -> PotionInput: Space press/release intent
+	  -> PotionInput: distinct Space presses, heat adjustment, focus intent
 	  -> PotionMixer: layers + recipe match
 		  -> reserve one owned dose for each unfinished layer
-		  -> BrewingReaction: agitate -> settle/recover -> complete
-		  -> preparation_requested(PotionInstance) after successful settling
+		  -> BrewingReaction: heat -> check/drop -> heat -> check/drop -> complete
+		  -> preparation_requested(PotionInstance) with quality score and potency
 		  -> one PotionEntity attaches to PlayerModel.hand_right
 		  -> HeldPotionSlot retains the instance/entity pair
-		  -> profile atomically spends reservations and stores held recipe/layers
+		  -> profile atomically spends reservations and stores held recipe/layers/quality
 		  -> potion_prepared(PotionInstance)
 			  -> drink(Player): direct PotionImpactContext
 			  -> throw_into(Arena/PotionEntities, origin, direction): FLYING
@@ -161,12 +162,13 @@ routes through `GameManager`; Quit calls `GameManager.quit_game()`.
 | `combat/enemies/` | Reusable enemy actors, profiles, local sensing/movement, separate tactical brains, attacks, projectiles, and sandbox spawning. |
 | `combat/reagents/` | Refillable scene-local sources, nearest-source collection input, and cosmetic grain-stream feedback. |
 | `combat/potions/` | Reagent constants, recipes, unfinished mixer layers, runtime potion instances, one held slot, delivery IDs, and physical potion entities. |
-| `combat/potions/brewing/` | Deterministic reaction simulation, editable vessel tuning, and small-flask implementation notes. |
+| `combat/potions/brewing/` | Deterministic two-release simulation, vessel tuning, visual/input presentation profile, and small-flask notes. |
 | `combat/potions/effects/` | Stateless effect contracts, delivery context, resolver, and effect implementations. |
-| `combat/potions/resources/` | Editable default recipe book and recipe resources. |
+| `combat/potions/resources/` | Editable recipe book, recipes, and quality-to-potency profile. |
 | `combat/ui/` | Flask rendering and bottom-center mixer controls. |
 | `shared/alchemy/` | Project-wide semantic Charged Neon palette data shared by potion UI, recipes, menus, and VFX. |
 | `vfx/reactive_crystal/` | Reusable crystal pile and shatter scenes plus an isolated five-color workshop. The shatter scene is not wired into active impacts yet. |
+| `vfx/gold_sparks/` | Reusable continuous pixel-spark emitter plus separate burner and perfect-potion tuning resources. |
 | `globals/` | Autoload services and scene-level music declarations. |
 | `globals/profile/` | Persistent profile coordination, RGB quantity/reservation accounting, and versioned checked file storage. |
 | `globals/resources/` | Scene registry and project information resources. |
@@ -174,7 +176,7 @@ routes through `GameManager`; Quit calls `GameManager.quit_game()`.
 | `ui/` | Reusable pause menu. |
 | `tests/` | Retained player/potion suites plus headless main-menu and reactive-crystal contracts. |
 | `docs/` | Active architecture, visual direction, and local art references. |
-| `docs/plannings/` | Dated designs/plans; historical entries carry scope notices. The 2026-09-12 conversion plan owns presentation migration; the 2026-09-15 brewing design records current small-flask and future vessel direction. |
+| `docs/plannings/` | Historical designs/plans; the 2026-09-15 brewing design retains future vessel direction, but its small-flask mechanics are superseded by the 2026-11-17 plan under `docs/superpowers/plans/`. |
 | `music/`, `sprites/`, `extra/` | Audio, remaining images, fonts, and shaders. |
 
 ## Scene Composition
@@ -224,16 +226,19 @@ the menu interactive and opens its scene-authored error dialog.
   A newly mixed entity is added here before attachment; while held, its parent
   is the PlayerModel's `hand_right` socket. Release reparents the same node here.
 - `Systems/PotionInput`: maps Input Map actions to potion intent signals,
-  including distinct Space press and release events.
+  including distinct Space presses, heat adjustment, and focus changes.
 - `Systems/PotionMixer`: owns unfinished reagent layers and recipe matching.
-  Its authored `BrewingReaction` child owns progress, energy, settling, and
-  overreaction recovery. Each layer reserves one available inventory dose.
-  Successful settling requests a transactional preparation; only an attached,
+  Its authored `BrewingReaction` child owns height, power, two checks, drops,
+  and blending. Each layer reserves one available inventory dose.
+  The second reset requests a quality-bearing transactional preparation; only an attached,
   held, durably saved entity is acknowledged as prepared.
 - `Systems/HeldPotionSlot`: holds references to exactly one instance/entity pair.
-- `UI/PotionMixerUI`: displays layers, geometric reaction motion, current and
-  predicted-settle markers, success range, recovery foam, prepared color, and
-  reagent controls with available-quantity labels and exact-count tooltips.
+- `UI/PotionMixerUI`: displays layers, one height-mapped ideal bracket, gradual
+  blending, two check scores, a short result, and stock-aware reagent controls.
+  The `360 x 290` layout retains a `144 x 190` Tube 01 FlaskView and composes
+  modular HeatControl/AlchemicalBurner scenes, with a `0..100` slider under the
+  flame and a workshop for isolated presentation. Full recipe color appears
+  only after the second reset.
 - `UI/ProfileErrorDialog`: reports durable profile failures without consuming
   sources, ingredients, or the held bottle.
 - `UI/PauseMenu`: reusable pause and settings overlay.
@@ -331,7 +336,7 @@ remove methods from this reference until it is implemented.
 | `characters/player/PlayerModelWorkshop.gd` | Synchronize workshop status controls with the canonical model. | Workshop `PlayerModel`, labels, and bones toggle. | None | None | None |
 | `characters/player/PlayerModelWorkshopActor.gd` | Move and collide the workshop actor while forwarding velocity to the model. | Input Map movement actions and a model exposing `set_motion()`. | None | `movement_speed`, `player_model_path` | None |
 | `combat/PotionCombatController.gd` | Coordinate input, reserved mixing, durable held ownership, restoration, UI, and entity delivery. | `GameManager` profile, `PotionInput`, `PotionMixer`, `HeldPotionSlot`, `PotionMixerUI`, `PlayerCombatController`, optional collector, error dialog, entity parent and scene. | None | `potion_input_path`, `potion_mixer_path`, `held_potion_slot_path`, `potion_mixer_ui_path`, `player_combat_controller_path`, `potion_entities_parent_path`, `potion_entity_scene` | None |
-| `combat/PotionInput.gd` | Translate named Input Map actions into potion intent and guarantee paired agitation release on key-up, pause, Escape, or focus loss. | Project input actions, `PotionReagent`, `PotionDelivery`. | `mixer_toggle_requested`, `reagent_requested(reagent: StringName)`, `agitation_started`, `agitation_released`, `potion_use_requested(delivery_method: StringName)`, `remove_reagent_requested`, `clear_mixture_requested` | None | None |
+| `combat/PotionInput.gd` | Translate distinct mix presses, heat adjustment, and focus changes; clear held controls on interruption. | Input Map, reagent/delivery IDs, presentation profile. | `mixer_toggle_requested`, `reagent_requested`, `mix_pressed`, `heat_adjust_requested(direction)`, `focus_changed(focused)`, `potion_use_requested`, `remove_reagent_requested`, `clear_mixture_requested` | `presentation_profile` | `clear_held_controls()` |
 | `combat/actors/PlayerCombatController.gd` | Move the active player and provide holder and world-space delivery geometry. | Movement actions, `StatusEffectComponent`, and `PlayerModel.set_motion()`/`get_socket()`. | `movement_changed(current_velocity: Vector2)` | `speed`, `player_model_path`, `status_effects_path`, `place_distance` (`64.0`) | `set_movement_locked()`, `is_movement_locked()`, `get_potion_holder() -> Marker2D`, `get_throw_origin() -> Vector2`, `get_throw_direction() -> Vector2`, `get_place_position() -> Vector2` |
 | `combat/actors/HealthComponent.gd` | Own bounded actor health. | None. | `health_changed`, `depleted`, `damaged` | `max_health`, `current_health` | `take_damage()`, `heal()`, `reset_health()`, `get_health_ratio()` |
 | `combat/actors/ImpactHitbox.gd` | Map a collision-only area to the entity whose components effects may query. | Configured subject node. | Inherited `Area2D` signals | `effect_subject_path` | `get_effect_subject()` |
@@ -353,10 +358,10 @@ remove methods from this reference until it is implemented.
 | `combat/potions/PotionReagent.gd` | Define supported reagent IDs and resolve their shared colors. | `ChargedNeonPalette.tres`. | None | None | Static `is_valid()`, `get_color()` |
 | `combat/potions/PotionRecipeData.gd` | Describe one exact three-layer potion recipe and its composable effects. | `PotionReagent`, `PotionEffectData`. | None | ID, name, three counts, effects, mixed color | `is_valid()`, `matches_layers()` |
 | `combat/potions/PotionRecipeBookData.gd` | Find order-independent layer matches or one unambiguous stable recipe ID. | `PotionRecipeData` resources. | None | `recipes` | `find_match()`, `find_by_id()` |
-| `combat/potions/brewing/BrewingProfileData.gd` | Store editable timing, success-window, cooldown, and recovery values for one vessel. | None. | None | `energy_ramp_time`, `progress_rate`, `energy_dissipation_time`, `success_min_progress`, `success_max_progress`, `overreaction_cooldown`, `recovery_progress` | `is_valid() -> bool` |
-| `combat/potions/brewing/BrewingReaction.gd` | Simulate deterministic reaction progress and energy independently of recipes, UI, entities, and effects. | Valid `BrewingProfileData`. | `state_changed(state)`, `reaction_changed(progress, energy, predicted_settled_progress)`, `completed`, `overreacted`, `recovered` | `profile` | `start_agitation() -> bool`, `release_agitation()`, `advance(delta)`, `cancel()`, `get_state()`, `get_progress()`, `get_energy()`, `get_predicted_settled_progress()`, `is_editable()` |
-| `combat/potions/PotionMixer.gd` | Own unfinished layers and their reservations, validate recipes, coordinate one reaction, and request transactional preparation after settling. | `PotionReagent`, injected `ReagentInventory`, configured `PotionRecipeBookData`, authored `BrewingReaction`. | `layers_changed(layers)`, `preparation_requested(potion)`, `potion_prepared(potion)`, `mix_rejected(layers)`, `mixture_cleared`, `brewing_changed(state, progress, energy, predicted_settled_progress)`, `brewing_overreacted`, `brewing_recovered` | `max_layers` (`3`, clamped `1..3`), `recipe_book`, `brewing_reaction_path` | `configure_inventory()`, `add_reagent()`, `remove_last()`, `clear()`, `start_brewing()`, `release_brewing()`, brewing getters, `get_layers()`, `acknowledge_preparation()` |
-| `combat/potions/PotionInstance.gd` | Own one valid recipe reference, copied creation layers, and one-shot consumption state. | `PotionRecipeData`, `PotionImpactContext`, `PotionEffectResolver`. | None | None | Static `create(recipe: PotionRecipeData, layers: Array[StringName]) -> PotionInstance`; `get_recipe() -> PotionRecipeData`, `get_created_layers() -> Array[StringName]`, `get_color() -> Color`, `is_valid() -> bool`, `is_consumed() -> bool`, `apply(context: PotionImpactContext) -> int`, `discard() -> bool` |
+| `combat/potions/brewing/BrewingProfileData.gd` | Store two-release height/timing windows and provide the single scoring rule used by simulation and UI. | None. | None | `rise_rate`, `perfect_min`, `perfect_max`, `normal_min`, `normal_max`, `reset_duration` | `is_valid()`, `score_height()`, `is_perfect_height()` |
+| `combat/potions/brewing/BrewingReaction.gd` | Simulate height, power, checks, drops, blending, suspension, and completion. | `BrewingProfileData`. | `state_changed(state)`, `reaction_changed(height, power, blend)`, `check_completed(index, score)`, `completed(score)` | `profile` | `start()`, `release_pressure()`, `set_heat_power()`, `set_suspended()`, `advance()`, `cancel()`, `get_state()`, `get_progress()` (height), `get_heat_power()`, `get_cycle_index()`, `get_quality_score()`, `get_blend_progress()`, `get_results()`, `is_editable()` |
+| `combat/potions/PotionMixer.gd` | Own layers/reservations, recipe matching, quality lookup, and guarded pending preparation. | Inventory, recipe book, reaction, quality profile. | `layers_changed`, `preparation_requested`, `potion_prepared`, `mix_rejected`, `mixture_cleared`, `brewing_changed(state, height, power, blend)`, `check_completed(index, score)` | `max_layers`, `recipe_book`, `brewing_reaction_path`, `quality_profile` | `configure_inventory()`, `add_reagent()`, `remove_last()`, `clear()`, `start_brewing()`, `release_brewing()` (manual, not key-up), `set_heat_power()`, `set_suspended()`, brewing getters, `get_layers()`, `acknowledge_preparation()` |
+| `combat/potions/PotionInstance.gd` | Own recipe, copied layers, quality score, potency multiplier, and once-only consumption. | Recipe, impact context, effect resolver. | None | None | `create()`, `get_recipe()`, `get_created_layers()`, `get_quality_score()`, `get_potency_multiplier()`, `get_color()`, `is_valid()`, `is_consumed()`, `apply()`, `discard()` |
 | `combat/potions/HeldPotionSlot.gd` | Retain the one currently held instance/entity pair. | `PotionInstance`, `PotionEntity`. | `potion_changed(potion: PotionInstance)` (null on clear) | None | `hold(potion: PotionInstance, entity: PotionEntity) -> bool`, `clear() -> void`, `has_potion() -> bool`, `get_potion() -> PotionInstance`, `get_entity() -> PotionEntity` |
 | `combat/potions/PotionEntity.gd` | Own one bottle through `HELD`, `FLYING`, `PLACED`, `CONSUMED` states. | `PotionInstance`, `PotionDelivery`, `PotionImpactContext`, scene visuals and collision nodes. | `state_changed(state: State)`, `resolved(context: PotionImpactContext, applied_effect_count: int)` | `flight_speed` (`650.0` px/s), `flight_lifetime` (`2.5` s), `arming_delay` (`0.35` s), `placed_lifetime` (`20.0` s) | `initialize(potion: PotionInstance, source: Node) -> bool`, `attach_to(holder: Node2D) -> bool`, `drink(target: Node) -> bool`, `throw_into(world_parent: Node2D, origin: Vector2, direction: Vector2) -> bool`, `place_into(world_parent: Node2D, world_position: Vector2) -> bool`, `discard() -> bool`, `get_state() -> State`, `get_potion() -> PotionInstance` |
 | `combat/potions/PotionDelivery.gd` | Share `StringName` delivery constants `DRINK = &"drink"`, `THROW = &"throw"`, `PLACE = &"place"`. | None. | None | None | None |
@@ -365,8 +370,9 @@ remove methods from this reference until it is implemented.
 | `combat/potions/effects/SlowPotionEffectData.gd` | Apply a timed movement reduction when an impacted subject exposes `StatusEffectComponent`. | `PotionEffectData`, `PotionImpactContext`, `StatusEffectComponent`. | None | `reduction` (`0.45`), `duration` (`5.0`) | `is_valid()`, `apply()` |
 | `combat/potions/effects/PotionImpactContext.gd` | Carry delivery source, subject, collider, world geometry, and direct-child capability lookup. | Impacted scene nodes. | None | None | `configure()`, `is_valid()`, `find_component()` |
 | `combat/potions/effects/PotionEffectResolver.gd` | Apply every valid recipe effect and count supported applications. | `PotionRecipeData`, `PotionEffectData`, `PotionImpactContext`. | None | None | `apply_recipe()` |
-| `combat/ui/FlaskView.gd` | Render scene-authored layers, agitation/settling motion, progress prediction, success range, cooldown foam, prepared liquid, and rejection feedback. | Tube-01 PNG glass/mask, band shader, feedback polygons/lines and `PotionReagent` colors. | None | None | `set_layers()`, `show_brewing()`, `show_mixed()`, `show_failure()`, `reset_view()` |
-| `combat/ui/PotionMixerUI.gd` | Present stock-aware reagent controls and reflect editable, brewing, recovery, and prepared states. | `FlaskView`, injected `ReagentInventory`, three reagent buttons, and three count labels. | `reagent_selected` | None | `configure_inventory()`, `set_open()`, `show_mixing()`, `show_brewing()`, `show_ready()`, `show_mix_failure()`, `reset_view()`, `are_reagent_buttons_enabled()` |
+| `combat/ui/FlaskView.gd` | Render masked layers, liquid height, direct ideal marks, progressive blending, prepared color, gold perfect outline/sparks, and local release feedback. | Existing Tube 01 glass/mask, brewing/presentation profiles, reagent colors, GoldSparkEmitter. | None | Presentation tuning resource | `set_layers()`, `show_brewing()`, `is_ideal_cue_active()`, `show_check_feedback()`, `show_ready()`, `show_mixed()`, `show_failure()`, `reset_view()` |
+| `combat/ui/PotionMixerUI.gd` | Present stock-aware controls, independent fire switch, heat adjustment, two scores, and short result. | FlaskView, inventory, HeatControl, AlchemicalBurner, BrewingAudioFeedback, presentation profile. | Reagent, heat, and fire-toggle intents | Presentation tuning resource | Inventory/open/state presentation methods; presentation never advances the simulation. |
+| `combat/ui/BrewingAudioFeedback.gd` | Translate burner, heating, release score, and perfect completion state into replaceable sounds. | Scene-authored AudioStreamPlayers on the SFX bus. | None | None | `set_fire_state()`, `set_heating()`, `set_suspended()`, `play_release()`, `play_perfect_brew()` |
 | `combat/reagents/ReagentSource.gd` | Persist one whole-source award before depleting its scene-local deposit and starting cosmetic feedback. | `PlayerProfile`, `PotionReagent`, authored prompt/deposit, collection-effect scene. | Inherited `Area2D` signals | `reagent`, `doses` (`5`) | `can_collect()`, `set_prompt_visible()`, `collect()` |
 | `combat/reagents/PlayerReagentCollector.gd` | Select the nearest overlapping nonempty source deterministically and translate physical E into one collection attempt. | Injected `PlayerProfile`, player-centered `Area2D`, `ReagentSource`. | `collection_failed(message)` | `collection_area_path` | `configure()`, `select_nearest_source()` |
 | `combat/reagents/ReagentCollectionEffect.gd` | Move authored grains from a depleted source toward the player after ownership is durable. | Scene-authored `Polygon2D` grains and tweens. | None | None | `play()` |
@@ -376,6 +382,8 @@ remove methods from this reference until it is implemented.
 | `vfx/reactive_crystal/ReactiveCrystalPile.gd` | Present one editable crystal deposit with settled geometry, localized glow, reflection, and low-simmer motes. | `AlchemyPaletteData`, authored polygons, `GPUParticles2D`. | None | `palette`, `color_id`, `crystal_color`, `glow_strength`, `motion_strength`, `mote_amount`, `random_seed` | `set_crystal_color()`, `set_glow_strength()`, `set_emitting()` |
 | `vfx/reactive_crystal/PotionShatterParticles.gd` | Play and self-retire a color-configurable one-shot potion shatter visual. It does not resolve impacts or effects. | Two authored `GPUParticles2D` groups and cleanup timer. | None | `glow_strength`, `cleanup_delay` | `play_burst(world_position, color, incoming_direction)` |
 | `vfx/reactive_crystal/ReactiveCrystalVFXWorkshop.gd` | Preview all five palette colors and manually trigger isolated shatter bursts. | Shared palette, pile scene, shatter scene, five authored controls. | None | None | None |
+| `vfx/gold_sparks/GoldSparkProfileData.gd` | Store continuous spark frequency, visible-particle cap, velocity, gravity, and color. | None. | None | `emission_rate`, `max_visible_particles`, `speed_min`, `speed_max`, `gravity_y`, `spark_color` | `is_valid()` |
+| `vfx/gold_sparks/GoldSparkEmitter.gd` | Apply one spark profile to scene-authored particles and gate emission by visibility/suspension. | GoldSparkProfileData, GPUParticles2D, shared particle shader/texture. | None | `profile`, `emitting` | `set_emitting()`, `is_emitting()`, `set_suspended()` |
 
 ### Application Shell
 
@@ -413,7 +421,7 @@ remove methods from this reference until it is implemented.
 | `tests/PotionUseTests.gd` | Validate drink/throw/place input, same bottle identity, slot clearing, UI closure, held-potion Tab gating, discard, and input with an empty slot. | `CombatScene.tscn` and potion/player runtime components. | None | None | None |
 | `tests/MainMenuTests.gd` | Validate menu parsing, text commands, focus, inline settings replacement, 0-10 audio conversion, transition locking, native art, transparency, and ambient loops. | Main-menu scenes, imported menu textures, and application autoloads. | None | None | None |
 | `tests/ReactiveCrystalParticleTests.gd` | Validate the shared palette, pile/shatter scene contracts, particle counts, cleanup, and five-color workshop composition. | Charged Neon palette and reactive-crystal scenes. | None | None | None |
-| `tests/BrewingReactionTests.gd` | Validate early release/resume, success boundaries, overreaction recovery, idempotence, and frame-step-independent simulation. | Brewing reaction and small-flask profile. | None | None | None |
+| `tests/BrewingReactionTests.gd` | Validate two pressure releases, scoring boundaries, overflow, reset, suspension, idempotence, and frame-step-independent simulation. | Brewing reaction and small-flask profile. | None | None | None |
 | `tests/BrewingCombatTests.gd` | Validate press/release input, forced release, pause freezing/resume, authored flask feedback, hidden settling, button locks, and clearing active reactions. | `CombatScene.tscn`, mixer UI, input, reaction, and held slot. | None | None | None |
 | `tests/EnemyBehaviourTests.gd` | Validate tactical states, range hysteresis, melee dodging, windup/recovery, target loss, pause, and enemy deletion. | Enemy scenes and local components. | None | None | None |
 | `tests/EnemyProjectileTests.gd` | Validate dart sweeps, source/other-actor filtering, wall blocking, fixed aim, expiry, and pause. | `EnemyProjectile`, Player, actor hitboxes, and physics fixtures. | None | None | None |
@@ -443,39 +451,36 @@ from `is_consumed()`.
 
 ### Mixing And One Held Slot
 
-1. `PotionInput` converts handled Input Map actions into intent signals. Space
-   emits `agitation_started` once on press and `agitation_released` once on
-   release. Pause, Escape, and focus loss also force a release. Drink, throw,
-   and place share `potion_use_requested(delivery_method)`.
-2. `PotionCombatController` accepts reagent edits and mixing only while the
-   mixer is open and `HeldPotionSlot` is empty. Tab is ignored while holding.
-3. `PotionMixer.start_brewing()` asks `PotionRecipeBookData` for an
-   order-independent exact three-layer match. Invalid and incomplete recipes
-   emit `mix_rejected` without changing ingredients or reaction progress.
-4. `BrewingReaction` integrates energy and progress from the editable
-   `SmallFlaskBrewingProfile.tres`. Releasing stops energy input immediately;
-   residual energy dissipates and advances progress. An early settle returns
-   to editable idle with progress preserved. Settling in the inclusive
-   `0.70..0.90` window completes. Exceeding `0.90` enters a `0.6` second
-   cooldown, then restores `0.40` progress and the same ingredients.
-5. Success creates a fresh `PotionInstance`, clears unfinished layers, then
-   emits `layers_changed`, `mixture_cleared`, and `potion_prepared(instance)`
-   in that order. The mixer retains no finished preparation.
-6. The controller instantiates `potion_entity_scene` once, validates its type,
-   adds it to `Arena/PotionEntities`, calls `initialize(instance, Player)`,
-   attaches it to the right-hand holder, then calls `HeldPotionSlot.hold()`.
-   The slot requires an empty slot, a valid unused instance, and an entity
-   referencing that instance. If Tab hid the mixer while settling, completion
-   keeps it hidden; otherwise it stays open with the completed color.
-7. If construction, attachment, or holding fails, the new instance is discarded,
-   the candidate is cleaned up, and the empty mixer stays open. No orphaned
-   preparation remains available for use.
+1. `PotionInput` emits `mix_pressed` on distinct Space presses, never key-up or
+   repeat, plus heat-adjustment and focus intent. Drink, throw, and place retain
+   `potion_use_requested(delivery_method)`. Old agitation APIs are removed.
+2. `PotionCombatController` accepts edits/mixing only with an open mixer and
+   empty held slot. Tab remains ignored while holding a prepared bottle.
+3. `PotionMixer.start_brewing()` validates an order-independent exact three-layer
+   recipe. Invalid/incomplete recipes leave ingredients unchanged.
+4. The first press starts heating; the next two distinct presses call manual
+   `release_brewing()` / `release_pressure()`, one during each heat. Height
+   `0..1` rises at `0.75 * power` per second; power is `0..1`, initially
+   `0.5`. Inclusive `0.65..0.75` scores `+1`; inclusive `0.50..0.90`
+   outside ideal scores `0`; all other heights score `-1`. Overflow at
+   `1.0` automatically scores `-1`.
+5. Each check drops/resets for `0.22` seconds. The first reset automatically
+   starts the second heat; the second reset finishes even at total score `-2`.
+   Scores sum to `-2..2`, mapped to `0.6/0.8/1.0/1.2/1.4` potency.
+6. The mixer creates a quality-bearing candidate and emits
+   `preparation_requested`. A pending guard blocks duplicate creation/edits.
+   The controller initializes and attaches its entity, fills the held slot,
+   atomically saves ingredient spending and held ownership, then acknowledges.
+   Only successful acknowledgement clears layers and emits `potion_prepared`.
+7. Construction, attachment, holding, or save failure rejects and cleans up the
+   candidate without spending ingredients or leaving an orphaned usable bottle.
+   The reservation/save handshake remains intact.
 
-Ingredient edits are locked during agitation, settling, and cooldown. Editing
-an early-settled idle mixture resets its reaction progress before changing the
-layers. C cancels immediately, clears layers, and invalidates unfinished
-completion. The reaction runs in normal scene time: movement remains available,
-and pausing the tree freezes progression.
+Ingredients are locked during heating, resetting, and pending preparation.
+C cancels, clears layers, releases reservations, and invalidates completion.
+Tab hides and suspends; reopening resumes. Pause and focus loss suspend and
+clear held controls, without synthesizing a release. Hidden reactions do not
+complete in the background. Movement remains available during active brewing.
 
 ### Bottle Lifecycle
 
@@ -551,8 +556,12 @@ does not emit it. No animation event delays, owns, commits, or cancels use.
 The current profile persists unlimited RGB totals and one held bottle record
 across scene changes and application restarts. Unfinished mixer reservations are
 temporary; successful preparation atomically spends their layers and records
-the held recipe ID plus original layers. The runtime `PotionEntity` is rebuilt
-from that record when combat loads.
+the held recipe ID, original layers, quality score, and potency multiplier.
+Profile store V2 writes both quality values; V1 loads as normal quality (`0`,
+`1.0`). The runtime `PotionEntity` is rebuilt from that record when combat loads.
+Health magnitude uses `roundi(base_amount * multiplier)`; slow magnitude scales
+while duration and the existing cap remain unchanged. Shared effects are not
+mutated.
 
 There is no multi-potion inventory, empty-bottle category, quest-item category,
 pickup/recovery for finished bottles, storage container, or inventory screen.
@@ -569,19 +578,20 @@ transfer rules are not implemented by this slice.
 ## Implemented Small Flask And Future Brewing Evolution
 
 The [approved design record](./plannings/specs/2026-09-15-potion-brewing-vision-design.md)
-owns the broader vessel and laboratory direction. Its one-stage small-flask
-interaction is implemented; larger apparatus, multiple stages, storage, and
-deliberate persistent placement remain future scope.
+owns the broader vessel and laboratory direction. Its historical small-flask
+mechanics are superseded by the [two-release plan](./superpowers/plans/2026-11-17-two-release-brewing.md).
+The following contract is being integrated; larger apparatus, multiple recipe
+stages, storage, and deliberate persistent placement remain future scope.
 
 ### Behavior and Ownership Boundaries
 
 | Concern | Current small-flask behavior | Future boundary |
 | --- | --- | --- |
-| Reaction input | Hold Space agitates; release, Tab-hide, pause, Escape, or focus loss stops agitation. Residual energy settles in normal scene time. | Reuse the press/release language for larger equipment without routing rules through UI or autoloads. |
-| Reaction state | `BrewingReaction` owns idle, agitating, settling, cooldown, and completed states. Early release resumes; overreaction retains ingredients and recovers to 40%. | Keep future stage state scene-local and separate from `PotionEntity.State`. |
-| Recipe completion | Only a settled result in the configured window produces one `PotionInstance`. | Multi-stage recipes must create no usable bottle before their final successful stage. |
+| Reaction input | First Space press starts heat; next two distinct presses release pressure. Tab suspends/hides; pause and focus loss suspend and clear holds. | Keep stage rules outside UI/autoloads. |
+| Reaction state | `IDLE`, `HEATING`, `RESETTING`, `COMPLETED`; suspension preserves state. Two checks with automatic overflow and no recovery retry. | Keep stage state separate from `PotionEntity.State`. |
+| Recipe completion | After two drops, every score prepares one quality-bearing instance, including `-2`. | Future multi-stage recipes create no bottle before their final stage. |
 | Vessels | The active small flask accepts exactly three ingredient units and uses one shared profile resource. | Larger apparatus needs explicit capacity and stage data; changing `max_layers` alone is insufficient. |
-| Flask feedback | Tube-01 PNG glass and masked liquid show layers; scene-authored markers, foam and motion preserve brewing feedback. | Preserve mask clipping, contiguous layer boundaries and grayscale glass without moving simulation into presentation. |
+| Flask feedback | Tube 01 glass/mask, one ideal bracket using liquid-height mapping, progressive blending, two scores, short result, and burner/slider. | Preserve mask clipping and grayscale glass; simulation stays outside presentation. |
 | Finished effects | Drink, throw, and later activation deliver the same formula to compatible subjects. | Preserve immutable recipe/effect resources and target-owned capability state. Timing does not create delivery-specific health or transformation implementations. |
 | Placement | A proximity bottle arms after 0.35 seconds and expires after 20 seconds; it is not persisted. | Add dormant bottles and deliberate activation separately; keep trigger policy and lifetime outside the effect resolver. |
 | Storage and revisits | RGB totals and one held bottle survive scene/application reload; world bottles and source depletion do not. | Store domain identity and relevant placement records, not inactive scene nodes; retain one owner and once-only consumption. |
@@ -592,7 +602,7 @@ adds meaningful stages rather than stretching the same hold. Capacities such as
 values. Recipe knowledge may precede access to a suitable vessel. Portable bottle
 size, batch yield, and storage are separate from brewing apparatus size.
 
-The existing two recipes remain count-based and order-independent. Future stage
+The existing three recipes remain count-based and order-independent. Future stage
 requirements must be explicit recipe data, not rules inferred from UI click
 order. Larger recipes cannot work simply by changing an Inspector maximum:
 `PotionMixer`, recipe validation/matching, instance validation, and flask layer
@@ -609,7 +619,8 @@ ingredients + suitable vessel + brewing stage state
   -> one activation resolves recipe effects against eligible capabilities
 ```
 
-There is no requirement for gel/solid forms, per-bottle potency rolls, permanent
+Quality is deterministic from the two checks, not a random potency roll.
+There is no requirement for gel/solid forms, random potency rolls, permanent
 brewing decay, or animation-delayed use. Unfinished brewing is distinct from a
 finished potion waiting to be used.
 
@@ -632,11 +643,18 @@ therefore requires a separate change covering dormant state, intentional trigger
 safe placement, activation range, session identity, restoration, and consumption
 across revisits. Raising `placed_lifetime` alone cannot implement that strategy.
 
-Current tests cover predictable release outcomes, resumable early release,
-recoverable overreaction, inclusive boundaries, one creation, input interruption,
-hidden completion, and frame-step independence. Future vessel/storage work still
-needs capacity and stage compatibility plus no duplication or resurrection of
-placed or stored preparations.
+Two-release verification is pending main integration. Required coverage includes
+inclusive score boundaries, automatic overflow, two resets, one preparation,
+power adjustment, suspension, cancellation, quality effects, V1/V2 persistence,
+and reservation/save failure handling. Future vessel/storage work still needs
+capacity/stage compatibility and no duplication or resurrection of preparations.
+
+All new tuning stays in resources: `SmallFlaskBrewingProfile.tres` uses the new
+`BrewingProfileData` semantics; `BrewingPresentationProfile_Default.tres` under
+brewing owns visual/input tuning; `resources/PotionQualityProfile_Default.tres`
+uses `PotionQualityProfileData`. The built-in generated and cleaned flame at
+`sprites/vfx/alchemical_fire/alchemical_fire_v001.png` is four `16 x 16`
+frames in a `64 x 16` sheet.
 
 ## Default Recipes
 
@@ -670,7 +688,8 @@ effects should ask a target component to create and own their runtime state.
 | `move_up`, `move_down`, `move_left`, `move_right` | W/S/A/D and arrows | `PlayerCombatController`, workshop actor |
 | `toggle_mixer` | Tab | `PotionInput` |
 | `add_red_reagent`, `add_green_reagent`, `add_blue_reagent` | 1/2/3 | `PotionInput` |
-| `mix_potion` | Hold Space to agitate; release to settle | `PotionInput` |
+| `mix_potion` | Space: start heat, then two distinct pressure releases | `PotionInput` |
+| Heat adjustment | Z/X: decrease/increase 5%; hold delay 0.3 s, repeat 0.1 s | `PotionInput`; slider 0..100 under flame |
 | `drink_potion` | Right Mouse | `PotionInput` |
 | `throw_potion` | Left Mouse | `PotionInput` |
 | `place_potion` | Q | `PotionInput` |
@@ -679,11 +698,22 @@ effects should ask a target component to create and own their runtime state.
 | `collect_reagent` | E | `PlayerReagentCollector` |
 | `ui_cancel` | Escape | `PauseMenu` |
 
-Space key repeat is ignored. A fresh press is required after cooldown, pause,
-focus loss, or a forced release. Tab may hide an unfinished reaction; settling
-and cooldown continue while gameplay is active.
+Space repeat and key-up do not release pressure. Tab hides and suspends an
+unfinished reaction, reopening resumes it. Pause/focus loss suspend and clear
+held controls; resumption must not retain a heat-adjustment hold.
 
 ## Recorded Runtime Verification
+
+The detailed results below are historical (2026-09-23), not evidence for the
+2026-11-17 two-release change. On 2026-11-18, all 22 current `tests/*Tests.tscn`
+scenes passed headlessly with isolated `APPDATA`: `BrewingReactionTests` 334
+checks, `BrewingCombatTests` 71, `PotionQualityTests` 359, and the retained
+domain, entity, profile, menu, player, enemy, and status suites. Editor import
+exited 0. OpenGL screenshots at 1920x1080 and 1280x720 confirmed visible
+liquid, ideal-height bracket, and pixel flame. Godot emitted an environment-only
+certificate-store warning; editor import also could not write its settings
+inside the Steam engine directory. Neither reported a resource or script error.
+Manual keyboard/mouse feel and audible music still require an interactive pass.
 
 The import, scene smokes, active resource validation, and all twenty retained
 test scenes were run on **2026-09-23** after repairing persistent inventory,
@@ -822,7 +852,8 @@ changes were created by the brewing implementation.
 
 ### Manual Godot Checklist
 
-Status on 2026-09-23: every item below is **pending**, not manually verified.
+Status on 2026-11-18: every item below is **pending**, not manually verified.
+The brewing checks reflect the approved two-release contract.
 
 1. Open `characters/player/PlayerModel.tscn`. Verify the 15 bones, geometric
    parts, both hand sockets, `AnimationPlayer`, and `AnimationTree` are
@@ -834,24 +865,23 @@ Status on 2026-09-23: every item below is **pending**, not manually verified.
    it, actor collision remains intact, and the health bar follows. Use the
    workshop or collision-test fixtures for wall checks; the sandbox is not an
    authored bounded expedition room.
-4. Open the mixer with Tab; add red, red, blue. Hold Space and release when the
-   predicted-settle marker is inside the bracket. Confirm residual motion ends
-   in one prepared bottle at the right hand.
-5. Release early, let the mixture settle unfinished, and press Space again.
-   Confirm ingredients and progress are retained and the second reaction can
-   complete. Edit an early-settled mixture and confirm progress resets.
-6. Hold past the upper boundary. Confirm foam/cooldown appears, ingredients
-   remain, progress recovers to 40%, and a fresh Space press is required.
-7. While agitating, press Tab. Confirm the flask hides, agitation releases,
-   and settling continues. Reopen during settling and verify markers return and
-   reagent controls remain disabled. Hide again and confirm success can create
-   the held bottle without reopening the UI.
-8. Confirm Backspace and reagent inputs are blocked during agitation, settling,
-   and cooldown. Press C during each phase and confirm it immediately clears
-   ingredients and prevents later completion.
-9. Start agitation, then pause or switch application focus. Confirm agitation
-   releases, pause freezes reaction time, and resuming requires a fresh press
-   before adding more energy. Movement should remain available while brewing.
+4. Open Tab, add red/red/blue, and press Space once. Confirm heating starts at
+   50% power and key-up/repeat does not release. Press again in the ideal bracket
+   for each heat; confirm two +1 checks, two 0.22-second drops, and one +2 bottle.
+5. Check ideal boundaries 0.65/0.75, normal boundaries 0.50/0.90, and early/late
+   releases. Confirm summed scores map to 0.6/0.8/1.0/1.2/1.4 potency.
+6. Let both cycles overflow at 1.0. Confirm automatic -1 checks, automatic second
+   heating, and a prepared -2 bottle after the second drop, without a retry.
+7. Hide with Tab during heating and during reset; confirm height, drop time,
+   and blend freeze, reopening resumes, and no hidden completion occurs.
+8. Confirm reagent/Backspace edits are blocked during brewing and pending
+   preparation. C cancels each unfinished phase, releases all reservations,
+   and prevents any later preparation.
+9. Check Z/X 5% steps, 0.3-second delay, 0.1-second repeat, slider parity, and
+   zero-power height stability. Pause or switch focus while holding Z/X:
+   progression suspends, holds clear, and resume causes no synthetic check.
+   Movement remains available while brewing.
+
 10. Use Right Mouse while Player is below maximum health. Confirm immediate
    healing, bottle removal, mixer closure, and no duplicate use on another press.
 11. Brew green, green, blue; use Left Mouse. Confirm the same bottle leaves the
@@ -872,7 +902,10 @@ Status on 2026-09-23: every item below is **pending**, not manually verified.
 18. Verify movement, camera following, actor collision, pause, settings, resume,
 	music playback, and Main Menu/Play routing.
 19. Inspect at `1920 x 1080` and `1280 x 720`; verify all reaction geometry is
-   clipped to the flask and both progress markers remain distinguishable.
+   clipped to the flask; the single ideal bracket matches liquid height, the
+   360 x 290 layout fits, both scores/result are readable, and the four flame
+   frames animate. Layers blend gradually and reach full color only after the
+   second reset. Preview HeatControl and AlchemicalBurner in their workshop.
 20. Start combat. Confirm it contains Friend, no hostile enemies, and two visible
 	spawn rings: `H Â· Skirmisher` on the right and `J Â· Pursuer` on the left.
 21. Press H. Confirm the Skirmisher approaches from far away, retreats if approached,

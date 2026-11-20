@@ -33,7 +33,15 @@ func collect_reagent(reagent: StringName, amount: int) -> bool:
 	totals[reagent] = int(totals.get(reagent, 0)) + amount
 	return _save_and_apply(totals, _held, true)
 
-func commit_prepared_potion(recipe_id: StringName, layers: Array[StringName]) -> bool:
+func commit_prepared_potion(
+	recipe_id: StringName,
+	layers: Array[StringName],
+	quality_score: int = 0,
+	potency_multiplier: float = 1.0
+) -> bool:
+	if not PotionQualityProfileData.is_valid_quality(quality_score, potency_multiplier):
+		last_error = "Prepared potion quality is invalid."
+		return false
 	var totals := inventory.get_totals_copy()
 	var required: Dictionary = {}
 	for reagent in layers:
@@ -43,7 +51,12 @@ func commit_prepared_potion(recipe_id: StringName, layers: Array[StringName]) ->
 		if inventory.get_reserved_count(reagent) < amount:
 			return false
 		totals[reagent] = int(totals.get(reagent, 0)) - amount
-	var held := {"recipe_id": recipe_id, "layers": layers.duplicate()}
+	var held := {
+		"recipe_id": recipe_id,
+		"layers": layers.duplicate(),
+		"quality_score": quality_score,
+		"potency_multiplier": potency_multiplier,
+	}
 	return _save_and_apply(totals, held)
 
 func clear_held_potion() -> bool:
@@ -62,6 +75,9 @@ func get_held_record() -> Dictionary:
 	return _held.duplicate(true)
 
 func _save_and_apply(totals: Dictionary, held: Dictionary, preserve_reservations: bool = false) -> bool:
+	if not PotionQualityProfileData.is_valid_quality(held.get("quality_score", 0), held.get("potency_multiplier", 1.0)):
+		last_error = "Prepared potion quality is invalid."
+		return false
 	if _store != null and not _store.save_snapshot({"totals": totals, "held": held}):
 		last_error = _store.last_error
 		return false

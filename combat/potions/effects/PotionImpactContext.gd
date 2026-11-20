@@ -9,6 +9,7 @@ var source: Node
 var world_position := Vector2.ZERO
 var direction := Vector2.RIGHT
 var delivery_method: StringName = PotionDelivery.THROW
+var potency_multiplier := 1.0
 
 
 ## Configures and returns this context for direct or projectile-driven delivery.

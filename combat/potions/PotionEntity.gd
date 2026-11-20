@@ -15,6 +15,8 @@ signal resolved(context: PotionImpactContext, applied_effect_count: int)
 
 @onready var _bottle_visual: Sprite2D = $BottleVisual
 @onready var _outline: Sprite2D = $Outline
+@onready var _perfect_quality_accent: Sprite2D = $PerfectQualityAccent
+@onready var _perfect_sparks = $PerfectSparks
 @onready var _flight_area: Area2D = $FlightArea
 @onready var _sweep_cast: ShapeCast2D = $SweepCast
 @onready var _placement_trigger: Area2D = $PlacementTrigger
@@ -47,6 +49,9 @@ func initialize(potion: PotionInstance, source: Node) -> bool:
 	_source = source
 	_initialized = true
 	_set_visual_color(potion.get_color())
+	var is_perfect := potion.get_quality_score() == 2
+	_perfect_quality_accent.visible = is_perfect
+	_perfect_sparks.set_emitting(is_perfect)
 	_set_state(State.HELD)
 	return true
 

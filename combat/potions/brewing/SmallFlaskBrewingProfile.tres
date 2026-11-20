@@ -4,10 +4,9 @@
 
 [resource]
 script = ExtResource("1_profile")
-energy_ramp_time = 0.25
-progress_rate = 0.55
-energy_dissipation_time = 0.45
-success_min_progress = 0.7
-success_max_progress = 0.9
-overreaction_cooldown = 0.6
-recovery_progress = 0.4
+rise_rate = 0.75
+perfect_min = 0.65
+perfect_max = 0.75
+normal_min = 0.5
+normal_max = 0.9
+reset_duration = 0.22

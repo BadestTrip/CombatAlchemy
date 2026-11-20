@@ -4,7 +4,9 @@
 
 > Status: Living creative reference
 > Working title: CombatAlchemy
-> Vision version: 0.7
+> Vision version: 0.8
+> Brewing update (2026-11-18): approved two-release contract recorded; runtime integration and verification are underway. Manual tests remain pending.
+> Current small-flask plan: [Two-Release Brewing](./superpowers/plans/2026-11-17-two-release-brewing.md)
 > Last updated: 2026-11-17
 > Technical companion: [Project Architecture](./PROJECT_ARCHITECTURE.md)
 > Visual companion: [Art Reference Index](./ART_REFERENCE_INDEX.md)
@@ -150,7 +152,7 @@ feature belongs to and must not describe approved direction as current behavior.
 
 | Layer | Included goals |
 | --- | --- |
-| **Current foundation** | Player movement and collision, compact directional model workshop, three-layer small-flask brewing with hold/release/settle timing and recoverable overreaction, capability-based potion effects, one produced potion instance represented by the same physical entity while held, thrown, placed, or drunk, persistent RGB reagent quantities and one held bottle, three refill-on-load collection sources, health-bearing test actors, pause, settings, music, scene transitions, and main-menu routing. |
+| **Current foundation** | Player movement and collision, compact directional model workshop, three-layer small-flask brewing with two heat/pressure-release checks and deterministic quality, capability-based potion effects, one produced potion instance represented by the same physical entity while held, thrown, placed, or drunk, persistent RGB reagent quantities and one held bottle, three refill-on-load collection sources, health-bearing test actors, pause, settings, music, scene transitions, and main-menu routing. |
 | **Approved presentation conversion** | Keep the native 1920 x 1080 project canvas; use the implemented animated Field Notes main menu as the first delivered screen; validate gameplay composition with the asset-standard dimensions before replacing PlayerModel or remaining combat visuals; retain gameplay, sockets, controls, and physical-potion ownership. No new gameplay systems. |
 | **Approved brewing expansion, not implemented** | Meaningful multi-stage laboratory recipes in larger vessels; apparatus progression; the same finished potion usable through deliberate later activation and future storage. The small one-stage combat flask is implemented and should be playtested before this expansion. |
 | **Implemented reagent and storage slice** | Persistent player-bound RGB totals with unlimited logical 999-unit stacks; one durably remembered held bottle; temporary unfinished-mixture reservations; three geometric five-dose sources that refill on arena load. This is infrastructure, not the final harvesting experience or a full inventory. |
@@ -199,7 +201,9 @@ mixing rather than hotbar selection.
 Pressure should come from the world and encounter, not from intentionally
 awkward controls.
 
-The approved brewing interaction is **agitate, anticipate, release, settle**.
+The approved small-flask interaction is **heat, release pressure, heat, release
+pressure**. One Space press starts heating; two later distinct presses perform
+the checks. Key-up is not a brewing action.
 Small combat recipes use a short reaction; complex laboratory recipes use
 several meaningful stages. The same control language should build mastery
 without turning safe-house preparation into a longer repetitive hold.
@@ -264,7 +268,7 @@ The distinction in this table is mandatory in planning and communication.
 | Entry flow | Main Menu Play loads one persistent profile and opens a potion combat sandbox | Main Menu leads to a refuge and expedition cycle |
 | Player | Movable Researcher 01 pixel `PlayerModel`, following camera, four positive-scale facings, and hand sockets used by the held potion | Compact full-body pixel frames with the same motion/facing/socket API; hood, gas mask, white headlamp and practical equipment; 64 x 80 cells under the asset standard; composition review remains pending |
 | Encounters | Pursuer and Skirmisher enemy archetypes alongside health-bearing test actors; see the technical companion for current behavior | Expand readable perception, hazard awareness, and alchemical responses after the current behaviors are proven |
-| Mixing | Three owned RGB layers and count-based health, damage, and slow recipes; additions reserve stock, successful preparation spends it, and hold/release controls the reaction | Learnable dust properties and authored reactions; tune short field brewing before staged laboratory procedures. The candidate RGB table below is not implemented |
+| Mixing | Three owned RGB layers and count-based health, damage, and slow recipes; additions reserve stock, successful preparation spends it, and two explicit pressure releases determine quality | Learnable dust properties and authored reactions; tune short field brewing before staged laboratory procedures. The candidate RGB table below is not implemented |
 | Vessels | One mixer limited to three ingredient units | Small, larger, and eventually advanced brewing apparatus gates capacity and recipe complexity; sizes and yields are not fixed |
 | Application | Create one physical potion, then drink it, throw it, place it on the ground, or discard it | Preserve one recipe's meaning across all uses, including transformation and future storage |
 | Placement | A proximity bottle arms after 0.35 seconds and expires after 20 seconds; scene changes do not preserve it | Dormant placement, deliberate activation on return, and session-level persistence across relevant revisits; optional trigger types later |
@@ -296,7 +300,8 @@ CombatAlchemy is not:
 - a glossy mobile-fantasy interface covered in panels and currencies;
 - a direct recreation of one real historical culture;
 - a system where ambiguity is created by unreadable feedback;
-- a mandatory perfect-timing grind that gives a known recipe arbitrary potency;
+- a mandatory perfect-timing grind or random potency rolls; the approved two-check
+  quality system uses visible windows and always prepares a valid recipe;
 - a liquid/gel/solid taxonomy that needlessly restricts drinking, throwing, or placement;
 - a reason to build broad support systems before the discovery loop needs them.
 
@@ -712,13 +717,14 @@ mixing.
 - Size the flask from the eventual gameplay composition, with reagent swatches
   to its right and enough margin for required window sizes. Tube 01 uses a 16 x 32 native UI image at 5x within the existing footprint;
   the complete HUD composition remains open.
-- Current placeholders show separated liquid layers from bottom upward. The
-  intended dust presentation begins with visible grain deposits and streams,
-  then dissolves them into colored trails during agitation.
+- Current liquid layers start separated from bottom upward and blend gradually
+  during the two heat/drop cycles; full recipe color appears only after the
+  second reset. Future dust trails may enrich this without changing rules.
 - Show the prepared result as one unified liquid.
-- For current reaction brewing, keep a readable release window, liquid momentum,
-  and settling feedback inside the flask. Do not add permanent numeric progress
-  and energy meters or rely solely on a color change.
+- Use one ideal bracket with the same height mapping as the liquid, two check
+  scores, and a short result. The mixer is 360 x 290 with a 144 x 190 FlaskView,
+  existing Tube 01 glass/mask, and a 0..100 heat slider beneath the flame.
+  Do not restore predicted-settle markers or rely solely on a color change.
 - Keep reagent controls adjacent to the flask and identify them with both color
   and a simple label or shape.
 - Preserve the authored glass outline at every state.
@@ -913,31 +919,54 @@ storage rather than silently imposing a small bag, expiry, or lost inventory.
 
 ### Brewing Interaction and Vessel Progression
 
-**Implemented small-flask foundation:** hold Space to agitate, anticipate the
-reaction, release to stop adding energy immediately, and let the liquid settle.
-Residual energy briefly advances the reaction after release. The current
-pixel-art tube with scene-authored feedback shows current progress, predicted settled progress, and a broad
-success bracket. This momentum must remain visible and predictable as the
-placeholders are replaced.
+**Current small-flask contract (runtime integration underway):** the first
+distinct Space press starts heat at 50% power; the next two distinct presses
+release pressure, one per heating cycle. Height rises from 0 to 1 at
+`0.75 * power` per second. Inclusive 0.65-0.75 earns +1; inclusive 0.50-0.90
+outside ideal earns 0; anything else earns -1. Reaching 1 automatically checks
+for -1. Each check causes a 0.22-second drop; the first reset starts the second
+heat automatically. The second reset prepares the potion even at total -2.
 
-The current flask communicates developing, ready-to-stabilize, overreacting,
-and finished mixtures through geometric liquid motion, grains, markers, and
-foam. Sound and final art remain future presentation work. An early release
-leaves a mixture that can resume; initial overreaction costs recovery time
-rather than destroying ingredients. Final success creates one dependable
-potion result, not a different potency for every small timing variation.
+The two scores sum to -2 through +2, mapping to 0.6, 0.8, 1.0, 1.2, and 1.4
+potency. This is visible, deterministic quality, not a random roll or a retry
+requirement. Health magnitude is rounded with `roundi`; slow magnitude scales
+without changing duration or the existing cap. The held instance preserves score
+and multiplier across saves: V2 writes both, V1 restores normal quality.
+Reservations are spent only through the existing successful attachment/save
+handshake.
 
-The intended dust presentation shows addition, agitation, residual motion, and
-resolution: grains gather, dissolve into colored trails, continue reacting after
-release, and converge into uniform prepared liquid. Red may pulse, green fizz,
-and blue form slower coherent bands. These are presentation ideas, not extra
-hidden material rules. A restrained settling motion and clear sound can mark
-completion; foam explains recoverable overreaction. Keep feedback inside the
-flask and preserve visible prediction rather than demanding perfect reflexes.
+Z/X adjust heat in 5% steps, repeating after 0.3 seconds every 0.1 seconds; the
+slider exposes 0-100. Tab suspends and hides, reopening resumes. Pause/focus
+loss suspend and clear holds. C cancels and releases reservations.
+Holding/releasing Space does not perform checks.
+
+The 360 x 290 mixer keeps the 144 x 190 Tube 01 FlaskView. One ideal bracket
+shares the liquid-height mapping; gradual layer blending reaches full recipe
+color only after the second reset. Two scores and a short result accompany
+modular HeatControl and AlchemicalBurner scenes and an isolated workshop.
+The built-in generated and cleaned flame sheet at
+`sprites/vfx/alchemical_fire/alchemical_fire_v001.png` has four 16 x 16 frames
+in 64 x 16. All new mechanics, visual, input, and quality tuning belongs in
+`.tres` profiles. The burner can remain lit outside brewing; a valid brew lights
+it automatically only when necessary and restores its previous state unless the
+player intervenes. Above 90% power, the flame becomes larger and gains a tight
+gold local glow while the heating formula remains linear.
+
+Each pressure release now has immediate flask-local motion and a short SFX cue:
+clean and bright for ideal, restrained for normal, turbulent and dull for weak.
+Two ideal checks give the finished bottle a persistent gold accent and a concise
+completion sound. This celebrates execution without adding another reward beyond
+the existing quality multiplier. Prototype sounds use the SFX bus and remain
+replaceable production references.
+
+The older hold/release/settle design remains a historical record, not the current
+small-flask mechanic. Larger laboratory stages and expressive dust behavior
+remain future vision. Manual testing and main integration verification of the
+two-release change are pending; no new suite totals are asserted here.
 
 | Context | Intended brewing experience |
 | --- | --- |
-| Small combat flask | Few ingredient units and one short reaction while movement and the world continue. Roughly 1-3 seconds is an experiment, not fixed tuning. |
+| Small combat flask | Three ingredient units, two heat/release checks, and one preparation while movement and the world continue; tune readability and pacing through playtests. |
 | Larger safe-house vessel | Several meaningful additions and reaction stages using the same controls; difficulty comes from stage behavior and preparation, not a slower progress bar. |
 
 Capacity counts repeated **ingredient units**, not distinct colors. Red, red,
@@ -987,9 +1016,12 @@ vision. The existing player profile intentionally does not persist placed world
 bottles or world state.
 
 The [approved brewing design](./plannings/specs/2026-09-15-potion-brewing-vision-design.md)
-records release examples, brewing states, the staged transformation example,
-ownership constraints, and bounded validation steps. Small-flask timing is
-currently editable in `SmallFlaskBrewingProfile.tres` and requires playtesting.
+retains historical release examples and future staged transformation/ownership
+direction. The [two-release plan](./superpowers/plans/2026-11-17-two-release-brewing.md)
+supersedes its small-flask mechanics. Timing remains editable in
+`SmallFlaskBrewingProfile.tres`; visual/input tuning uses
+`BrewingPresentationProfile_Default.tres`, and potency uses
+`PotionQualityProfile_Default.tres`. These require integrated playtesting.
 Larger capacity, multi-stage behavior, activation controls, and broader recipe
 balance remain unimplemented.
 
@@ -1093,8 +1125,8 @@ Prioritize tactile, layered sounds:
 - cork, leather, glass taps, liquid weight, bubbles, grinding, and paper;
 - distinct reagent addition sounds with a shared family structure;
 - a clear successful-mix resolve and a materially different rejected mix;
-- for brewing presentation, add a readable agitation build, release cue, short settling
-  tail, and recoverable-overreaction sound without constant alarms;
+- for brewing presentation, add a readable heat build, pressure-release cue,
+  short drop/reset tail, and distinct overflow feedback without constant alarms;
 - readable drink, throw, miss, impact, heal, and damage sounds;
 - weather and location ambience that can fall nearly silent.
 
@@ -1405,7 +1437,7 @@ regression checks and documentation. Approve gameplay framing and representative
 character, flask, health, and damage scale before multiplying gameplay assets.
 Keep potion delivery rules and immediate drink/throw/place behavior unchanged.
 
-Playtest the integrated small-flask hold/release/settle interaction. Tune
+Playtest the integrated small-flask two-release interaction. Tune
 readability, predictable early/late outcomes, and repeated use before adding
 vessel tiers. Validate the candidate ten-combination RGB table before a larger
 catalog; do not present it as implemented simply because the vision approves
@@ -1466,7 +1498,7 @@ one visible consequence before committing to branching narrative systems.
 - Finish the current-screen conversion before adding a second visual pipeline.
 - Keep physics/recipe/ownership contracts stable while replacing presentation.
 - Prove a discovery rule before building a large recipe catalog.
-- Prove the short release/settle interaction before adding long staged recipes.
+- Prove the two-release small-flask interaction before adding long staged recipes.
 - Preserve recipe identity across delivery; validate persistence before promising
   return-and-activate strategies across scenes.
 - Complete one expedition before building several locations.
@@ -1504,7 +1536,7 @@ Use this shorter checklist for roadmap reviews, pull requests, briefs, and demos
 - [ ] Is knowledge more important than raw stat growth?
 - [ ] Does real-time pressure create a decision without making controls awkward?
 - [ ] Can success and failure teach the player something?
-- [ ] Is release responsive and the remaining reaction energy readable?
+- [ ] Are pressure releases responsive, heat/height readable, and both scores predictable?
 - [ ] Does a larger vessel unlock a meaningful recipe while small flasks stay useful?
 - [ ] Can a player predict a reagent's role and learn why a combination behaves as it does?
 - [ ] Does a discovered recipe teach a method that would also work before reading it?
@@ -1557,9 +1589,12 @@ work.
 | **Recipe** | A reproducible combination, required apparatus, preparation stages, and resulting behavior; discovering a record teaches the method rather than enabling chemistry. |
 | **Brewing vessel** | Apparatus that holds ingredients and provides working capacity for a reaction; not necessarily the portable finished bottle. |
 | **Brewing stage** | One meaningful operation in a recipe; intermediate completion does not create a usable potion. |
-| **Reaction energy** | Remaining activity that briefly advances brewing after agitation stops. |
-| **Release** | Stop adding agitation immediately; not a throw or an automatic use of the potion. |
-| **Settle** | Let remaining reaction energy dissipate and evaluate the brewing stage's outcome. |
+| **Heat power** | Adjustable 0..1 input controlling the current small flask's liquid-height rise. |
+| **Reaction energy** | Historical hold/release concept; not a state variable in the current two-release flask. |
+| **Release** | Explicit pressure-release press during heat, recording a score and starting a drop; not Space key-up, a throw, or potion use. |
+| **Drop/reset** | The 0.22-second height reset after each check; first starts heat automatically, second completes preparation. |
+| **Settle** | Historical small-flask wording and possible future laboratory-stage behavior, not the current scoring mechanic. |
+| **Quality** | Two check scores summed to -2..2, with a deterministic potency multiplier retained by the potion instance. |
 | **Prepared potion** | A unique successfully mixed potion ready to drink, throw, place, or discard; the current profile can remember the one held bottle, while multi-potion storage remains future work. |
 | **Dormant placement** | Planned stable world preparation awaiting deliberate activation; distinct from the current temporary proximity bottle. |
 | **Potion instance** | One produced potion's runtime identity, separate from its shared recipe and visual entity. |

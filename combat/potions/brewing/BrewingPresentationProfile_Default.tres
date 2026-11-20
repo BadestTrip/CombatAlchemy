@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="BrewingPresentationProfileData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://combat/potions/brewing/BrewingPresentationProfileData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+default_heat_power = 0.5
+heat_step = 0.05
+repeat_delay = 0.3
+repeat_interval = 0.1
+flame_min_fps = 4.0
+flame_max_fps = 10.0
+flame_min_height = 0.35
+flame_max_height = 1.0
+bubble_speed = 12.0
+feedback_duration = 0.6
+base_fill = 0.3
+max_fill = 0.92
+blend_before_complete = 0.95
+marker_width = 3.0
+high_heat_threshold = 0.9
+high_heat_scale_multiplier = 1.35
+high_heat_color = Color(1, 0.815686, 0.392157, 1)
+high_heat_glow_alpha = 0.42
+check_pulse_duration = 0.28
+perfect_brew_pulse_duration = 0.55

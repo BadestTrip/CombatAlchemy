@@ -61,9 +61,8 @@ func _run_tests() -> void:
 	)
 	_expect(
 		potion_input != null
-		and potion_input.has_signal(&"agitation_started")
-		and potion_input.has_signal(&"agitation_released"),
-		"PotionInput exposes brewing press and release signals"
+		and potion_input.has_signal(&"mix_pressed"),
+		"PotionInput exposes the distinct brewing press signal"
 	)
 	_expect(mixer != null, "CombatScene exposes PotionMixer")
 	_expect(slot != null, "CombatScene exposes HeldPotionSlot")
@@ -190,7 +189,12 @@ func _run_tests() -> void:
 
 func _test_saved_bottle_restores_and_clears_after_drink() -> void:
 	var profile := PlayerProfile.create_in_memory()
-	_expect(profile.restore_held_potion({"recipe_id": &"health_potion", "layers": [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE]}), "held restoration fixture stores a bottle")
+	_expect(profile.restore_held_potion({
+		"recipe_id": &"health_potion",
+		"layers": [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE],
+		"quality_score": 2,
+		"potency_multiplier": 1.4,
+	}), "held restoration fixture stores a perfect bottle")
 	GameManager.set_player_profile_for_testing(profile)
 	var combat := (load(COMBAT_SCENE_PATH) as PackedScene).instantiate()
 	var level_music := combat.get_node_or_null(^"LevelMusic")
@@ -203,9 +207,12 @@ func _test_saved_bottle_restores_and_clears_after_drink() -> void:
 	var health := combat.get_node(^"Arena/Player/HealthComponent") as HealthComponent
 	_expect(slot.has_potion(), "saved held record restores one physical held potion")
 	_expect(_find_potion_entities(combat).size() == 1, "saved held record creates exactly one entity")
+	var restored_entity := slot.call(&"get_entity") as PotionEntity
+	var restored_sparks := restored_entity.get_node_or_null(^"PerfectSparks") if restored_entity != null else null
+	_expect(restored_sparks != null and restored_sparks.has_method(&"is_emitting") and restored_sparks.call(&"is_emitting"), "restored quality plus two bottle restores its persistent sparks")
 	health.current_health = 40
 	potion_input.potion_use_requested.emit(PotionDelivery.DRINK)
-	_expect(health.current_health == 70, "restored bottle retains its recipe effect")
+	_expect(health.current_health == 82, "restored perfect bottle retains its quality-scaled recipe effect")
 	_expect(not profile.has_held_potion(), "drinking restored bottle clears persistent ownership")
 	combat.queue_free()
 	await get_tree().process_frame
@@ -224,10 +231,14 @@ func _test_failed_brew_save_refunds_and_clears_slot() -> void:
 	var slot := combat.get_node(^"Systems/HeldPotionSlot") as HeldPotionSlot
 	potion_input.mixer_toggle_requested.emit()
 	for reagent in [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE]: potion_input.reagent_requested.emit(reagent)
-	potion_input.agitation_started.emit()
-	reaction.advance(1.35)
-	potion_input.agitation_released.emit()
-	reaction.advance(0.45)
+	potion_input.mix_pressed.emit()
+	for check_index in 2:
+		reaction.advance(0.55 / 0.375)
+		potion_input.mix_pressed.emit()
+		reaction.advance(0.22)
+		if check_index == 0:
+			_expect(not slot.has_potion(), "first release cannot create a bottle before a failed save")
+			_expect(profile.inventory.get_reserved_count(PotionReagent.RED) == 2, "first release retains reservations before save")
 	_expect(not slot.has_potion(), "failed brew save leaves no stale held-slot ownership")
 	_expect(profile.inventory.get_available_count(PotionReagent.RED) == 2, "failed brew save refunds red reservations")
 	_expect(profile.inventory.get_available_count(PotionReagent.BLUE) == 1, "failed brew save refunds blue reservation")
@@ -320,11 +331,16 @@ func _prepare_potion(
 	_expect(reaction != null, "%s potion has a brewing reaction" % potion_name)
 	if reaction == null:
 		return null
-	potion_input.agitation_started.emit()
-	reaction.advance(1.35)
-	_expect(not (slot.call(&"has_potion") as bool), "%s potion is not created before release" % potion_name)
-	potion_input.agitation_released.emit()
-	reaction.advance(0.45)
+	mixer.set_heat_power(0.5)
+	potion_input.mix_pressed.emit()
+	for check_index in 2:
+		reaction.advance(0.55 / 0.375)
+		_expect(not (slot.call(&"has_potion") as bool), "%s potion is not created before release %d" % [potion_name, check_index + 1])
+		potion_input.mix_pressed.emit()
+		reaction.advance(0.22)
+		if check_index == 0:
+			_expect(not (slot.call(&"has_potion") as bool), "%s first release creates no held potion" % potion_name)
+			_expect(mixer.get_layers() == reagents, "%s first release preserves recipe layers" % potion_name)
 	_expect(slot.call(&"has_potion") as bool, "%s potion occupies HeldPotionSlot" % potion_name)
 	var entity := slot.call(&"get_entity") as PotionEntity
 	_expect(entity != null, "%s potion exposes its held entity" % potion_name)
@@ -335,6 +351,8 @@ func _prepare_potion(
 	_expect(entity.get_state() == PotionEntity.State.HELD, "%s entity is held" % potion_name)
 	_expect(entity.get_potion() == slot.call(&"get_potion"), "%s entity and slot share the potion instance" % potion_name)
 	_expect(entity.get_potion().get_recipe() == expected_recipe, "%s entity owns the expected recipe" % potion_name)
+	_expect(entity.get_potion().get_quality_score() == 0, "%s two normal checks preserve quality zero" % potion_name)
+	_expect(is_equal_approx(entity.get_potion().get_potency_multiplier(), 1.0), "%s normal brew keeps baseline effect strength" % potion_name)
 	_expect(entity.get_parent() == player.call(&"get_potion_holder"), "%s entity is parented to HandSocket_R" % potion_name)
 	_expect(entity.get_parent() != entities, "%s held entity is not a direct PotionEntities child" % potion_name)
 	_expect(entities.get_child_count() == 0, "%s leaves PotionEntities empty while held" % potion_name)

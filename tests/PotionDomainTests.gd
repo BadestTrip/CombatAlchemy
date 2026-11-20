@@ -24,7 +24,9 @@ func _ready() -> void:
 	_test_rejected_mix_signal()
 	_test_successful_mix_signals()
 	_test_repeated_mix_creates_unique_instances()
-	_test_brewing_locks_edits_and_settled_edits_reset_progress()
+	_test_brewing_locks_edits_and_preserves_reservations()
+	_test_cancel_rejects_stale_preparation_acknowledgement()
+	_test_pressure_check_quality_reaches_prepared_potion()
 	_test_mixer_teardown_releases_reservations()
 	_test_health_damage_and_healing_clamp_to_bounds()
 	_test_health_damaged_signal_reports_actual_damage_only()
@@ -34,7 +36,7 @@ func _ready() -> void:
 	_test_player_movement_lock_contract()
 	_free_owned_nodes()
 	if _failures.is_empty():
-		print("PotionDomainTests: PASS (19 tests)")
+		print("PotionDomainTests: PASS (21 tests)")
 		get_tree().quit(0)
 	else:
 		for failure in _failures:
@@ -92,7 +94,7 @@ func _test_health_recipe_in_alternate_order() -> void:
 	_expect(mixer.add_reagent(PotionReagent.BLUE), "health mix accepts blue first")
 	_expect(mixer.add_reagent(PotionReagent.RED), "health mix accepts first red")
 	_expect(mixer.add_reagent(PotionReagent.RED), "health mix accepts second red")
-	_expect(_complete_brew(mixer), "health mix prepares a recipe after settling")
+	_expect(_complete_brew(mixer), "health mix prepares a recipe after two releases")
 	_expect(prepared.size() == 1, "health mix emits exactly one potion instance")
 	if prepared.size() != 1:
 		return
@@ -119,7 +121,7 @@ func _test_damage_recipe_in_alternate_order() -> void:
 	_expect(mixer.add_reagent(PotionReagent.BLUE), "damage mix accepts blue first")
 	_expect(mixer.add_reagent(PotionReagent.GREEN), "damage mix accepts first green")
 	_expect(mixer.add_reagent(PotionReagent.GREEN), "damage mix accepts second green")
-	_expect(_complete_brew(mixer), "damage mix prepares a recipe after settling")
+	_expect(_complete_brew(mixer), "damage mix prepares a recipe after two releases")
 	_expect(prepared.size() == 1, "damage mix emits exactly one potion instance")
 	if prepared.size() != 1:
 		return
@@ -252,10 +254,15 @@ func _test_successful_mix_signals() -> void:
 	)
 	_expect(mixer.start_brewing(), "valid mix starts brewing for signal verification")
 	var reaction := mixer.get_node(^"BrewingReaction") as BrewingReaction
-	reaction.advance(1.35)
-	_expect(events.is_empty(), "agitation creates no potion before release")
+	reaction.advance(0.55 / 0.375)
+	_expect(events.is_empty(), "heating creates no potion before release")
 	mixer.release_brewing()
-	reaction.advance(0.45)
+	_expect(events.is_empty(), "first release creates no potion or clearing events")
+	reaction.advance(0.22)
+	_expect(events.is_empty(), "first reset creates no potion or clearing events")
+	reaction.advance(0.55 / 0.375)
+	mixer.release_brewing()
+	reaction.advance(0.22)
 	_expect(events.size() == 3, "successful mix emits three state events")
 	if events.size() != 3:
 		return
@@ -291,22 +298,73 @@ func _test_repeated_mix_creates_unique_instances() -> void:
 	)
 
 
-func _test_brewing_locks_edits_and_settled_edits_reset_progress() -> void:
-	var mixer := _new_mixer()
+func _test_brewing_locks_edits_and_preserves_reservations() -> void:
+	var inventory := ReagentInventory.new({PotionReagent.RED: 3, PotionReagent.BLUE: 1})
+	_expect(inventory.reserve(PotionReagent.RED), "fixture reserves red outside the mixer")
+	var mixer := _new_mixer(inventory)
 	mixer.add_reagent(PotionReagent.RED)
 	mixer.add_reagent(PotionReagent.RED)
 	mixer.add_reagent(PotionReagent.BLUE)
+	var original_layers := mixer.get_layers()
 	_expect(mixer.start_brewing(), "valid layers start a reaction")
-	_expect(not mixer.remove_last(), "agitation blocks removing ingredients")
-	_expect(not mixer.add_reagent(PotionReagent.GREEN), "agitation blocks adding ingredients")
+	_expect(not mixer.remove_last(), "heating blocks removing ingredients")
+	_expect(not mixer.add_reagent(PotionReagent.GREEN), "heating blocks adding ingredients")
 	var reaction := mixer.get_node(^"BrewingReaction") as BrewingReaction
-	reaction.advance(0.5)
+	reaction.advance(0.55 / 0.375)
 	mixer.release_brewing()
-	reaction.advance(0.45)
-	_expect(reaction.get_state() == BrewingReaction.State.IDLE, "early brew settles unfinished")
-	_expect(reaction.get_progress() > 0.0, "early brew retains reaction progress")
-	_expect(mixer.remove_last(), "settled unfinished ingredients can be edited")
-	_expect(is_zero_approx(reaction.get_progress()), "editing a settled mixture resets reaction progress")
+	_expect(reaction.get_state() == BrewingReaction.State.RESETTING, "first release resets pressure")
+	_expect(not mixer.remove_last(), "resetting blocks removing ingredients")
+	_expect(not mixer.add_reagent(PotionReagent.GREEN), "resetting blocks adding ingredients")
+	mixer.release_brewing()
+	_expect(reaction.get_results().size() == 1, "release during reset cannot count as the second check")
+	mixer.set_suspended(true)
+	var frozen_height := mixer.get_brewing_progress()
+	reaction.advance(2.0)
+	_expect(is_equal_approx(mixer.get_brewing_progress(), frozen_height), "suspension freezes reset height")
+	_expect(not mixer.remove_last(), "suspension does not unlock ingredient edits")
+	_expect(mixer.get_layers() == original_layers, "first release and suspension preserve layers")
+	_expect(inventory.get_reserved_count(PotionReagent.RED) == 3, "first release preserves mixer and external red reservations")
+	_expect(inventory.get_reserved_count(PotionReagent.BLUE) == 1, "first release preserves blue reservation")
+	mixer.set_suspended(false)
+	reaction.advance(0.22)
+	_expect(reaction.get_state() == BrewingReaction.State.HEATING, "first reset resumes the second heating check")
+	_expect(not mixer.remove_last(), "second heating check still locks edits")
+	mixer.clear()
+	_expect(reaction.get_state() == BrewingReaction.State.IDLE, "clear cancels an unfinished two-check brew")
+	_expect(is_zero_approx(reaction.get_progress()), "clear resets reaction height")
+	_expect(inventory.get_reserved_count(PotionReagent.RED) == 1, "clear preserves the external reservation")
+	_expect(inventory.get_reserved_count(PotionReagent.BLUE) == 0, "clear refunds mixer blue reservation")
+	_expect(mixer.add_reagent(PotionReagent.BLUE), "clear unlocks ingredient edits")
+
+
+func _test_cancel_rejects_stale_preparation_acknowledgement() -> void:
+	var inventory := ReagentInventory.new({PotionReagent.RED: 4, PotionReagent.BLUE: 2})
+	var mixer := _new_mixer(inventory, false)
+	var pending: Array[PotionInstance] = []
+	var prepared: Array[PotionInstance] = []
+	mixer.preparation_requested.connect(func(potion: PotionInstance) -> void: pending.append(potion))
+	mixer.potion_prepared.connect(func(potion: PotionInstance) -> void: prepared.append(potion))
+	for reagent in [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE]:
+		mixer.add_reagent(reagent)
+	_expect(mixer.start_brewing(), "pending acknowledgement fixture starts brewing")
+	var reaction := mixer.get_node(^"BrewingReaction") as BrewingReaction
+	for check_index in 2:
+		reaction.advance(0.55 / 0.375)
+		mixer.release_brewing()
+		reaction.advance(0.22)
+	_expect(pending.size() == 1, "two checks request exactly one preparation acknowledgement")
+	if pending.size() != 1:
+		return
+	_expect(not mixer.remove_last(), "pending preparation keeps layers locked")
+	mixer.clear()
+	_expect(inventory.get_reserved_count(PotionReagent.RED) == 0, "cancel refunds pending red reservations")
+	_expect(inventory.get_reserved_count(PotionReagent.BLUE) == 0, "cancel refunds pending blue reservation")
+	mixer.add_reagent(PotionReagent.BLUE)
+	_expect(not mixer.acknowledge_preparation(pending[0], true), "cancel rejects stale successful acknowledgement")
+	_expect(not mixer.acknowledge_preparation(pending[0], false), "cancel rejects stale failed acknowledgement")
+	_expect(prepared.is_empty(), "stale acknowledgement cannot create a potion")
+	_expect(mixer.get_layers() == [PotionReagent.BLUE], "stale acknowledgement preserves the replacement mixture")
+	_expect(inventory.get_reserved_count(PotionReagent.BLUE) == 1, "stale acknowledgement preserves replacement reservation")
 
 
 func _test_health_damage_and_healing_clamp_to_bounds() -> void:
@@ -320,6 +378,27 @@ func _test_health_damage_and_healing_clamp_to_bounds() -> void:
 	_expect(health.heal(150) == 100, "healing returns the amount actually restored")
 	_expect(health.current_health == 100, "healing clamps at maximum health")
 	_expect(health.heal(1) == 0, "healing at maximum restores nothing")
+
+
+func _test_pressure_check_quality_reaches_prepared_potion() -> void:
+	for heights in [[0.55, 0.55, 0], [0.55, 0.7, 1], [0.7, 0.7, 2]]:
+		var mixer := _new_mixer()
+		var prepared: Array[PotionInstance] = []
+		mixer.potion_prepared.connect(func(potion: PotionInstance) -> void: prepared.append(potion))
+		for reagent in [PotionReagent.RED, PotionReagent.RED, PotionReagent.BLUE]:
+			mixer.add_reagent(reagent)
+		_expect(mixer.start_brewing(), "quality fixture starts brewing")
+		var reaction := mixer.get_node(^"BrewingReaction") as BrewingReaction
+		for check_index in 2:
+			reaction.advance(float(heights[check_index]) / 0.375)
+			mixer.release_brewing()
+			_expect(reaction.get_results()[check_index] == (1 if heights[check_index] == 0.7 else 0), "perfect check adds one while normal adds zero")
+			if check_index == 1:
+				_expect(reaction.get_quality_score() == heights[2], "reaction sums both release scores")
+			reaction.advance(0.22)
+		_expect(prepared.size() == 1, "quality fixture creates exactly one potion")
+		if prepared.size() == 1:
+			_expect(prepared[0].get_quality_score() == heights[2], "prepared potion preserves the two-check quality score")
 
 
 func _test_health_damaged_signal_reports_actual_damage_only() -> void:
@@ -408,7 +487,7 @@ func _test_player_movement_lock_contract() -> void:
 	_expect(not (player.call(&"is_movement_locked") as bool), "movement lock can be disabled")
 
 
-func _new_mixer(inventory: ReagentInventory = null) -> PotionMixer:
+func _new_mixer(inventory: ReagentInventory = null, auto_acknowledge: bool = true) -> PotionMixer:
 	var mixer := PotionMixer.new()
 	mixer.name = "PotionMixer"
 	mixer.recipe_book = DEFAULT_RECIPE_BOOK
@@ -421,10 +500,11 @@ func _new_mixer(inventory: ReagentInventory = null) -> PotionMixer:
 	if inventory == null:
 		inventory = ReagentInventory.new({PotionReagent.RED: 100, PotionReagent.GREEN: 100, PotionReagent.BLUE: 100})
 	mixer.configure_inventory(inventory)
-	mixer.preparation_requested.connect(func(potion: PotionInstance) -> void:
-		inventory.apply_totals(inventory.get_totals_copy())
-		mixer.acknowledge_preparation(potion, true)
-	)
+	if auto_acknowledge:
+		mixer.preparation_requested.connect(func(potion: PotionInstance) -> void:
+			inventory.apply_totals(inventory.get_totals_copy())
+			mixer.acknowledge_preparation(potion, true)
+		)
 	_owned_nodes.append(mixer)
 	return mixer
 
@@ -433,9 +513,11 @@ func _complete_brew(mixer: PotionMixer) -> bool:
 	if not mixer.start_brewing():
 		return false
 	var reaction := mixer.get_node(^"BrewingReaction") as BrewingReaction
-	reaction.advance(1.35)
-	mixer.release_brewing()
-	reaction.advance(0.45)
+	mixer.set_heat_power(0.5)
+	for check_index in 2:
+		reaction.advance(0.55 / 0.375)
+		mixer.release_brewing()
+		reaction.advance(0.22)
 	return reaction.get_state() == BrewingReaction.State.IDLE and mixer.get_layers().is_empty()
 
 

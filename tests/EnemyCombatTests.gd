@@ -20,6 +20,7 @@ func _ready() -> void:
 
 
 func _run_tests() -> void:
+	GameManager.set_player_profile_for_testing(PlayerProfile.create_in_memory({PotionReagent.RED: 100, PotionReagent.GREEN: 100, PotionReagent.BLUE: 100}))
 	var combat := COMBAT.instantiate()
 	add_child(combat)
 	var spawner := combat.get_node_or_null("Arena/EnemyTestSpawner")
